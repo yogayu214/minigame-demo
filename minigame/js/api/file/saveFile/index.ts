@@ -3,6 +3,11 @@
  * FileSystemManager.saveFile
  */
 
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
 /** 保存临时文件到本地 */
 export function saveFile() {
   const fs = wx.getFileSystemManager();
@@ -13,8 +18,15 @@ export function saveFile() {
     success() {
       fs.saveFile({
         tempFilePath: wx.env.USER_DATA_PATH + '/tempSave.txt',
-        success(res: any) { console.log('保存成功, 路径:', res.savedFilePath); },
-        fail(err: any) { console.log('失败:', err.errMsg); },
+        success(res: any) {
+          display.data({
+            '状态': '保存成功',
+            '保存路径': res.savedFilePath,
+          });
+        },
+        fail(err: any) {
+          wx.showModal({ title: '保存失败', content: err.errMsg, showCancel: false });
+        },
       });
     },
   });

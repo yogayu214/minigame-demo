@@ -1,0 +1,98 @@
+/**
+ * 键盘
+ * wx.showKeyboard / wx.hideKeyboard / wx.updateKeyboard /
+ * wx.onKeyboardInput / wx.offKeyboardInput /
+ * wx.onKeyboardConfirm / wx.offKeyboardConfirm /
+ * wx.onKeyboardComplete / wx.offKeyboardComplete /
+ * wx.onKeyboardHeightChange / wx.offKeyboardHeightChange /
+ * wx.onKeyDown / wx.offKeyDown / wx.onKeyUp / wx.offKeyUp
+ * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/device/keyboard/wx.showKeyboard.html
+ */
+
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
+const listeners: Record<string, any> = {};
+
+/** 显示软键盘 */
+export function showKeyboard() {
+  wx.showKeyboard({
+    defaultValue: '',
+    maxLength: 20,
+    multiple: false,
+    confirmHold: false,
+    confirmType: 'done',
+    keyboardType: 'default',
+    success() {
+      display.text('✓ 软键盘已弹出');
+    },
+  } as any);
+}
+
+/** 隐藏软键盘 */
+export function hideKeyboard() {
+  wx.hideKeyboard({
+    success() {
+      display.text('✓ 软键盘已隐藏');
+    },
+  });
+}
+
+/** 更新软键盘默认值 */
+export function updateKeyboard() {
+  wx.updateKeyboard({
+    value: '更新-' + Date.now(),
+    success() {
+      display.text('✓ 已更新软键盘内容');
+    },
+  });
+}
+
+/** 监听键盘输入 + 确认 + 完成 + 高度变化 */
+export function listenSoftKeyboard() {
+  listeners.input = (res: any) => display.data({ 事件: 'input', value: res.value });
+  listeners.confirm = (res: any) => display.data({ 事件: 'confirm', value: res.value });
+  listeners.complete = (res: any) => display.data({ 事件: 'complete', value: res.value });
+  listeners.height = (res: any) => display.data({ 事件: 'heightChange', height: String(res.height) });
+
+  wx.onKeyboardInput(listeners.input);
+  wx.onKeyboardConfirm(listeners.confirm);
+  wx.onKeyboardComplete(listeners.complete);
+  wx.onKeyboardHeightChange(listeners.height);
+  display.text('已注册软键盘 4 个事件');
+}
+
+/** 停止软键盘监听 */
+export function stopSoftKeyboard() {
+  if (listeners.input) wx.offKeyboardInput(listeners.input);
+  if (listeners.confirm) wx.offKeyboardConfirm(listeners.confirm);
+  if (listeners.complete) wx.offKeyboardComplete(listeners.complete);
+  if (listeners.height) wx.offKeyboardHeightChange(listeners.height);
+  ['input', 'confirm', 'complete', 'height'].forEach((k) => delete listeners[k]);
+  display.text('✓ 已停止软键盘监听');
+}
+
+/** 监听物理键盘按键（PC 端） */
+export function listenHardKeyboard() {
+  listeners.keydown = (res: any) => display.data({ 事件: 'keydown', code: res.code, key: res.key });
+  listeners.keyup = (res: any) => display.data({ 事件: 'keyup', code: res.code, key: res.key });
+  wx.onKeyDown(listeners.keydown);
+  wx.onKeyUp(listeners.keyup);
+  display.text('已注册物理键盘监听（PC 端有效）');
+}
+
+/** 停止物理键盘监听 */
+export function stopHardKeyboard() {
+  if (listeners.keydown) wx.offKeyDown(listeners.keydown);
+  if (listeners.keyup) wx.offKeyUp(listeners.keyup);
+  delete listeners.keydown;
+  delete listeners.keyup;
+  display.text('✓ 已停止物理键盘监听');
+}
+
+export function onUnload() {
+  stopSoftKeyboard();
+  stopHardKeyboard();
+}

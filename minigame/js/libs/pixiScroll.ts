@@ -79,10 +79,6 @@ function pixiScroll(PIXI, app, property) {
         this.po.x = 30 * PIXI.ratio;
 
         if (property.isTabBar) {
-            let sprite = new PIXI.Sprite(PIXI.loader.resources[`images/${apiName}.png`].texture);
-            this.bg.addChild(sprite);
-            sprite.width = sprite.height = sprite.width * 0.32 * PIXI.ratio;
-            sprite.position.set(this.width - sprite.width - 32 * PIXI.ratio, (this.drawHeight - sprite.height) / 2);
             text.call(this, 32, 44);
         }
 
@@ -97,8 +93,10 @@ function pixiScroll(PIXI, app, property) {
             if (Math.abs(e.target.recordY - e.data.global.y) < 5) {
                 if (this.child) {
                     this.child.po.visible = !this.child.po.visible;
-                    e.target.children[0].alpha = this.child.po.visible ? 0.2 : 1;
-                    e.target.children[1].alpha = e.target.children[0].alpha;
+                    // 展开时把分类按钮的文字变灰提示，收起时还原
+                    if (e.target.children[0]) {
+                        e.target.children[0].alpha = this.child.po.visible ? 0.2 : 1;
+                    }
                     this.childHeight = -this.childHeight;
                     for (let i = sc.items.indexOf(this) + 1, len = sc.items.length; i < len; i++) {
                         sc.items[i].po.y = sc.items[i].po.y - this.childHeight;
@@ -136,8 +134,7 @@ function pixiScroll(PIXI, app, property) {
     function ChildListItem(parent, itemList) {
         let po = new PIXI.Graphics(),
             line,
-            text,
-            icon;
+            text;
         for (let i = 0, item, len = itemList.length; i < len; i++) {
             item = new PIXI.Graphics();
             item.beginFill(0xffffff)
@@ -155,10 +152,6 @@ function pixiScroll(PIXI, app, property) {
                 fontSize: `${32 * PIXI.ratio}px`,
             });
             text.position.set(30 * PIXI.ratio, (item.height - text.height) / 2);
-
-            icon = new PIXI.Sprite(PIXI.loader.resources['images/right.png'].texture);
-            icon.width = icon.height = 48 * PIXI.ratio;
-            icon.position.set(item.width - icon.width - 32 * PIXI.ratio, (item.height - icon.height) / 2);
 
             item.y = i * item.height + parent.cornerRadius;
 
@@ -182,7 +175,7 @@ function pixiScroll(PIXI, app, property) {
                 e.recordY = e.data.global.y;
                 e.switchColorFn.call(item, 0xededed);
             };
-            item.addChild(text, icon);
+            item.addChild(text);
             po.addChild(item);
             this.totalHeight = item.y + item.height;
         }

@@ -20,3 +20,6 @@ export function hide() { if (gameIcon) gameIcon.hide(); }
 
 /** 销毁 */
 export function destroy() { if (gameIcon) { gameIcon.destroy(); gameIcon = null; } }
+
+/** 页面销毁时清理 */
+export function onUnload() { if (gameIcon) { gameIcon.destroy(); gameIcon = null; } }

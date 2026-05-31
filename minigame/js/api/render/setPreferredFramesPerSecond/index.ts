@@ -3,20 +3,20 @@
  * wx.setPreferredFramesPerSecond
  */
 
-/** 设置帧率为 60fps */
-export function set60fps() {
+export let currentFPS = 60;
+let _onFPSChange: ((fps: number) => void) | null = null;
+/** 由 rich-configs 绑定 */
+export function setOnFPSChange(fn: ((fps: number) => void) | null) { _onFPSChange = fn; }
+
+/** 设置渲染帧率（1~60） */
+export function setFPS(value: number) {
+  currentFPS = value;
+  wx.setPreferredFramesPerSecond(value);
+  if (_onFPSChange) _onFPSChange(value);
+}
+
+/** 页面销毁时恢复默认帧率 */
+export function onUnload() {
   wx.setPreferredFramesPerSecond(60);
-  wx.showToast({ title: '60fps' });
-}
-
-/** 设置帧率为 30fps */
-export function set30fps() {
-  wx.setPreferredFramesPerSecond(30);
-  wx.showToast({ title: '30fps' });
-}
-
-/** 设置帧率为 15fps */
-export function set15fps() {
-  wx.setPreferredFramesPerSecond(15);
-  wx.showToast({ title: '15fps' });
+  _onFPSChange = null;
 }

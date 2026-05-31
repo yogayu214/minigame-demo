@@ -2,7 +2,6 @@ const signIn = [
   {
     label: '小游戏示例',
     name: 'APIentry',
-    path: 'APIentry/index',
     tabBar: 'index',
     children: [
       // ========== 基础能力 ==========
@@ -10,14 +9,67 @@ const signIn = [
         label: '基础',
         name: 'base',
         children: [
-          // 待补充：系统信息、更新、生命周期、分包加载等
+          {
+            label: '系统信息',
+            name: 'baseSystem',
+            path: 'base/system/index',
+          },
+          {
+            label: '更新',
+            name: 'baseUpdate',
+            path: 'base/update/index',
+          },
+          {
+            label: '生命周期',
+            name: 'baseLifeCycle',
+            path: 'base/lifeCycle/index',
+          },
+          {
+            label: '应用级事件',
+            name: 'baseAppEvent',
+            path: 'base/appEvent/index',
+          },
+          {
+            label: '性能',
+            name: 'basePerformance',
+            path: 'base/performance/index',
+          },
+          {
+            label: '分包加载',
+            name: 'baseLoadSubpackage',
+            path: 'base/loadSubpackage/index',
+          },
+          {
+            label: '调试',
+            name: 'baseDebug',
+            path: 'base/debug/index',
+          },
+          {
+            label: '用户加密',
+            name: 'baseCrypto',
+            path: 'base/crypto/index',
+          },
         ],
       },
       {
         label: '跳转',
         name: 'navigate',
         children: [
-          // 待补充：重启小程序、跳转小程序、退出小程序等
+          {
+            label: '重启小程序',
+            name: 'restartMiniProgram',
+            path: 'navigate/restartMiniProgram/index',
+          },
+          {
+            label: '跳转其他小程序',
+            name: 'navigateToMiniProgram',
+            path: 'navigate/navigateToMiniProgram/index',
+          },
+          {
+            label: '退出小程序',
+            name: 'exitMiniProgram',
+            path: 'navigate/exitMiniProgram/index',
+          },
         ],
       },
       {
@@ -39,6 +91,21 @@ const signIn = [
             name: 'shareTimeLine',
             path: 'share/shareTimeLine/index',
           },
+          {
+            label: '带 query 转发好友',
+            name: 'setMessageToFriendQuery',
+            path: 'share/setMessageToFriendQuery/index',
+          },
+          {
+            label: '群活动分享',
+            name: 'shareActivity',
+            path: 'share/shareActivity/index',
+          },
+          {
+            label: '图片分享菜单',
+            name: 'showShareImageMenu',
+            path: 'share/showShareImageMenu/index',
+          },
         ],
       },
       {
@@ -59,6 +126,16 @@ const signIn = [
             label: '显示消息提示框',
             name: 'showToast',
             path: 'ui/showToast/index',
+          },
+          {
+            label: '菜单 / 官方组件',
+            name: 'uiMenu',
+            path: 'ui/menu/index',
+          },
+          {
+            label: '窗口',
+            name: 'uiWindow',
+            path: 'ui/window/index',
           },
         ],
       },
@@ -88,6 +165,16 @@ const signIn = [
             name: 'WebSocket',
             path: 'network/webSocket/index',
           },
+          {
+            label: 'TCP Socket',
+            name: 'tcpSocket',
+            path: 'network/tcp/index',
+          },
+          {
+            label: 'UDP Socket',
+            name: 'udpSocket',
+            path: 'network/udp/index',
+          },
         ],
       },
       {
@@ -99,13 +186,32 @@ const signIn = [
             name: 'storageOp',
             path: 'storage/storage/index',
           },
+          {
+            label: '后台预拉取',
+            name: 'backgroundFetch',
+            path: 'storage/backgroundFetch/index',
+          },
+          {
+            label: 'BufferURL',
+            name: 'bufferUrl',
+            path: 'storage/bufferUrl/index',
+          },
         ],
       },
       {
         label: '数据分析',
         name: 'data-analysis',
         children: [
-          // 待补充：事件上报、游戏场景上报等
+          {
+            label: '事件 / 场景上报',
+            name: 'dataAnalysisReport',
+            path: 'data-analysis/report/index',
+          },
+          {
+            label: '日志管理',
+            name: 'dataAnalysisLogManager',
+            path: 'data-analysis/logManager/index',
+          },
         ],
       },
 
@@ -139,6 +245,16 @@ const signIn = [
             name: 'createImage',
             path: 'render/createImage/index',
           },
+          {
+            label: 'Canvas 离屏',
+            name: 'renderCanvas',
+            path: 'render/canvas/index',
+          },
+          {
+            label: '光标 / 指针锁定',
+            name: 'cursor',
+            path: 'render/cursor/index',
+          },
         ],
       },
       {
@@ -164,6 +280,41 @@ const signIn = [
             label: '相机',
             name: 'camera',
             path: 'media/camera/index',
+          },
+          {
+            label: '内部音频',
+            name: 'innerAudio',
+            path: 'media/innerAudio/index',
+          },
+          {
+            label: 'Web Audio',
+            name: 'webAudio',
+            path: 'media/webAudio/index',
+          },
+          {
+            label: '录音管理器',
+            name: 'recorder',
+            path: 'media/recorder/index',
+          },
+          {
+            label: '直播推流',
+            name: 'livePusher',
+            path: 'media/livePusher/index',
+          },
+          {
+            label: '实时语音',
+            name: 'voipChat',
+            path: 'media/voipChat/index',
+          },
+          {
+            label: '视频解码器',
+            name: 'videoDecoder',
+            path: 'media/videoDecoder/index',
+          },
+          {
+            label: '图片选择 / 预览',
+            name: 'mediaImage',
+            path: 'media/image/index',
           },
         ],
       },
@@ -249,6 +400,46 @@ const signIn = [
             name: 'deviceOrientationChange',
             path: 'device/deviceOrientationChange/index',
           },
+          {
+            label: '蓝牙',
+            name: 'bluetooth',
+            path: 'device/bluetooth/index',
+          },
+          {
+            label: '内存预警',
+            name: 'memoryWarning',
+            path: 'device/memoryWarning/index',
+          },
+          {
+            label: '鼠标事件',
+            name: 'mouse',
+            path: 'device/mouse/index',
+          },
+          {
+            label: '扫码',
+            name: 'scanCode',
+            path: 'device/scanCode/index',
+          },
+          {
+            label: '手柄',
+            name: 'gamePad',
+            path: 'device/gamePad/index',
+          },
+          {
+            label: '键盘',
+            name: 'keyboard',
+            path: 'device/keyboard/index',
+          },
+          {
+            label: '触摸事件',
+            name: 'touch',
+            path: 'device/touch/index',
+          },
+          {
+            label: '滚轮事件',
+            name: 'wheel',
+            path: 'device/wheel/index',
+          },
         ],
       },
       {
@@ -304,6 +495,16 @@ const signIn = [
             label: '本地缓存文件',
             name: 'savedFile',
             path: 'file/savedFile/index',
+          },
+          {
+            label: '文件系统综合',
+            name: 'fileSystemManager',
+            path: 'file/fileSystemManager/index',
+          },
+          {
+            label: '保存到本机（PC）',
+            name: 'saveFileToDisk',
+            path: 'file/saveFileToDisk/index',
           },
         ],
       },
@@ -388,13 +589,77 @@ const signIn = [
             name: 'setting',
             path: 'open-api/setting/index',
           },
+          {
+            label: '账号信息',
+            name: 'accountInfo',
+            path: 'open-api/accountInfo/index',
+          },
+          {
+            label: '用户授权',
+            name: 'authorize',
+            path: 'open-api/authorize/index',
+          },
+          {
+            label: '视频号 / 直播',
+            name: 'channels',
+            path: 'open-api/channels/index',
+          },
+          {
+            label: '收货地址',
+            name: 'chooseAddress',
+            path: 'open-api/chooseAddress/index',
+          },
+          {
+            label: '客服会话 / 反馈',
+            name: 'customerMessage',
+            path: 'open-api/customerMessage/index',
+          },
+          {
+            label: '群相关',
+            name: 'groupInfo',
+            path: 'open-api/group/index',
+          },
+          {
+            label: '隐私授权',
+            name: 'privacy',
+            path: 'open-api/privacy/index',
+          },
+          {
+            label: '微信运动',
+            name: 'weRun',
+            path: 'open-api/weRun/index',
+          },
+          {
+            label: '业务视图',
+            name: 'openBusinessView',
+            path: 'open-api/openBusinessView/index',
+          },
         ],
       },
       {
         label: '虚拟支付',
         name: 'pay',
         children: [
-          // 待补充：商户号支付、蓝包等
+          {
+            label: '米大师支付',
+            name: 'midasPay',
+            path: 'pay/midas/index',
+          },
+          {
+            label: '海外支付',
+            name: 'overseasPay',
+            path: 'pay/overseasPay/index',
+          },
+          {
+            label: '商户转账',
+            name: 'merchantTransfer',
+            path: 'pay/merchantTransfer/index',
+          },
+          {
+            label: '店礼物 / 红包',
+            name: 'storeGift',
+            path: 'pay/storeGift/index',
+          },
         ],
       },
 
@@ -417,10 +682,14 @@ const signIn = [
           {
             label: '好友对战（帧同步）',
             name: 'getGameServerManager',
-            path() {
-              // gitHub地址 https://github.com/wechat-miniprogram/minigame-lockstep-demo
-              wx.navigateToMiniProgram({ appId: 'wx4f4a4549a1069d03' });
-            },
+            // 走 sub-lockstep 分包（见 subMinigamePages 登记）
+            // 源码参考：github.com/wechat-miniprogram/minigame-lockstep-demo
+            path: 'game-server/getGameServerManager/index',
+          },
+          {
+            label: 'GameServerManager 基础',
+            name: 'gameServerManagerBasic',
+            path: 'game-server/gameServerManager/index',
           },
         ],
       },
@@ -449,6 +718,11 @@ const signIn = [
             label: '插屏广告',
             name: 'createInterstitialAd',
             path: 'ad/createInterstitialAd/index',
+          },
+          {
+            label: '自定义广告',
+            name: 'createCustomAd',
+            path: 'ad/createCustomAd/index',
           },
         ],
       },
@@ -479,7 +753,11 @@ const signIn = [
         label: '工具',
         name: 'util',
         children: [
-          // 待补充：编码/解码等
+          {
+            label: '字符编解码',
+            name: 'utilEncode',
+            path: 'util/encode/index',
+          },
         ],
       },
       {
@@ -491,7 +769,11 @@ const signIn = [
         label: 'WASM',
         name: 'wasm',
         children: [
-          // 待补充：WebAssembly 相关
+          {
+            label: 'WXWebAssembly',
+            name: 'wxWebAssembly',
+            path: 'wasm/wxWebAssembly/index',
+          },
         ],
       },
       {
@@ -502,18 +784,6 @@ const signIn = [
             label: '群活动',
             name: 'groupTask',
             path: 'chat-tool/groupTask/index',
-            children: [
-              {
-                label: '创建群活动',
-                name: 'createGroupTask',
-                path: 'chat-tool/groupTask/createGroupTask/index',
-              },
-              {
-                label: '群活动详情',
-                name: 'groupTaskDetail',
-                path: 'chat-tool/groupTask/groupTaskDetail/index',
-              },
-            ],
           },
         ],
       },
@@ -541,6 +811,16 @@ const signIn = [
             name: 'face-detect',
             path: 'ai/face-detect/index',
           },
+          {
+            label: 'AI 推理',
+            name: 'aiInference',
+            path: 'ai/aiInference/index',
+          },
+          {
+            label: 'VK Session',
+            name: 'vkSession',
+            path: 'ai/vkSession/index',
+          },
         ],
       },
 
@@ -549,14 +829,22 @@ const signIn = [
         label: '服务端API',
         name: 'server',
         children: [
-          // 待补充：内容安全、二维码生成等
+          {
+            label: '云函数综合演示',
+            name: 'serverCloudFunctions',
+            path: 'server/cloudFunctions/index',
+          },
         ],
       },
       {
         label: '性能',
         name: 'perf',
         children: [
-          // 待补充：性能相关
+          {
+            label: '用户目录文件性能',
+            name: 'perfFilePerf',
+            path: 'perf/filePerf/index',
+          },
         ],
       },
     ],
@@ -564,19 +852,228 @@ const signIn = [
 ];
 
 const renderPage = require('../libs/page-renderer');
+const richRenderer = require('../libs/rich-renderer');
+const apiEntry = require('../libs/apiEntry');
 
-/**
- * 加载页面模块，兼容两种格式：
- * 1. 旧模式：module.exports = function(PIXI, app, obj) { return container }
- * 2. 新模式：纯 export 函数，自动用 page-renderer 包装
- */
-function loadPageModule(mod, PIXI, app, params, pageLabel?, children?) {
-  if (typeof mod === 'function') {
-    // 旧模式：直接调用
-    return mod(PIXI, app, params, children);
+// 走 rich-renderer 的页面：key 是路由 name，value 是对应的 rich-config 路径
+const richPages: Record<string, string> = {
+  'worker':                      '../libs/rich-configs/worker',
+  'setPreferredFramesPerSecond': '../libs/rich-configs/setPreferredFramesPerSecond',
+  'accelerometerChange':         '../libs/rich-configs/accelerometerChange',
+  'compassChange':               '../libs/rich-configs/compassChange',
+  'gyroscopeChange':             '../libs/rich-configs/gyroscopeChange',
+  'deviceMotionChange':          '../libs/rich-configs/deviceMotionChange',
+  'screenBrightness':            '../libs/rich-configs/screenBrightness',
+};
+
+// 走通用 display 工厂的页面：key 是路由 name，value 是业务模块路径
+// 业务模块需 export setDisplay（通过 createDisplay() 生成）
+const displayPages: Record<string, string> = {
+  // base/
+  'baseSystem':               'base/system/index',
+  'baseUpdate':               'base/update/index',
+  'baseLifeCycle':            'base/lifeCycle/index',
+  'baseAppEvent':             'base/appEvent/index',
+  'basePerformance':          'base/performance/index',
+  'baseLoadSubpackage':       'base/loadSubpackage/index',
+  'baseDebug':                'base/debug/index',
+  'baseCrypto':               'base/crypto/index',
+  // navigate/
+  'restartMiniProgram':       'navigate/restartMiniProgram/index',
+  'navigateToMiniProgram':    'navigate/navigateToMiniProgram/index',
+  'exitMiniProgram':          'navigate/exitMiniProgram/index',
+  // util / wasm / perf / data-analysis / pay / server
+  'utilEncode':               'util/encode/index',
+  'wxWebAssembly':            'wasm/wxWebAssembly/index',
+  'perfFilePerf':             'perf/filePerf/index',
+  'dataAnalysisReport':       'data-analysis/report/index',
+  'dataAnalysisLogManager':   'data-analysis/logManager/index',
+  'midasPay':                 'pay/midas/index',
+  'overseasPay':              'pay/overseasPay/index',
+  'merchantTransfer':         'pay/merchantTransfer/index',
+  'storeGift':                'pay/storeGift/index',
+  'serverCloudFunctions':     'server/cloudFunctions/index',
+  // game-server / ai / ad
+  'gameServerManagerBasic':   'game-server/gameServerManager/index',
+  'aiInference':              'ai/aiInference/index',
+  'vkSession':                'ai/vkSession/index',
+  'createCustomAd':           'ad/createCustomAd/index',
+  // device 新增
+  'bluetooth':                'device/bluetooth/index',
+  'memoryWarning':            'device/memoryWarning/index',
+  'mouse':                    'device/mouse/index',
+  'scanCode':                 'device/scanCode/index',
+  'gamePad':                  'device/gamePad/index',
+  'keyboard':                 'device/keyboard/index',
+  'touch':                    'device/touch/index',
+  'wheel':                    'device/wheel/index',
+  // file 新增
+  'fileSystemManager':        'file/fileSystemManager/index',
+  'saveFileToDisk':           'file/saveFileToDisk/index',
+  // media 新增
+  'innerAudio':               'media/innerAudio/index',
+  'webAudio':                 'media/webAudio/index',
+  'recorder':                 'media/recorder/index',
+  'livePusher':               'media/livePusher/index',
+  'voipChat':                 'media/voipChat/index',
+  'videoDecoder':             'media/videoDecoder/index',
+  'mediaImage':               'media/image/index',
+  // network 新增
+  'tcpSocket':                'network/tcp/index',
+  'udpSocket':                'network/udp/index',
+  // open-api 新增
+  'accountInfo':              'open-api/accountInfo/index',
+  'authorize':                'open-api/authorize/index',
+  'channels':                 'open-api/channels/index',
+  'chooseAddress':            'open-api/chooseAddress/index',
+  'customerMessage':          'open-api/customerMessage/index',
+  'groupInfo':                'open-api/group/index',
+  'privacy':                  'open-api/privacy/index',
+  'weRun':                    'open-api/weRun/index',
+  'openBusinessView':         'open-api/openBusinessView/index',
+  // render 新增
+  'renderCanvas':             'render/canvas/index',
+  'cursor':                   'render/cursor/index',
+  // share 新增
+  'setMessageToFriendQuery':  'share/setMessageToFriendQuery/index',
+  'shareActivity':            'share/shareActivity/index',
+  'showShareImageMenu':       'share/showShareImageMenu/index',
+  // storage 新增
+  'backgroundFetch':          'storage/backgroundFetch/index',
+  'bufferUrl':                'storage/bufferUrl/index',
+  // ui 新增
+  'uiMenu':                   'ui/menu/index',
+  'uiWindow':                 'ui/window/index',
+  // 已有
+  'getBatteryInfo':           'device/getBatteryInfo/index',
+  'getNetworkType':           'device/getNetworkType/index',
+  'clipboardData':            'device/clipboardData/index',
+  'onNetworkStatusChange':    'device/onNetworkStatusChange/index',
+  'deviceOrientationChange':  'device/deviceOrientationChange/index',
+  'getUpdateManager':         'device/getUpdateManager/index',
+  'getLocation':              'location/getLocation/index',
+  'request':                  'network/request/index',
+  'downloadFile':             'network/downloadFile/index',
+  'uploadFile':               'network/uploadFile/index',
+  'login':                    'open-api/login/index',
+  'getUserInfo':              'open-api/getUserInfo/index',
+  'setting':                  'open-api/setting/index',
+  'requestSubscribeMessage':  'open-api/requestSubscribeMessage/index',
+  'UnionID':                  'open-api/UnionID/index',
+  'appletCode':               'open-api/appletCode/index',
+  'storageOp':                'storage/storage/index',
+  'showActionSheet':          'ui/showActionSheet/index',
+  'voice':                    'media/voice/index',
+  'camera':                   'media/camera/index',
+  'readdir':                  'file/readdir/index',
+  'saveFile':                 'file/saveFile/index',
+  'access':                   'file/access/index',
+  'stat':                     'file/stat/index',
+  'getFileInfo':              'file/getFileInfo/index',
+  'dir':                      'file/dir/index',
+  'unzip':                    'file/unzip/index',
+};
+
+// 走 sub-minigame 分包的页面：key 是路由 name，value 是分包名
+const subMinigamePages: Record<string, string> = {
+  'groupTask': 'chattool',
+  'getGameServerManager': 'lockstep',
+};
+
+// 分包入口元数据：分包名 → { modulePath, backFn }
+// - modulePath：loadSubpackage 成功后 require 的入口文件
+// - backFn：供 delPage 路径调用的反向清理方法名（主动销毁整个分包时用）
+const subMinigameEntries: Record<string, { modulePath: string; backFn: string }> = {
+  'chattool': { modulePath: '../../sub-chattool/index', backFn: 'navigateBack' },
+  'lockstep': { modulePath: '../../sub-lockstep/index',  backFn: 'exitToMain'   },
+};
+
+// 组件库引用（传给分包使用）
+const components = require('../libs/component/index');
+
+function loadPage(name: string, path: string, PIXI: any, app: any, params: any, label?: string, treePage?: any) {
+  // 路径 C：sub-minigame 分包（异步加载，接管 stage，拥有独立路由）
+  if (subMinigamePages[name]) {
+    const subpackageName = subMinigamePages[name];
+    const entry = subMinigameEntries[subpackageName];
+
+    // 创建占位 container 给主路由管理
+    const container = new PIXI.Container();
+    app.stage.addChild(container);
+
+    // 显示加载提示
+    wx.showLoading({ title: '加载中', mask: true });
+
+    // 异步加载分包
+    wx.loadSubpackage({
+      name: subpackageName,
+      success() {
+        wx.hideLoading();
+        const mod = require(entry.modulePath);
+        mod.launch(PIXI, app, params, () => {
+          // 分包返回主 demo 时：弹出 treeView，恢复上一页
+          const routerObj = window.router as any;
+          if (routerObj.treeView.length >= 2) {
+            const pageName = routerObj.treeView.pop();
+            if (treePage[pageName]?.page) {
+              treePage[pageName].page.visible = false;
+              app.stage.removeChild(treePage[pageName].page);
+              treePage[pageName].page.destroy(true);
+            }
+            treePage[pageName].page = null;
+            treePage[pageName].init = false;
+            const prevName = routerObj.getNowPageName();
+            if (treePage[prevName]?.page) {
+              treePage[prevName].page.visible = true;
+            }
+          }
+        }, components); // 注入组件库（chattool 用，lockstep 忽略）
+      },
+      fail(err: any) {
+        wx.hideLoading();
+        console.error('分包加载失败:', err);
+        wx.showModal({ content: '分包加载失败', showCancel: false });
+      },
+    });
+
+    // 存 onUnload（主动 delPage 时触发）
+    if (treePage) {
+      treePage[name]._onUnload = () => {
+        try {
+          const mod = require(entry.modulePath);
+          mod[entry.backFn] && mod[entry.backFn]();
+        } catch (e) { /* 分包可能还没加载 */ }
+      };
+    }
+    return container;
   }
-  // 新模式：纯 export 函数，传 label 作为页面标题
-  return renderPage(PIXI, app, params, mod, pageLabel);
+
+  if (richPages[name]) {
+    const { config } = require(richPages[name]);
+    // rich-renderer 的 onUnload 在 goBack.callBack 里已由 rich-renderer 自己调用，
+    // 但 delPage 路径需要额外存一份供 router 调用
+    if (treePage && config.onUnload) {
+      treePage[name]._onUnload = () => config.onUnload(null);
+    }
+    return richRenderer(PIXI, app, params, config);
+  }
+
+  // 走通用 display 工厂：业务模块用 setDisplay 接收展示 api，rich-config 自动生成
+  if (displayPages[name]) {
+    const mod = require(displayPages[name]);
+    const { createDisplayConfig } = require('../libs/rich-configs/display');
+    const config = createDisplayConfig(mod, label);
+    if (treePage && config.onUnload) {
+      treePage[name]._onUnload = () => config.onUnload(null);
+    }
+    return richRenderer(PIXI, app, params, config);
+  }
+  const mod = require(path);
+  // 把模块的 onUnload 存到 treePage，供 delPage 路径调用
+  if (treePage && typeof mod.onUnload === 'function') {
+    treePage[name]._onUnload = () => mod.onUnload();
+  }
+  return renderPage(PIXI, app, params, mod, label);
 }
 
 function router(PIXI, app, parameter) {
@@ -598,19 +1095,17 @@ function router(PIXI, app, parameter) {
   }
   regroup(signIn);
 
-  for (let i = 0, len = signIn.length; i < len; i++) {
-    let name = signIn[i].name;
-    let mod = require(treePage[name].path);
-    treePage[name].page = loadPageModule(
-      mod,
-      PIXI,
-      app,
-      treePage[name].parameter,
-      treePage[name].label,
-      signIn[i].children
-    );
-    treePage[name].init = true;
-  }
+  // 首页单独初始化（不走 page-renderer）
+  const entryName = signIn[0].name;
+  const entryParam = { ...parameter, name: entryName, isTabBar: true };
+  treePage[entryName] = { label: signIn[0].label, parameter: entryParam };
+  treePage[entryName].page = apiEntry(
+    PIXI,
+    app,
+    entryParam,
+    signIn[0].children
+  );
+  treePage[entryName].init = true;
 
   window.router = new (function () {
     this.treeView = ['APIentry'];
@@ -628,12 +1123,11 @@ function router(PIXI, app, parameter) {
       try {
         if (!treePage[newPage].init) {
           console.warn('!!! newPage', newPage, treePage[newPage].path);
-          let mod = require(treePage[newPage].path);
-          treePage[newPage].page = loadPageModule(mod, PIXI, app, {
+          treePage[newPage].page = loadPage(newPage, treePage[newPage].path, PIXI, app, {
             ...treePage[newPage].parameter,
             ...query,
             ...res,
-          }, treePage[newPage].label);
+          }, treePage[newPage].label, treePage);
           treePage[newPage].init = true;
         }
 
@@ -664,6 +1158,11 @@ function router(PIXI, app, parameter) {
     this.delPage = function () {
       if (this.treeView.length < 2) return;
       let name = this.treeView.pop();
+      // 先调业务层清理（video/camera/worker/socket 等资源销毁）
+      if (treePage[name]._onUnload) {
+        try { treePage[name]._onUnload(); } catch (e) { console.error('onUnload error:', e); }
+        treePage[name]._onUnload = null;
+      }
       treePage[name].page.visible = false;
       app.stage.removeChild(treePage[name].page).destroy(true);
       treePage[name].page = null;

@@ -1,4 +1,4 @@
-module.exports = function(PIXI, deploy = {}) {
+module.exports = function(PIXI, deploy: any = {}) {
     let {
         width = canvas.width - 80 * PIXI.ratio,
         height = 94 * PIXI.ratio,
@@ -32,12 +32,13 @@ module.exports = function(PIXI, deploy = {}) {
 
         this.onClickFn = function(callBack) {
             this.interactive = true;
+            let recordY = 0;
             this.touchstart = e => {
                 maskLayer.visible = true;
-                e.recordY = e.data.global.y;
+                recordY = e.data.global.y;
                 
                 const handleTouchEnd = e => {
-                    if (Math.abs(e.recordY - e.data.global.y) < 5) {
+                    if (Math.abs(recordY - e.data.global.y) < 5) {
                         callBack(e);
                     }
                 };
@@ -67,7 +68,7 @@ module.exports = function(PIXI, deploy = {}) {
             this.interactive = boolean;
         }.bind(kind);
 
-        this.turnColors = function(deploy = {}) {
+        this.turnColors = function(deploy: any = {}) {
             let { color: newColor, border: newBorder, alpha: newAlpha } = deploy;
             newBorder = Object.assign({}, border, newBorder);
 

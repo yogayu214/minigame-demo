@@ -1,19 +1,30 @@
 /**
  * 实时语音通话
  * wx.joinVoIPChat / wx.exitVoIPChat / wx.updateVoIPChatMuteConfig
+ * wx.onVoIPChatMembersChanged / wx.onVoIPChatInterrupted
  */
 
 let groupId = '';
+let scopeRecord: boolean | null = null;
+
+// ===== 内部工具函数 =====
 
 /** 检查录音授权 */
 function authorize(callback: () => void) {
+  if (scopeRecord) return callback();
   wx.getSetting({
-    success(res) {
-      if (res.authSetting['scope.record']) return callback();
+    success(res: any) {
+      scopeRecord = res.authSetting['scope.record'];
+      if (scopeRecord) return callback();
       wx.authorize({
         scope: 'scope.record',
-        success: callback,
-        fail() { wx.showToast({ title: '需要录音授权', icon: 'none' }); },
+        success() { scopeRecord = true; callback(); },
+        fail() {
+          wx.hideLoading();
+          scopeRecord = false;
+          wx.showModal({ title: '授权失败', content: '没有授权是无法加入实时语音通话', showCancel: false });
+          window.router.delPage();
+        },
       });
     },
   });
@@ -26,28 +37,88 @@ function getSignature(gId: string, callback: (res: any) => void) {
       name: 'getSignature',
       data: { groupId: gId },
       success(res: any) { callback(res.result); },
-      fail(res: any) { console.log('获取签名失败:', res.errCode); },
+      fail(res: any) {
+        wx.hideLoading();
+        wx.showModal({ title: '获取签名失败', content: String(res.errCode), showCancel: false });
+        window.router.delPage();
+      },
     });
   });
 }
+
+/** 被动断开时的处理 */
+function onInterrupted(res: any) {
+  console.log('onVoIPChatInterrupted:', res);
+  wx.offVoIPChatInterrupted(onInterrupted);
+  // 尝试重新加入房间
+  window.router.delPage();
+  setTimeout(() => {
+    const query = window.query;
+    if (query) window.router.navigateTo(query.pathName, query);
+  }, 0);
+}
+
+// ===== 导出的 API 函数 =====
 
 /** 创建并加入语音房间 */
 export function joinVoIPChat() {
   wx.showLoading({ title: '正在创建房间' });
   groupId = `语音房间${Math.random().toString(36).substring(2)}`;
+
   getSignature(groupId, (signRes) => {
     wx.joinVoIPChat({
       ...signRes,
       complete(res: any) {
         wx.hideLoading();
         if (res.errCode) {
-          console.log('加入失败:', res.errCode);
-        } else {
-          console.log('已加入房间:', groupId, '当前人数:', res.openIdList.length);
-          wx.onVoIPChatMembersChanged((r: any) => {
-            console.log('房间人数变化:', r.openIdList.length);
-          });
+          window.router.delPage();
+          return;
         }
+        console.log('已加入房间:', groupId, '当前人数:', res.openIdList?.length);
+
+        // 监听房间人数变化
+        wx.onVoIPChatMembersChanged((r: any) => {
+          console.log('房间人数变化:', r.openIdList.length);
+        });
+
+        // 监听被动断开（如切入后台）
+        wx.onVoIPChatInterrupted(onInterrupted);
+
+        // 存储 query 供分享进房和中断恢复使用
+        window.query = {
+          pathName: 'VoIPChat',
+          roomName: groupId,
+          re_enter: '返回当前房间',
+        };
+      },
+    });
+  });
+}
+
+/** 加入已有房间（从分享进入时） */
+export function joinExistingRoom() {
+  const query = window.query;
+  if (!query?.roomName) {
+    wx.showToast({ title: '没有可加入的房间', icon: 'none' });
+    return;
+  }
+  groupId = query.roomName;
+  wx.showLoading({ title: query.re_enter || '正在进入房间', mask: true });
+
+  getSignature(groupId, (signRes) => {
+    wx.joinVoIPChat({
+      ...signRes,
+      complete(res: any) {
+        wx.hideLoading();
+        if (res.errCode) {
+          window.router.delPage();
+          return;
+        }
+        console.log('已加入房间:', groupId);
+        wx.onVoIPChatMembersChanged((r: any) => {
+          console.log('房间人数变化:', r.openIdList.length);
+        });
+        wx.onVoIPChatInterrupted(onInterrupted);
       },
     });
   });
@@ -65,8 +136,10 @@ export function shareRoom() {
 /** 退出语音房间 */
 export function exitVoIPChat() {
   wx.exitVoIPChat();
+  wx.offVoIPChatInterrupted(onInterrupted);
   wx.showToast({ title: '已退出房间' });
   groupId = '';
+  window.query = null;
 }
 
 /** 静音麦克风 */
@@ -99,4 +172,13 @@ export function unmuteEarphone() {
     muteConfig: { muteEarphone: false },
     success() { wx.showToast({ title: '耳机已开启' }); },
   });
+}
+
+export function onUnload() {
+  if (groupId) {
+    wx.exitVoIPChat();
+    wx.offVoIPChatInterrupted(onInterrupted);
+    groupId = '';
+    window.query = null;
+  }
 }

@@ -3,43 +3,95 @@
  * wx.getRecorderManager / wx.createInnerAudioContext
  */
 
-let recorder: any = null;
-let audioPlayer: any = null;
-let tempAudioPath: string = '';
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
+let recorderManager: any = null;
+let innerAudioContext: any = null;
+let rebooting: any = null;
+let recordDuration = 0;
 
 /** 开始录音 */
 export function startRecord() {
-  recorder = wx.getRecorderManager();
-  recorder.onStop((res: any) => {
-    tempAudioPath = res.tempFilePath;
-    console.log('录音完成, 路径:', res.tempFilePath);
+  if (!recorderManager) {
+    recorderManager = wx.getRecorderManager();
+  }
+
+  recorderManager.onStart(() => {
+    display.text('● 录音中...');
   });
-  recorder.start({ format: 'mp3' });
-  console.log('录音中...');
+
+  recorderManager.onStop((res: any) => {
+    recordDuration = res.duration;
+    innerAudioContext = wx.createInnerAudioContext();
+    innerAudioContext.src = res.tempFilePath;
+    display.data({
+      '状态': '录音完成',
+      '时长': `${(res.duration / 1000).toFixed(1)}s`,
+      '文件': res.tempFilePath,
+    });
+  });
+
+  recorderManager.start({ duration: 600000 });
 }
 
 /** 停止录音 */
 export function stopRecord() {
-  if (recorder) recorder.stop();
+  if (recorderManager) recorderManager.stop();
 }
 
 /** 播放录音 */
 export function playRecord() {
-  if (!tempAudioPath) { wx.showToast({ title: '请先录音', icon: 'none' }); return; }
-  audioPlayer = wx.createInnerAudioContext();
-  audioPlayer.src = tempAudioPath;
-  audioPlayer.onEnded(() => console.log('播放结束'));
-  audioPlayer.play();
-  console.log('播放中...');
+  if (!innerAudioContext) {
+    wx.showToast({ title: '请先录音', icon: 'none' });
+    return;
+  }
+  innerAudioContext.play();
+  display.text(`▶ 播放中... (时长 ${(recordDuration / 1000).toFixed(1)}s)`);
+
+  innerAudioContext.onEnded(() => {
+    display.text('播放结束');
+  });
+
+  innerAudioContext.onPause(() => {
+    new Promise((resolve) => {
+      rebooting = resolve;
+      wx.onAudioInterruptionEnd(rebooting);
+      wx.onShow(rebooting);
+    }).then(() => {
+      wx.offShow(rebooting);
+      wx.offAudioInterruptionEnd(rebooting);
+      rebooting = null;
+    });
+  });
 }
 
 /** 停止播放 */
 export function stopPlay() {
-  if (audioPlayer) { audioPlayer.stop(); audioPlayer.destroy(); audioPlayer = null; }
+  if (innerAudioContext) {
+    innerAudioContext.stop();
+    innerAudioContext.offEnded();
+    innerAudioContext.offPause();
+    display.text('已停止播放');
+  }
 }
 
-/** 页面销毁时清理 */
+/** 删除录音 */
+export function deleteRecord() {
+  if (innerAudioContext) {
+    innerAudioContext.destroy();
+    innerAudioContext = null;
+  }
+  recordDuration = 0;
+  wx.offAudioInterruptionEnd();
+  display.text('录音已删除');
+}
+
 export function onUnload() {
-  if (recorder) recorder.stop();
-  if (audioPlayer) { audioPlayer.stop(); audioPlayer.destroy(); audioPlayer = null; }
+  if (recorderManager) recorderManager.stop();
+  if (innerAudioContext) { innerAudioContext.destroy(); innerAudioContext = null; }
+  if (rebooting) { wx.offShow(rebooting); wx.offAudioInterruptionEnd(rebooting); }
+  recordDuration = 0;
 }

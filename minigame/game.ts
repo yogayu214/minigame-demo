@@ -1,7 +1,7 @@
 declare global {
   interface Window {
     router: {
-      navigateTo: (pathName: string, query: any, options?: any) => void;
+      navigateTo: (pathName: string, query?: any, options?: any) => void;
       navigateBack: () => void;
       delPage: () => void;
       getNowPageName: () => string;
@@ -62,37 +62,10 @@ PIXI.loader
   .add([
     'images/official.png',
     'images/APIicon.png',
-    'images/right.png',
     'images/right_arrow.png',
     'images/right_arrow_black.png',
     'images/star.png',
     'images/customerService.png',
-    // 一级分类图标
-    'images/base.png',
-    'images/navigate.png',
-    'images/share.png',
-    'images/ui.png',
-    'images/network.png',
-    'images/storage.png',
-    'images/data-analysis.png',
-    'images/render.png',
-    'images/media.png',
-    'images/location.png',
-    'images/device.png',
-    'images/file.png',
-    'images/open-api.png',
-    'images/pay.png',
-    'images/game-recorder.png',
-    'images/game-server.png',
-    'images/ad.png',
-    'images/recommend.png',
-    'images/util.png',
-    'images/worker.png',
-    'images/wasm.png',
-    'images/chat-tool.png',
-    'images/ai.png',
-    'images/server.png',
-    'images/perf.png',
   ])
   .load(() => {
     wx.loadSubpackage({

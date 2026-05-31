@@ -1,5 +1,6 @@
 {
     "deviceOrientation": "portrait",
+    "resizable": true,
     "iOSHighPerformance": false,
     "showStatusBar": false,
     "networkTimeout": {
@@ -9,10 +10,25 @@
         "downloadFile": 5000
     },
     "workers": "workers",
+    "lockStepOptions": {
+        "dataType": "String",
+        "gameTick": 33,
+        "heartBeatTick": 2000,
+        "offlineTimeLength": 10000,
+        "UDPReliabilityStrategy": 3
+    },
     "subpackages": [
         {
             "name": "api",
             "root": "js/api/"
+        },
+        {
+            "name": "chattool",
+            "root": "sub-chattool/"
+        },
+        {
+            "name": "lockstep",
+            "root": "sub-lockstep/"
         }
     ],
     "permission": {

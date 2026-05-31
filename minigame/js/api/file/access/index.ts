@@ -3,20 +3,27 @@
  * FileSystemManager.access
  */
 
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
 /** 判断文件是否存在 */
 export function accessFile() {
+  const path = wx.env.USER_DATA_PATH + '/opTest.txt';
   wx.getFileSystemManager().access({
-    path: wx.env.USER_DATA_PATH + '/opTest.txt',
-    success() { console.log('文件存在'); },
-    fail() { console.log('文件不存在'); },
+    path,
+    success() { display.data({ '路径': path, '状态': '✓ 文件存在' }); },
+    fail() { display.data({ '路径': path, '状态': '✗ 文件不存在' }); },
   });
 }
 
 /** 判断目录是否存在 */
 export function accessDir() {
+  const path = wx.env.USER_DATA_PATH + '/testDir';
   wx.getFileSystemManager().access({
-    path: wx.env.USER_DATA_PATH + '/testDir',
-    success() { console.log('目录存在'); },
-    fail() { console.log('目录不存在'); },
+    path,
+    success() { display.data({ '路径': path, '状态': '✓ 目录存在' }); },
+    fail() { display.data({ '路径': path, '状态': '✗ 目录不存在' }); },
   });
 }

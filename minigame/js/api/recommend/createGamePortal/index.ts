@@ -17,3 +17,6 @@ export function show() { if (gamePortal) gamePortal.show(); }
 
 /** 销毁 */
 export function destroy() { if (gamePortal) { gamePortal.destroy(); gamePortal = null; } }
+
+/** 页面销毁时清理 */
+export function onUnload() { if (gamePortal) { gamePortal.destroy(); gamePortal = null; } }

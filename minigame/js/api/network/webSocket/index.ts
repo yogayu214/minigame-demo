@@ -3,12 +3,22 @@
  * wx.connectSocket / wx.sendSocketMessage / wx.closeSocket
  */
 
+let onOpen: any = null;
+let onClose: any = null;
+let onError: any = null;
+let onMessage: any = null;
+
 /** 连接 WebSocket */
 export function connectSocket() {
-  wx.onSocketOpen(() => { console.log('连接已建立'); });
-  wx.onSocketClose(() => { console.log('连接已关闭'); });
-  wx.onSocketError((err: any) => { console.log('连接错误:', err.errMsg); });
-  wx.onSocketMessage((res: any) => { console.log('收到消息:', res.data); });
+  onOpen = () => { console.log('连接已建立'); wx.showToast({ title: '已连接' }); };
+  onClose = () => { console.log('连接已关闭'); };
+  onError = (err: any) => { console.log('连接错误:', err.errMsg); };
+  onMessage = (res: any) => { console.log('收到消息:', res.data); };
+
+  wx.onSocketOpen(onOpen);
+  wx.onSocketClose(onClose);
+  wx.onSocketError(onError);
+  wx.onSocketMessage(onMessage);
   wx.connectSocket({ url: 'wss://echo.websocket.org' });
 }
 
@@ -27,7 +37,11 @@ export function closeSocket() {
   wx.showToast({ title: '已断开' });
 }
 
-/** 页面销毁时清理 */
 export function onUnload() {
   try { wx.closeSocket(); } catch (e) {}
+  if (onOpen) wx.offSocketOpen(onOpen);
+  if (onClose) wx.offSocketClose(onClose);
+  if (onError) wx.offSocketError(onError);
+  if (onMessage) wx.offSocketMessage(onMessage);
+  onOpen = onClose = onError = onMessage = null;
 }

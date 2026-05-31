@@ -7,3 +7,6 @@ node_modules/
 dist/
 *.tsbuildinfo
 *.log
+
+# CodeBuddy IDE 本地数据
+.codebuddy/

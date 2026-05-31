@@ -1,13 +1,18 @@
 /**
  * 横竖屏切换
- * wx.onDeviceOrientationChange
+ * wx.setDeviceOrientation
  */
+
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
 
 /** 切换为横屏 */
 export function switchToLandscape() {
   wx.setDeviceOrientation({
     value: 'landscape',
-    success() { wx.showToast({ title: '已切换横屏' }); },
+    success() { display.text('当前方向：横屏'); },
   });
 }
 
@@ -15,6 +20,6 @@ export function switchToLandscape() {
 export function switchToPortrait() {
   wx.setDeviceOrientation({
     value: 'portrait',
-    success() { wx.showToast({ title: '已切换竖屏' }); },
+    success() { display.text('当前方向：竖屏'); },
   });
 }

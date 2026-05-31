@@ -3,12 +3,20 @@
  * wx.setClipboardData / wx.getClipboardData
  */
 
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
+let lastCopied = '';
+
 /** 复制文本到剪贴板 */
 export function setClipboard() {
+  lastCopied = 'Hello MiniGame! ' + new Date().toLocaleTimeString();
   wx.setClipboardData({
-    data: 'Hello MiniGame!',
+    data: lastCopied,
     success() {
-      wx.showToast({ title: '已复制' });
+      display.data({ 'Copy': lastCopied, 'Paste': '（点击粘贴按钮）' });
     },
   });
 }
@@ -17,7 +25,7 @@ export function setClipboard() {
 export function getClipboard() {
   wx.getClipboardData({
     success(res: any) {
-      console.log('剪贴板内容:', res.data);
+      display.data({ 'Copy': lastCopied || '（无）', 'Paste': res.data });
     },
   });
 }

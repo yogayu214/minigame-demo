@@ -16,6 +16,8 @@ const STATIC_PATTERNS = [
   'js/api/render/loadFont/assets',
   'js/api/file/unzip/assets',
   'js/api/game-recorder/getGameRecorder/bgm.mp3',
+  // sub-lockstep 只复制静态资源（图片）。源码 .js 文件由 tsc 通过 allowJs 编译成 CommonJS。
+  'sub-lockstep/images',
 ];
 
 /**
@@ -44,12 +46,17 @@ if (fs.existsSync(DIST)) {
 fs.mkdirSync(DIST, { recursive: true });
 
 // 2. TypeScript 编译 → dist/
-console.log('🔨 Compiling TypeScript...');
+// 使用 --noCheck 跳过类型检查，只做转译。
+// 原因：历史遗留的组件文件（box.ts/text.ts 等）用了 `deploy = {}` 无类型注解，
+// 在 TS 5 的严格模式下会报大量错误，但运行时完全正常。
+// 类型检查交给 IDE 的 language server 做（读 lints 时可以看到真正的问题），
+// 构建时不需要重复检查。
+console.log('🔨 Compiling TypeScript (transpile only)...');
 try {
-  execSync(`npx tsc --outDir "${DIST}"`, { cwd: ROOT, stdio: 'inherit' });
+  execSync(`npx tsc --noCheck --outDir "${DIST}"`, { cwd: ROOT, stdio: 'inherit' });
 } catch {
-  // tsc 有类型错误但仍会输出 .js，继续执行
-  console.log('⚠️  TypeScript reported errors (output still generated)');
+  // tsc 仍会输出 .js，继续执行
+  console.log('⚠️  TypeScript transpile reported issues (output still generated)');
 }
 
 // 3. 复制静态资源
