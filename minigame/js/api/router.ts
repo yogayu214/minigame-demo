@@ -10,6 +10,11 @@ const signIn = [
         name: 'base',
         children: [
           {
+            label: '环境变量',
+            name: 'baseEnv',
+            path: 'base/env/index',
+          },
+          {
             label: '系统信息',
             name: 'baseSystem',
             path: 'base/system/index',
@@ -871,6 +876,7 @@ const richPages: Record<string, string> = {
 const displayPages: Record<string, string> = {
   // base/
   'baseSystem':               'base/system/index',
+  'baseEnv':                  'base/env/index',
   'baseUpdate':               'base/update/index',
   'baseLifeCycle':            'base/lifeCycle/index',
   'baseAppEvent':             'base/appEvent/index',
