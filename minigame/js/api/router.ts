@@ -1040,6 +1040,7 @@ function loadPage(name: string, path: string, PIXI: any, app: any, params: any, 
         console.error('分包加载失败:', err);
         wx.showModal({ content: '分包加载失败', showCancel: false });
       },
+      complete() { /* 类型补齐，运行时无副作用 */ },
     });
 
     // 存 onUnload（主动 delPage 时触发）
