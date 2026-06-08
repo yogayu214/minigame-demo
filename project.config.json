@@ -44,7 +44,7 @@
     "disableSWC": true
   },
   "compileType": "game",
-  "libVersion": "2.21.0",
+  "libVersion": "3.15.2",
   "appid": "wx20afc706a711eefc",
   "projectname": "miniGameExample",
   "miniprogramRoot": "dist/",

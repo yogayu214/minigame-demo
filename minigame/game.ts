@@ -20,6 +20,7 @@ import './js/vendor/weapp-adapter';
 import * as PIXI from './js/vendor/pixi.min';
 import pmgressBar from './js/libs/pmgressBar';
 import share from './js/libs/share';
+import { resolvePathName } from './js/libs/sceneMap';
 
 wx.cloud.init({ env: 'example-69d3b' });
 
@@ -83,23 +84,26 @@ PIXI.loader
 
         share(); //全局分享
 
-        if (Object.keys(query).length && query.pathName) {
-          window.router.navigateTo(query.pathName, query, options);
+        // 解析 scene 参数或直接用 pathName
+        const launchPathName = resolvePathName(query);
+        if (launchPathName) {
+          window.router.navigateTo(launchPathName, { ...query, pathName: launchPathName }, options);
         }
 
         wx.onShow((res) => {
-          let query = Object.assign(window.query || {}, res.query),
-            noNavigateToRequired = !['VoIPChat'].includes(query.pathName);
+          let q = Object.assign(window.query || {}, res.query);
+          const showPathName = resolvePathName(q);
+          const noNavigateToRequired = !['VoIPChat'].includes(showPathName || '');
 
-          if (Object.keys(query).length && query.pathName) {
+          if (showPathName) {
             noNavigateToRequired && window.router.navigateBack();
 
             !window.query &&
               !noNavigateToRequired &&
-              window.router.navigateTo(query.pathName, query, res);
+              window.router.navigateTo(showPathName, { ...q, pathName: showPathName }, res);
 
             noNavigateToRequired &&
-              window.router.navigateTo(query.pathName, query, res);
+              window.router.navigateTo(showPathName, { ...q, pathName: showPathName }, res);
           }
 
           noNavigateToRequired && (window.query = null);
