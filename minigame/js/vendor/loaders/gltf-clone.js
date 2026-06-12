@@ -1,4 +1,4 @@
-export default function(gltf, THREE) {
+module.exports = function(gltf, THREE) {
   const clone = {
     animations: gltf.animations,
     scene: gltf.scene.clone(true)

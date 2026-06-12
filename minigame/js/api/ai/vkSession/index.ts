@@ -16,8 +16,8 @@ let session: any = null;
 
 /** 检测 VK 支持情况 */
 export function checkVKSupport() {
-  const v1 = wx.isVKSupport?.('v1') ?? false;
-  const v2 = wx.isVKSupport?.('v2') ?? false;
+  const v1 = (typeof wx.isVKSupport === 'function' && wx.isVKSupport('v1')) || false;
+  const v2 = (typeof wx.isVKSupport === 'function' && wx.isVKSupport('v2')) || false;
   display.data({
     'isVKSupport(v1)': String(v1),
     'isVKSupport(v2)': String(v2),
@@ -26,21 +26,23 @@ export function checkVKSupport() {
 
 /** 创建 VK Session（v1） */
 export function createSessionV1() {
-  if (!wx.isVKSupport?.('v1')) {
+  if (!(typeof wx.isVKSupport === 'function' && wx.isVKSupport('v1'))) {
     display.text('当前环境不支持 VK v1');
     return;
   }
   session = wx.createVKSession({ version: 'v1', track: { plane: { mode: 1 } } });
-  session.start?.((errCode: number) => {
-    display.text(errCode === 0 ? '✓ VK Session v1 已启动' : `✗ 启动失败: ${errCode}`);
-  });
+  if (typeof session.start === 'function') {
+    session.start((errCode: number) => {
+      display.text(errCode === 0 ? '✓ VK Session v1 已启动' : `✗ 启动失败: ${errCode}`);
+    });
+  }
 }
 
 /** 销毁 Session */
 export function destroySession() {
   if (session) {
-    session.stop?.();
-    session.destroy?.();
+    if (typeof session.stop === 'function') session.stop();
+    if (typeof session.destroy === 'function') session.destroy();
     session = null;
     display.text('✓ 已销毁 Session');
   }

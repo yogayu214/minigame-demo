@@ -314,12 +314,13 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
           // ---- 第二遍：按统一的 valX 渲染每一行 ----
           let yOffset = 0;
           for (const { value, keyT } of rows) {
-            const valT = new PIXI.Text(String(value), {
+            const valWrapWidth = Math.max(valMaxW, innerW * 0.45);
+          const valT = new PIXI.Text(String(value), {
               fontSize: `${valFontSize}px`,
               fill: 0x666666,
               lineHeight,
               wordWrap: true,
-              wordWrapWidth: Math.max(valMaxW, 80 * PIXI.ratio),
+              wordWrapWidth: valWrapWidth,
               breakWords: true,
             });
             valT.x = valX;

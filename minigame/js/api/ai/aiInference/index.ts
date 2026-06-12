@@ -17,8 +17,8 @@ export function getInferenceEnvInfo() {
     success(res: any) {
       display.data({
         version: res.ver || '-',
-        支持GPU: String(res.gpuSupport ?? '-'),
-        支持NPU: String(res.npuSupport ?? '-'),
+        支持GPU: String(res.gpuSupport != null ? res.gpuSupport : '-'),
+        支持NPU: String(res.npuSupport != null ? res.npuSupport : '-'),
         最大模型大小: res.maxModelSize ? `${res.maxModelSize}` : '-',
       });
     },
@@ -35,19 +35,25 @@ export function createInferenceSession() {
     precisionLevel: 4,
     allowQuantize: false,
   });
-  session.onLoad?.(() => {
-    display.text('✓ 推理 session 已加载');
-  });
-  session.onError?.((err: any) => {
-    display.text(`✗ 加载失败：${err.errMsg || err.message}`);
-  });
+  if (session.onLoad) {
+    session.onLoad(() => {
+      display.text('✓ 推理 session 已加载');
+    });
+  }
+  if (session.onError) {
+    session.onError((err: any) => {
+      display.text(`✗ 加载失败：${err.errMsg || err.message}`);
+    });
+  }
   display.text('createInferenceSession 已调用，等待 onLoad...');
 }
 
 /** 销毁推理 session */
 export function destroySession() {
   if (session) {
-    session.destroy?.();
+    if (session.destroy) {
+      session.destroy();
+    }
     session = null;
     display.text('✓ 已销毁 session');
   }

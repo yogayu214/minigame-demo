@@ -1,4 +1,4 @@
-export function registerGLTFLoader(THREE) {
+function registerGLTFLoader(THREE) {
   THREE.GLTFLoader = (function() {
     function GLTFLoader() {
       this.manager = THREE.DefaultLoadingManager;
@@ -1629,3 +1629,5 @@ export function registerGLTFLoader(THREE) {
     return GLTFLoader
   })();
 }
+
+module.exports = { registerGLTFLoader };
