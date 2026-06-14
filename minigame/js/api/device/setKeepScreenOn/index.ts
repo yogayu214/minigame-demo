@@ -3,12 +3,17 @@
  * wx.setKeepScreenOn
  */
 
+import { createDisplay } from '../../../libs/display-slot';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
 /** 开启屏幕常亮 */
 export function enableKeepScreenOn() {
   wx.setKeepScreenOn({
     keepScreenOn: true,
     success() {
-      wx.showToast({ title: '已开启' });
+      display.text('已开启屏幕常亮');
     },
   });
 }
@@ -18,7 +23,7 @@ export function disableKeepScreenOn() {
   wx.setKeepScreenOn({
     keepScreenOn: false,
     success() {
-      wx.showToast({ title: '已关闭' });
+      display.text('已关闭屏幕常亮');
     },
   });
 }

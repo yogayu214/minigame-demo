@@ -14,13 +14,10 @@ export function getFileInfo() {
   wx.getFileSystemManager().getFileInfo({
     filePath: path,
     success(res: any) {
-      display.data({
-        '路径': path,
-        '文件大小': `${res.size} 字节`,
-      });
+      display.text(`路径: ${path}\n文件大小: ${res.size} 字节`);
     },
     fail(err: any) {
-      wx.showModal({ title: '失败', content: err.errMsg, showCancel: false });
+      display.text(`获取失败: ${err.errMsg}`);
     },
   });
 }

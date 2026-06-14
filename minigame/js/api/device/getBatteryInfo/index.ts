@@ -12,13 +12,12 @@ export const setDisplay = display.setter;
 export function getBatteryInfo() {
   wx.getBatteryInfo({
     success(res: any) {
-      display.data({
-        '当前电量': `${res.level}%`,
-        '电池状态': res.isCharging ? '充电中' : '未充电',
-      });
+      display.text(
+        `当前电量: ${res.level}%\n电池状态: ${res.isCharging ? '充电中' : '未充电'}`
+      );
     },
     fail(err: any) {
-      wx.showModal({ title: '获取失败', content: err.errMsg, showCancel: false });
+      display.text(`获取失败：${err.errMsg}`);
     },
   });
 }

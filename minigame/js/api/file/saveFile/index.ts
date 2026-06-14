@@ -19,15 +19,15 @@ export function saveFile() {
       fs.saveFile({
         tempFilePath: wx.env.USER_DATA_PATH + '/tempSave.txt',
         success(res: any) {
-          display.data({
-            '状态': '保存成功',
-            '保存路径': res.savedFilePath,
-          });
+          display.text(`状态: 保存成功\n保存路径: ${res.savedFilePath}`);
         },
         fail(err: any) {
-          wx.showModal({ title: '保存失败', content: err.errMsg, showCancel: false });
+          display.text(`保存失败: ${err.errMsg}`);
         },
       });
+    },
+    fail(err: any) {
+      display.text(`写入失败: ${err.errMsg}`);
     },
   });
 }

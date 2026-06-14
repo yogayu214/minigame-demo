@@ -1,0 +1,32 @@
+/**
+ * 获取文本行高
+ * wx.getTextLineHeight
+ * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/render/font/wx.getTextLineHeight.html
+ */
+
+import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
+
+/** 获取文本行高 */
+export function getTextLineHeight() {
+  if (typeof (wx as any).getTextLineHeight !== 'function') {
+    display.text('当前环境不支持 wx.getTextLineHeight');
+    return;
+  }
+  const lineHeight = (wx as any).getTextLineHeight({
+    fontSize: 24,
+    fontFamily: 'sans-serif',
+    text: 'Hello 微信小游戏',
+  });
+  display.text(
+    formatObj({
+      lineHeight: lineHeight,
+      fontSize: 24,
+      fontFamily: 'sans-serif',
+      text: 'Hello 微信小游戏',
+    })
+  );
+}

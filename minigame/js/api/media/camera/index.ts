@@ -4,77 +4,132 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
 let camera: any = null;
 
-/** 创建相机 */
-export function onLoad() {
-  const { windowWidth } = wx.getSystemInfoSync();
-  camera = wx.createCamera({
-    x: 0, y: 200, width: windowWidth, height: windowWidth,
-    devicePosition: 'front',
+/** 授权相机权限 */
+function authorizeCamera(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    wx.getSetting({
+      success(res: any) {
+        if (res.authSetting['scope.camera']) {
+          resolve();
+        } else {
+          wx.authorize({
+            scope: 'scope.camera',
+            success() {
+              resolve();
+            },
+            fail: reject,
+          });
+        }
+      },
+      fail: reject,
+    });
   });
+}
+
+/** 创建相机 */
+export function createCamera() {
+  authorizeCamera()
+    .then(() => {
+      if (camera) {
+        camera.destroy();
+        camera = null;
+      }
+      const { windowWidth, windowHeight } = wx.getSystemInfoSync();
+      const camSize = Math.min(windowWidth, 300);
+      const x = (windowWidth - camSize) / 2;
+      const y = windowHeight * 0.5;
+
+      camera = wx.createCamera({
+        x,
+        y,
+        width: camSize,
+        height: camSize,
+        devicePosition: 'front',
+      });
+      display.text('相机已创建');
+    })
+    .catch(() => {
+      display.text('需要授权相机权限才能使用相机');
+    });
 }
 
 /** 切换前后摄像头 */
 export function switchCamera() {
-  if (camera) {
-    camera.devicePosition = camera.devicePosition === 'back' ? 'front' : 'back';
-    display.text(`切换到：${camera.devicePosition === 'front' ? '前置' : '后置'}摄像头`);
+  if (!camera) {
+    display.text('请先创建相机');
+    return;
   }
+  camera.devicePosition = camera.devicePosition === 'back' ? 'front' : 'back';
+  display.text(
+    `切换到：${camera.devicePosition === 'front' ? '前置' : '后置'}摄像头`
+  );
 }
 
 /** 拍照 */
 export function takePhoto() {
-  if (!camera) return;
-  wx.showLoading({ title: '拍照中...', mask: true });
-  camera.takePhoto().then((res: any) => {
-    wx.hideLoading();
-    if (!res.tempImagePath) {
-      wx.showModal({ title: '拍照失败', content: '相机还没有完全启动', showCancel: false });
-      return;
-    }
-    display.image(res.tempImagePath);
-  }).catch(() => {
-    wx.hideLoading();
-    wx.showToast({ title: '拍照失败', icon: 'none' });
-  });
+  if (!camera) {
+    display.text('请先创建相机');
+    return;
+  }
+  camera
+    .takePhoto()
+    .then((res: any) => {
+      if (!res.tempImagePath) {
+        display.text('拍照失败：相机还没有完全启动');
+        return;
+      }
+      display.image(res.tempImagePath);
+    })
+    .catch(() => {
+      display.text('拍照失败');
+    });
 }
 
 /** 开始录像 */
 export function startRecord() {
-  if (camera) {
-    camera.startRecord();
-    display.text('● 录像中...');
+  if (!camera) {
+    display.text('请先创建相机');
+    return;
   }
+  camera.startRecord();
+  display.text('录像中...');
 }
 
 /** 停止录像 */
 export function stopRecord() {
   if (!camera) return;
-  wx.showLoading({ title: '输出中...', mask: true });
-  camera.stopRecord().then((res: any) => {
-    wx.hideLoading();
-    display.data({
-      '状态': '录像成功',
-      '视频路径': res.tempVideoPath,
-      '封面路径': res.tempThumbPath || '-',
+  camera
+    .stopRecord()
+    .then((res: any) => {
+      display.text(
+        formatObj({
+          状态: '录像成功',
+          视频路径: res.tempVideoPath,
+          封面路径: res.tempThumbPath || '-',
+        })
+      );
+    })
+    .catch((res: any) => {
+      if (res.errMsg === 'operateCamera:fail:is not recording') {
+        display.text('输出失败：没有点击开始录制');
+      } else if (res.errMsg === 'operateCamera:fail:stop error') {
+        display.text('输出失败：录制的时间过短');
+      } else {
+        display.text(`输出失败：${res.errMsg || '未知错误'}`);
+      }
     });
-  }).catch((res: any) => {
-    wx.hideLoading();
-    if (res.errMsg === 'operateCamera:fail:is not recording') {
-      wx.showModal({ title: '输出失败', content: '你没有点击开始录制', showCancel: false });
-    } else if (res.errMsg === 'operateCamera:fail:stop error') {
-      wx.showModal({ title: '输出失败', content: '录制的时间过短', showCancel: false });
-    } else {
-      wx.showModal({ title: '输出失败', content: res.errMsg || '未知错误', showCancel: false });
-    }
-  });
 }
 
 export function onUnload() {
-  if (camera) { camera.destroy(); camera = null; }
+  if (camera) {
+    camera.destroy();
+    camera = null;
+  }
 }

@@ -13,16 +13,24 @@ export const setDisplay = display.setter;
 /** 主动唤起隐私授权确认弹窗 */
 export function requirePrivacyAuthorize() {
   wx.requirePrivacyAuthorize({
-    success() { display.text('✓ 用户已同意隐私协议'); },
-    fail(err: any) { display.text(`授权失败：${err.errMsg}`); },
+    success() {
+      display.text('用户已同意隐私协议');
+    },
+    fail(err: any) {
+      display.text(`授权失败：${err.errMsg}`);
+    },
   });
 }
 
 /** 打开隐私协议页面 */
 export function openPrivacyContract() {
   wx.openPrivacyContract({
-    success() { display.text('✓ 已打开隐私协议'); },
-    fail(err: any) { display.text(`打开失败：${err.errMsg}`); },
+    success() {
+      display.text('已打开隐私协议');
+    },
+    fail(err: any) {
+      display.text(`打开失败：${err.errMsg}`);
+    },
   });
 }
 
@@ -30,10 +38,9 @@ export function openPrivacyContract() {
 export function getPrivacySetting() {
   wx.getPrivacySetting({
     success(res: any) {
-      display.data({
-        needAuthorization: String(res.needAuthorization),
-        privacyContractName: res.privacyContractName || '-',
-      });
+      display.text(
+        `needAuthorization: ${res.needAuthorization}\nprivacyContractName: ${res.privacyContractName || '-'}`
+      );
     },
     fail(err: any) {
       display.text(`查询失败：${err.errMsg}`);
@@ -47,5 +54,5 @@ export function onNeedPrivacyAuthorization() {
     display.text('收到 onNeedPrivacyAuthorization 回调，自动同意');
     resolve({ event: 'agree', buttonId: 'agree-btn' });
   });
-  display.text('✓ 已注册 onNeedPrivacyAuthorization 监听');
+  display.text('已注册 onNeedPrivacyAuthorization 监听');
 }

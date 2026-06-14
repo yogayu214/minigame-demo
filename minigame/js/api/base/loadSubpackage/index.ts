@@ -8,6 +8,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -20,10 +21,12 @@ export function loadSubpackage() {
   const task = wx.loadSubpackage({
     name: DEMO_SUBPACKAGE,
     success() {
-      display.data({
-        状态: '✓ 分包加载成功',
-        分包名: DEMO_SUBPACKAGE,
-      });
+      display.text(
+        formatObj({
+          状态: '分包加载成功',
+          分包名: DEMO_SUBPACKAGE,
+        })
+      );
     },
     fail(err: any) {
       display.text(`加载失败：${err.errMsg}`);
@@ -32,11 +35,13 @@ export function loadSubpackage() {
   });
 
   task.onProgressUpdate((res: any) => {
-    display.data({
-      进度: `${res.progress}%`,
-      已下载: `${res.totalBytesWritten} B`,
-      总大小: `${res.totalBytesExpectedToWrite} B`,
-    });
+    display.text(
+      formatObj({
+        进度: `${res.progress}%`,
+        已下载: `${res.totalBytesWritten} B`,
+        总大小: `${res.totalBytesExpectedToWrite} B`,
+      })
+    );
   });
 }
 
@@ -46,7 +51,7 @@ export function preDownloadSubpackage() {
   const task = wx.preDownloadSubpackage({
     name: DEMO_SUBPACKAGE,
     success() {
-      display.text('✓ 预下载完成（未执行）');
+      display.text('预下载完成');
     },
     fail(err: any) {
       display.text(`预下载失败：${err.errMsg}`);
@@ -55,10 +60,12 @@ export function preDownloadSubpackage() {
   });
 
   task.onProgressUpdate((res: any) => {
-    display.data({
-      预下载进度: `${res.progress}%`,
-      已下载: `${res.totalBytesWritten} B`,
-      总大小: `${res.totalBytesExpectedToWrite} B`,
-    });
+    display.text(
+      formatObj({
+        预下载进度: `${res.progress}%`,
+        已下载: `${res.totalBytesWritten} B`,
+        总大小: `${res.totalBytesExpectedToWrite} B`,
+      })
+    );
   });
 }

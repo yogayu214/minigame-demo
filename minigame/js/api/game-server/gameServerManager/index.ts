@@ -23,7 +23,7 @@ function ensure() {
 export function login() {
   ensure().login({
     success(res: any) {
-      display.data({ 状态: '✓ login 成功', accessInfo: JSON.stringify(res || {}) });
+      display.text(`login 成功\naccessInfo: ${JSON.stringify(res || {})}`);
     },
     fail(err: any) {
       display.text(`login 失败：${err.errMsg}`);
@@ -34,7 +34,7 @@ export function login() {
 /** 监听比赛对局开始 */
 export function onMatch() {
   ensure().onMatch((res: any) => {
-    display.data({ '事件': 'onMatch', '详情': JSON.stringify(res).slice(0, 100) });
+    display.text(`事件: onMatch\n详情: ${JSON.stringify(res).slice(0, 100)}`);
   });
   display.text('已注册 onMatch 监听');
 }
@@ -47,7 +47,7 @@ export function createRoom() {
     roomType: 'demo',
     gameType: 'demo',
     success(res: any) {
-      display.data({ 状态: '✓ 创建房间', 房间号: res.accessInfo });
+      display.text(`创建房间成功\n房间号: ${res.accessInfo}`);
     },
     fail(err: any) {
       display.text(`createRoom 失败：${err.errMsg}`);
@@ -59,7 +59,9 @@ export function createRoom() {
 export function getRoomInfo() {
   ensure().getRoomInfo({
     success(res: any) {
-      display.data({ 状态: '✓', 详情: JSON.stringify(res).slice(0, 100) });
+      display.text(
+        `getRoomInfo 成功\n详情: ${JSON.stringify(res).slice(0, 100)}`
+      );
     },
     fail(err: any) {
       display.text(`getRoomInfo 失败：${err.errMsg}`);
@@ -69,11 +71,9 @@ export function getRoomInfo() {
 
 /** 完整帧同步对战请进入分包：游戏服务 → 好友对战 */
 export function gotoLockstepDemo() {
-  display.data({
-    提示: '完整帧同步对战请进入分包',
-    路径: '主菜单 → 游戏服务 → 好友对战（帧同步）',
-    源码: 'sub-lockstep/',
-  });
+  display.text(
+    `完整帧同步对战请进入分包\n路径: 主菜单 → 游戏服务 → 好友对战（帧同步）\n源码: sub-lockstep/`
+  );
 }
 
 export function onUnload() {

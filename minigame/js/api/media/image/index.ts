@@ -7,50 +7,91 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
 let lastImagePath = '';
 
+/** 授权相机/相册 */
+function authorize(scope: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    wx.getSetting({
+      success(res: any) {
+        if (res.authSetting[scope]) {
+          resolve();
+        } else {
+          wx.authorize({
+            scope,
+            success() {
+              resolve();
+            },
+            fail(err: any) {
+              reject(err);
+            },
+          });
+        }
+      },
+      fail: reject,
+    });
+  });
+}
+
 /** 选择图片（相机/相册） */
 export function chooseImage() {
-  wx.chooseImage({
-    count: 1,
-    sizeType: ['original', 'compressed'],
-    sourceType: ['album', 'camera'],
-    success(res: any) {
-      lastImagePath = res.tempFilePaths?.[0] || '';
-      display.data({
-        数量: String(res.tempFiles?.length || 0),
-        路径: lastImagePath.slice(-30),
+  authorize('scope.camera')
+    .then(() => {
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success(res: any) {
+          lastImagePath = res.tempFilePaths?.[0] || '';
+          display.text(
+            formatObj({
+              数量: res.tempFiles?.length || 0,
+              路径: lastImagePath.slice(-30),
+            })
+          );
+        },
+        fail(err: any) {
+          display.text(`选择失败：${err.errMsg}`);
+        },
       });
-    },
-    fail(err: any) {
-      display.text(`选择失败：${err.errMsg}`);
-    },
-  });
+    })
+    .catch(() => {
+      display.text('需要授权相机/相册权限才能选择图片');
+    });
 }
 
 /** 选择多媒体（图片/视频） */
 export function chooseMedia() {
-  wx.chooseMedia({
-    count: 1,
-    mediaType: ['image', 'video'],
-    sourceType: ['album', 'camera'],
-    success(res: any) {
-      const f = res.tempFiles?.[0];
-      lastImagePath = f?.tempFilePath || '';
-      display.data({
-        type: res.type,
-        size: f ? `${f.size} B` : '-',
-        路径: lastImagePath.slice(-30),
+  authorize('scope.camera')
+    .then(() => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image', 'video'],
+        sourceType: ['album', 'camera'],
+        success(res: any) {
+          const f = res.tempFiles?.[0];
+          lastImagePath = f?.tempFilePath || '';
+          display.text(
+            formatObj({
+              type: res.type,
+              size: f ? `${f.size} B` : '-',
+              路径: lastImagePath.slice(-30),
+            })
+          );
+        },
+        fail(err: any) {
+          display.text(`选择失败：${err.errMsg}`);
+        },
       });
-    },
-    fail(err: any) {
-      display.text(`选择失败：${err.errMsg}`);
-    },
-  });
+    })
+    .catch(() => {
+      display.text('需要授权相机/相册权限才能选择媒体');
+    });
 }
 
 /** 从聊天会话选择文件 */
@@ -61,11 +102,13 @@ export function chooseMessageFile() {
     success(res: any) {
       const f = res.tempFiles?.[0];
       lastImagePath = f?.path || '';
-      display.data({
-        name: f?.name || '-',
-        size: f ? `${f.size} B` : '-',
-        路径: lastImagePath.slice(-30),
-      });
+      display.text(
+        formatObj({
+          name: f?.name || '-',
+          size: f ? `${f.size} B` : '-',
+          路径: lastImagePath.slice(-30),
+        })
+      );
     },
     fail(err: any) {
       display.text(`选择失败：${err.errMsg}`);
@@ -82,8 +125,12 @@ export function previewImage() {
   wx.previewImage({
     urls: [lastImagePath],
     current: lastImagePath,
-    success() { display.text('✓ 预览中'); },
-    fail(err: any) { display.text(`预览失败：${err.errMsg}`); },
+    success() {
+      display.text('预览中');
+    },
+    fail(err: any) {
+      display.text(`预览失败：${err.errMsg}`);
+    },
   });
 }
 
@@ -95,8 +142,12 @@ export function previewMedia() {
   }
   wx.previewMedia({
     sources: [{ url: lastImagePath, type: 'image' }],
-    success() { display.text('✓ 预览中'); },
-    fail(err: any) { display.text(`预览失败：${err.errMsg}`); },
+    success() {
+      display.text('预览中');
+    },
+    fail(err: any) {
+      display.text(`预览失败：${err.errMsg}`);
+    },
   });
 }
 
@@ -110,7 +161,9 @@ export function compressImage() {
     src: lastImagePath,
     quality: 50,
     success(res: any) {
-      display.data({ 状态: '✓ 已压缩', 新路径: res.tempFilePath.slice(-30) });
+      display.text(
+        formatObj({ 状态: '已压缩', 新路径: res.tempFilePath.slice(-30) })
+      );
     },
     fail(err: any) {
       display.text(`压缩失败：${err.errMsg}`);
@@ -124,9 +177,19 @@ export function saveImageToPhotosAlbum() {
     display.text('请先选择一张图');
     return;
   }
-  wx.saveImageToPhotosAlbum({
-    filePath: lastImagePath,
-    success() { display.text('✓ 已保存到相册'); },
-    fail(err: any) { display.text(`保存失败：${err.errMsg}`); },
-  });
+  authorize('scope.writePhotosAlbum')
+    .then(() => {
+      wx.saveImageToPhotosAlbum({
+        filePath: lastImagePath,
+        success() {
+          display.text('已保存到相册');
+        },
+        fail(err: any) {
+          display.text(`保存失败：${err.errMsg}`);
+        },
+      });
+    })
+    .catch(() => {
+      display.text('需要授权相册权限才能保存图片');
+    });
 }

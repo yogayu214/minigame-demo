@@ -8,6 +8,7 @@
 
 const fixedTemplate = require('./template/fixed');
 const { p_button, p_text } = require('./component/index');
+const Scroller = require('./Scroller/index');
 
 export interface RichConfig {
   /** 页面标题 */
@@ -53,21 +54,54 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const topView = config.buildTopView(PIXI, app, obj, underline);
   if (topView) container.addChild(topView);
 
-  // 按钮列表（在 topView 下方）
+  // 按钮列表（在 topView 下方，支持滚动）
   const topViewBottom = topView ? (topView.y || 0) + (topView.height || 0) : 0;
   const baseY = Math.max(
     topViewBottom + 40 * PIXI.ratio,
     underline ? (underline.y || 0) + (underline.height || 0) + 80 * PIXI.ratio : 0
   );
 
+  // 可滚动区域：从 baseY 到屏幕底部（留出 logo 空间）
+  const scrollY = baseY;
+  const logoH = logo ? (logo.height || 0) + 20 * PIXI.ratio : 100 * PIXI.ratio;
+  const scrollH = obj.height - scrollY - logoH;
+  const btnW = 580 * PIXI.ratio;
+  const btnH = 80 * PIXI.ratio;
+  const btnGap = 20 * PIXI.ratio;
+  const totalBtnH = config.actions.length * (btnH + btnGap) - btnGap;
+
+  // 滚动容器
+  const scrollWrapper = new PIXI.Container();
+  scrollWrapper.x = 0;
+  scrollWrapper.y = scrollY;
+  scrollWrapper.interactive = true;
+
+  // 内容层（存放按钮）
+  const scrollInner = new PIXI.Container();
+
+  // 遮罩
+  const scrollMask = new PIXI.Graphics();
+  scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
+  scrollInner.mask = scrollMask;
+
+  // 透明命中区（保证空白可拖动滚动）
+  const hitArea = new PIXI.Graphics();
+  hitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
+  hitArea.interactive = true;
+
+  scrollWrapper.addChild(hitArea, scrollInner, scrollMask);
+
+  // 按钮居中偏移
+  const btnX = (obj.width - btnW) / 2;
+
   config.actions.forEach((action, i) => {
-    const btnY = baseY + i * (80 * PIXI.ratio + 20 * PIXI.ratio);
     const btn = p_button(PIXI, {
-      width: 580 * PIXI.ratio,
-      height: 80 * PIXI.ratio,
+      width: btnW,
+      height: btnH,
       color: 0x05c25f,
-      y: btnY,
+      y: i * (btnH + btnGap),
     });
+    btn.x = btnX;
     btn.myAddChildFn(
       p_text(PIXI, {
         content: action.label,
@@ -82,8 +116,31 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
         wx.showModal({ title: '错误', content: e.errMsg || String(e), showCancel: false });
       }
     });
-    container.addChild(btn);
+    scrollInner.addChild(btn);
   });
+
+  container.addChild(scrollWrapper);
+
+  // 滚动逻辑（仅当内容超出可视区域时启用）
+  if (totalBtnH > scrollH) {
+    const scroller = new Scroller((_l: number, t: number) => {
+      scrollInner.y = -t;
+    });
+    scroller.contentSize(obj.width, scrollH, obj.width, totalBtnH);
+
+    (scrollWrapper as any).touchstart = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchStart(e.data.global.x, e.data.global.y);
+    };
+    (scrollWrapper as any).touchmove = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
+    };
+    (scrollWrapper as any).touchend = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchEnd(e.data.originalEvent.timeStamp);
+    };
+  }
 
   // 返回按钮回调
   goBack.callBack = () => {

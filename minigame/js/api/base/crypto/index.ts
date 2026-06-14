@@ -7,6 +7,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -16,12 +17,14 @@ export function getLatestUserKey() {
   const mgr: any = wx.getUserCryptoManager();
   mgr.getLatestUserKey({
     success(res: any) {
-      display.data({
-        encryptKey: shorten(res.encryptKey),
-        iv: shorten(res.iv),
-        version: String(res.version),
-        expireTime: new Date(res.expireTime * 1000).toLocaleString(),
-      });
+      display.text(
+        formatObj({
+          encryptKey: shorten(res.encryptKey),
+          iv: shorten(res.iv),
+          version: String(res.version),
+          expireTime: new Date(res.expireTime * 1000).toLocaleString(),
+        })
+      );
     },
     fail(err: any) {
       display.text(`获取失败：${err.errMsg}`);
@@ -36,10 +39,12 @@ export function getRandomValues() {
     length: 6,
     success(res: any) {
       const bytes = new Uint8Array(res.randomValues);
-      display.data({
-        长度: String(bytes.byteLength),
-        十六进制: bufToHex(bytes),
-      });
+      display.text(
+        formatObj({
+          长度: String(bytes.byteLength),
+          十六进制: bufToHex(bytes),
+        })
+      );
     },
     fail(err: any) {
       display.text(`获取失败：${err.errMsg}`);

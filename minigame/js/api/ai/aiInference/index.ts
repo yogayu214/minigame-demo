@@ -1,7 +1,7 @@
 /**
  * AI 推理环境
  * wx.getInferenceEnvInfo / wx.createInferenceSession
- * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/ai/inference/wx.getInferenceEnvInfo.html
+ * 注意：需在真机上测试
  */
 
 import { createDisplay } from '../../../libs/display-slot';
@@ -15,12 +15,9 @@ let session: any = null;
 export function getInferenceEnvInfo() {
   wx.getInferenceEnvInfo({
     success(res: any) {
-      display.data({
-        version: res.ver || '-',
-        支持GPU: String(res.gpuSupport != null ? res.gpuSupport : '-'),
-        支持NPU: String(res.npuSupport != null ? res.npuSupport : '-'),
-        最大模型大小: res.maxModelSize ? `${res.maxModelSize}` : '-',
-      });
+      display.text(
+        `version: ${res.ver || '-'}\n支持GPU: ${res.gpuSupport != null ? res.gpuSupport : '-'}\n支持NPU: ${res.npuSupport != null ? res.npuSupport : '-'}\n最大模型大小: ${res.maxModelSize || '-'}`
+      );
     },
     fail(err: any) {
       display.text(`查询失败：${err.errMsg}`);
@@ -31,18 +28,18 @@ export function getInferenceEnvInfo() {
 /** 创建推理 session（需先准备 .onnx 模型） */
 export function createInferenceSession() {
   session = (wx as any).createInferenceSession({
-    model: 'inference/demo.onnx',  // 需放置 onnx 模型
+    model: 'inference/demo.onnx', // 需放置 onnx 模型
     precisionLevel: 4,
     allowQuantize: false,
   });
   if (session.onLoad) {
     session.onLoad(() => {
-      display.text('✓ 推理 session 已加载');
+      display.text('推理 session 已加载');
     });
   }
   if (session.onError) {
     session.onError((err: any) => {
-      display.text(`✗ 加载失败：${err.errMsg || err.message}`);
+      display.text(`加载失败：${err.errMsg || err.message}`);
     });
   }
   display.text('createInferenceSession 已调用，等待 onLoad...');
@@ -55,7 +52,7 @@ export function destroySession() {
       session.destroy();
     }
     session = null;
-    display.text('✓ 已销毁 session');
+    display.text('已销毁 session');
   }
 }
 

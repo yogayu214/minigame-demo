@@ -21,15 +21,12 @@ export function onWheel() {
   count = 0;
   wheelListener = (res: any) => {
     count += 1;
-    display.data({
-      触发次数: String(count),
-      deltaX: String(res.deltaX),
-      deltaY: String(res.deltaY),
-      deltaZ: String(res.deltaZ),
-    });
+    display.text(
+      `触发次数: ${count}\ndeltaX: ${res.deltaX}\ndeltaY: ${res.deltaY}\ndeltaZ: ${res.deltaZ}`
+    );
   };
   wx.onWheel(wheelListener);
-  display.text('✓ 已注册滚轮监听（PC 端）');
+  display.text('已注册滚轮监听（PC 端）');
 }
 
 /** 停止监听 */
@@ -37,7 +34,7 @@ export function offWheel() {
   if (wheelListener) {
     wx.offWheel(wheelListener);
     wheelListener = null;
-    display.text('✓ 已停止滚轮监听');
+    display.text('已停止滚轮监听');
   }
 }
 

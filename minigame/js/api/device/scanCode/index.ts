@@ -13,11 +13,9 @@ export const setDisplay = display.setter;
 export function scanCode() {
   wx.scanCode({
     success(res: any) {
-      display.data({
-        result: res.result,
-        scanType: res.scanType,
-        charSet: res.charSet || '-',
-      });
+      display.text(
+        `result: ${res.result}\nscanType: ${res.scanType}\ncharSet: ${res.charSet || '-'}`
+      );
     },
     fail(err: any) {
       display.text(`扫码失败：${err.errMsg}`);
@@ -31,10 +29,7 @@ export function scanCodeCameraOnly() {
     onlyFromCamera: true,
     scanType: ['qrCode', 'barCode'],
     success(res: any) {
-      display.data({
-        result: res.result,
-        scanType: res.scanType,
-      });
+      display.text(`result: ${res.result}\nscanType: ${res.scanType}`);
     },
     fail(err: any) {
       display.text(`扫码失败：${err.errMsg}`);

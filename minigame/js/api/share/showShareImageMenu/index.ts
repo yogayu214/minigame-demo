@@ -9,22 +9,26 @@ import { createDisplay } from '../../../libs/display-slot';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const SAMPLE_URL = 'https://res.wx.qq.com/wxa-game/dev_doc/images/cover.jpg';
-
-/** 下载一张样例图，调起图片分享菜单 */
+/** 截取当前画布作为分享图片，调起图片分享菜单 */
 export function showShareImageMenu() {
-  display.text('下载图片中...');
-  wx.downloadFile({
-    url: SAMPLE_URL,
-    success(d: any) {
-      wx.showShareImageMenu({
-        path: d.tempFilePath,
-        success() { display.text('✓ 已弹出图片分享菜单'); },
-        fail(err: any) { display.text(`弹出失败：${err.errMsg}`); },
-      });
-    },
-    fail(err: any) {
-      display.text(`下载失败：${err.errMsg}`);
-    },
-  });
+  display.text('截取画布中...');
+  try {
+    const tempFilePath = canvas.toTempFilePathSync({
+      x: 0,
+      y: 0,
+      width: canvas.width,
+      height: (canvas.width * 4) / 5,
+    });
+    wx.showShareImageMenu({
+      path: tempFilePath,
+      success() {
+        display.text('已弹出图片分享菜单');
+      },
+      fail(err: any) {
+        display.text(`弹出失败：${err.errMsg}`);
+      },
+    });
+  } catch (e: any) {
+    display.text(`截图失败：${e.message || e}`);
+  }
 }

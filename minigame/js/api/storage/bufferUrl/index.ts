@@ -5,15 +5,17 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const SAMPLE_URL = 'https://res.wx.qq.com/wxa-game/dev_doc/images/cover.jpg';
+const SAMPLE_URL =
+  'https://mmgame.qpic.cn/image/50e4b673d8b0743ba48ce2a8b5e655b12ca05f9e0b530650d2dfd8e64c53ee31/0';
 let bufUrl = '';
 
 /** 下载图片到 ArrayBuffer，再用 createBufferURL 包装成 URL */
-export function createFromImage() {
+export function createBufferURL() {
   display.text('下载图片中...');
   wx.request({
     url: SAMPLE_URL,
@@ -24,10 +26,12 @@ export function createFromImage() {
         return;
       }
       bufUrl = wx.createBufferURL(res.data);
-      display.data({
-        size: `${res.data.byteLength} B`,
-        bufferUrl: bufUrl.slice(0, 60) + '...',
-      });
+      display.text(
+        formatObj({
+          size: `${res.data.byteLength} B`,
+          bufferUrl: bufUrl,
+        })
+      );
     },
     fail(err: any) {
       display.text(`下载失败：${err.errMsg}`);
@@ -35,25 +39,24 @@ export function createFromImage() {
   });
 }
 
-/** 用 BufferURL 预览图片 */
+/** 用 BufferURL 展示图片 */
 export function previewBufferUrl() {
   if (!bufUrl) {
-    display.text('请先 createFromImage');
+    display.text('请先 createBufferURL');
     return;
   }
-  wx.previewImage({ urls: [bufUrl] });
-  display.text('✓ 预览中');
+  display.image(bufUrl);
 }
 
 /** 释放 BufferURL */
-export function revoke() {
+export function revokeBufferURL() {
   if (bufUrl && typeof wx.revokeBufferURL === 'function') {
     wx.revokeBufferURL(bufUrl);
     bufUrl = '';
-    display.text('✓ 已 revoke');
+    display.text('已 revoke');
   }
 }
 
 export function onUnload() {
-  revoke();
+  revokeBufferURL();
 }

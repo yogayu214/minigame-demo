@@ -6,6 +6,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -20,11 +21,7 @@ export function listenOnShow() {
     return;
   }
   showListener = (res: any) => {
-    display.data({
-      onShow: '已触发',
-      scene: String(res.scene),
-      query: JSON.stringify(res.query || {}),
-    });
+    display.text(formatObj(res));
   };
   wx.onShow(showListener);
   display.text('已注册 onShow，切到后台再回来观察');
@@ -46,7 +43,7 @@ export function listenOnHide() {
     return;
   }
   hideListener = () => {
-    console.log('[base/lifeCycle] onHide 触发');
+    display.text('onHide已触发');
   };
   wx.onHide(hideListener);
   display.text('已注册 onHide，请切到后台观察 console');
@@ -63,24 +60,12 @@ export function stopOnHide() {
 
 /** 获取冷启动参数 */
 export function getLaunchOptionsSync() {
-  const res: any = wx.getLaunchOptionsSync();
-  display.data({
-    scene: String(res.scene),
-    query: JSON.stringify(res.query || {}),
-    shareTicket: res.shareTicket || '-',
-    referrerInfo: JSON.stringify(res.referrerInfo || {}),
-  });
+  display.text(formatObj(wx.getLaunchOptionsSync()));
 }
 
 /** 获取启动参数（冷启动和热启动均可） */
 export function getEnterOptionsSync() {
-  const res: any = wx.getEnterOptionsSync();
-  display.data({
-    scene: String(res.scene),
-    query: JSON.stringify(res.query || {}),
-    shareTicket: res.shareTicket || '-',
-    referrerInfo: JSON.stringify(res.referrerInfo || {}),
-  });
+  display.text(formatObj(wx.getEnterOptionsSync()));
 }
 
 export function onUnload() {

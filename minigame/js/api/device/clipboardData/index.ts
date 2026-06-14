@@ -16,7 +16,12 @@ export function setClipboard() {
   wx.setClipboardData({
     data: lastCopied,
     success() {
-      display.data({ 'Copy': lastCopied, 'Paste': '（点击粘贴按钮）' });
+      display.text(`Copy: ${lastCopied}\nPaste: （点击粘贴按钮）`);
+    },
+    fail(err: any) {
+      display.text(
+        `复制失败：${err?.errMsg || '未知错误'}\n待复制: ${lastCopied}`
+      );
     },
   });
 }
@@ -25,7 +30,10 @@ export function setClipboard() {
 export function getClipboard() {
   wx.getClipboardData({
     success(res: any) {
-      display.data({ 'Copy': lastCopied || '（无）', 'Paste': res.data });
+      display.text(`Copy: ${lastCopied || '（无）'}\nPaste: ${res.data}`);
+    },
+    fail(err: any) {
+      display.text(`粘贴失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -15,10 +15,10 @@ export function unzipFile() {
     zipFilePath: 'js/api/file/unzip/assets/test.zip',
     targetPath,
     success() {
-      display.data({ '解压路径': targetPath, '状态': '✓ 解压成功' });
+      display.text(`解压路径: ${targetPath}\n状态: 解压成功`);
     },
     fail(err: any) {
-      wx.showModal({ title: '解压失败', content: err.errMsg, showCancel: false });
+      display.text(`解压失败: ${err.errMsg}`);
     },
   });
 }

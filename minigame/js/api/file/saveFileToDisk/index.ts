@@ -24,15 +24,15 @@ export function saveFileToDisk() {
       wx.saveFileToDisk({
         filePath: d.tempFilePath,
         success() {
-          display.text('✓ 已保存到本机（用户在弹窗里选了路径）');
+          display.text('已保存到本机（用户在弹窗里选了路径）');
         },
         fail(err: any) {
-          display.text(`保存失败：${err.errMsg}`);
+          display.text(`保存失败: ${err.errMsg}`);
         },
       });
     },
     fail(err: any) {
-      display.text(`下载失败：${err.errMsg}`);
+      display.text(`下载失败: ${err.errMsg}`);
     },
   });
 }

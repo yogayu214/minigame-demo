@@ -30,10 +30,10 @@ export function writeFile() {
     data: 'Hello FileSystem!\nLine 2\nLine 3',
     encoding: 'utf8',
     success() {
-      display.data({ 路径: PATH, 状态: '✓ 写入成功' });
+      display.text(`路径: ${PATH}\n状态: 写入成功`);
     },
     fail(err: any) {
-      display.text(`写入失败：${err.errMsg}`);
+      display.text(`写入失败: ${err.errMsg}`);
     },
   });
 }
@@ -42,9 +42,9 @@ export function writeFile() {
 export function writeFileSync() {
   try {
     FS.writeFileSync(PATH, 'sync write @ ' + Date.now(), 'utf8');
-    display.text('✓ 同步写入成功');
+    display.text('同步写入成功');
   } catch (e: any) {
-    display.text(`同步写入失败：${e.message}`);
+    display.text(`同步写入失败: ${e.message}`);
   }
 }
 
@@ -54,10 +54,11 @@ export function readFile() {
     filePath: PATH,
     encoding: 'utf8',
     success(res: any) {
-      display.data({ 内容: String(res.data).slice(0, 60), 长度: String(String(res.data).length) });
+      const content = String(res.data).slice(0, 60);
+      display.text(`内容: ${content}\n长度: ${String(res.data).length}`);
     },
     fail(err: any) {
-      display.text(`读取失败：${err.errMsg}（请先 writeFile）`);
+      display.text(`读取失败: ${err.errMsg}（请先 writeFile）`);
     },
   });
 }
@@ -66,9 +67,9 @@ export function readFile() {
 export function readFileSync() {
   try {
     const data = FS.readFileSync(PATH, 'utf8');
-    display.data({ 内容: String(data).slice(0, 60), 同步: '✓' });
+    display.text(`内容: ${String(data).slice(0, 60)}\n同步: 是`);
   } catch (e: any) {
-    display.text(`同步读取失败：${e.message}`);
+    display.text(`同步读取失败: ${e.message}`);
   }
 }
 
@@ -79,10 +80,10 @@ export function appendFile() {
     data: `\nappended @ ${new Date().toLocaleTimeString()}`,
     encoding: 'utf8',
     success() {
-      display.text('✓ 追加成功');
+      display.text('追加成功');
     },
     fail(err: any) {
-      display.text(`追加失败：${err.errMsg}`);
+      display.text(`追加失败: ${err.errMsg}`);
     },
   });
 }
@@ -93,10 +94,10 @@ export function copyFile() {
     srcPath: PATH,
     destPath: COPY_PATH,
     success() {
-      display.data({ 源: PATH, 目标: COPY_PATH, 状态: '✓ 复制成功' });
+      display.text(`源: ${PATH}\n目标: ${COPY_PATH}\n状态: 复制成功`);
     },
     fail(err: any) {
-      display.text(`复制失败：${err.errMsg}`);
+      display.text(`复制失败: ${err.errMsg}`);
     },
   });
 }
@@ -106,10 +107,10 @@ export function unlink() {
   FS.unlink({
     filePath: COPY_PATH,
     success() {
-      display.text('✓ 副本已删除');
+      display.text('副本已删除');
     },
     fail(err: any) {
-      display.text(`删除失败：${err.errMsg}`);
+      display.text(`删除失败: ${err.errMsg}`);
     },
   });
 }
@@ -120,10 +121,10 @@ export function truncate() {
     filePath: PATH,
     length: 5,
     success() {
-      display.text('✓ 已截断到 5 字节');
+      display.text('已截断到 5 字节');
     },
     fail(err: any) {
-      display.text(`截断失败：${err.errMsg}`);
+      display.text(`截断失败: ${err.errMsg}`);
     },
   });
 }
@@ -140,17 +141,19 @@ export function fdReadWrite() {
         fd,
         arrayBuffer: buf,
         success(r: any) {
-          display.data({ 读取字节: String(r.bytesRead), 内容: bufToText(buf, r.bytesRead) });
+          display.text(
+            `读取字节: ${r.bytesRead}\n内容: ${bufToText(buf, r.bytesRead)}`
+          );
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`read 失败：${err.errMsg}`);
+          display.text(`read 失败: ${err.errMsg}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败：${err.errMsg}（请先 writeFile）`);
+      display.text(`open 失败: ${err.errMsg}（请先 writeFile）`);
     },
   });
 }
@@ -165,21 +168,21 @@ export function fstat() {
       FS.fstat({
         fd,
         success(r: any) {
-          display.data({
-            size: String(r.stats.size),
-            isFile: String(r.stats.isFile()),
-            mtime: new Date(r.stats.lastModifiedTime * 1000).toLocaleString(),
-          });
+          display.text(
+            `size: ${r.stats.size}\n` +
+              `isFile: ${r.stats.isFile()}\n` +
+              `mtime: ${new Date(r.stats.lastModifiedTime * 1000).toLocaleString()}`
+          );
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`fstat 失败：${err.errMsg}`);
+          display.text(`fstat 失败: ${err.errMsg}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败：${err.errMsg}`);
+      display.text(`open 失败: ${err.errMsg}`);
     },
   });
 }
@@ -194,10 +197,10 @@ export function readCompressedFile() {
     filePath: PATH,
     compressionAlgorithm: 'br',
     success(res: any) {
-      display.text('✓ 压缩文件读取成功，长度 ' + res.data.byteLength);
+      display.text('压缩文件读取成功，长度 ' + res.data.byteLength);
     },
     fail(err: any) {
-      display.text(`读取失败：${err.errMsg}`);
+      display.text(`读取失败: ${err.errMsg}`);
     },
   });
 }

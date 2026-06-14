@@ -4,16 +4,22 @@
  */
 
 let monitorFunc: any = null;
-let _onData: ((res: { alpha: number; beta: number; gamma: number }) => void) | null = null;
+let _onData:
+  | ((res: { alpha: number; beta: number; gamma: number }) => void)
+  | null = null;
 /** 由 rich-configs 绑定 */
-export function setOnData(fn: ((res: any) => void) | null) { _onData = fn; }
+export function setOnData(fn: ((res: any) => void) | null) {
+  _onData = fn;
+}
 
 /** 开始监听设备方向变化 */
 export function startListening() {
   wx.startDeviceMotionListening();
   if (monitorFunc) return;
   wx.onDeviceMotionChange(
-    (monitorFunc = (res: any) => { if (_onData) _onData(res); })
+    (monitorFunc = (res: any) => {
+      if (_onData) _onData(res);
+    })
   );
 }
 

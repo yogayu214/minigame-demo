@@ -1,93 +1,189 @@
 /**
  * 游戏对局回放
- * wx.getGameRecorder / wx.createGameRecorderShareButton
+ * wx.getGameRecorder / wx.createGameRecorderShareButton / wx.operateGameRecorderVideo
  */
+
+import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
+
+const display = createDisplay();
+export const setDisplay = display.setter;
 
 let gr: any = null;
 let shareButton: any = null;
 let writeTime = 0;
 
 export function onLoad() {
-  gr = wx.getGameRecorder();
+  try {
+    gr = wx.getGameRecorder();
+    if (!gr) {
+      console.error('[game-recorder] wx.getGameRecorder() 返回空');
+    }
+  } catch (e: any) {
+    console.error('[game-recorder] getGameRecorder 失败', e);
+  }
 }
 
 /** 开始录制 */
 export function startGameRecord() {
+  if (!gr) {
+    display.text('录制器未就绪，当前环境可能不支持 wx.getGameRecorder');
+    return;
+  }
   writeTime = 0;
-  wx.showLoading({ title: '正在启动录屏' });
-  gr.start().then((res: any) => {
-    wx.hideLoading();
-    if (res.error?.code) {
-      wx.showModal({ title: '录屏错误', content: res.errMsg, showCancel: false });
-      return;
-    }
-    gr.on('timeUpdate', (r: any) => {
-      writeTime = Math.min(r.currentTime, 60000);
-      console.log(`录制中: ${writeTime}ms`);
+  display.text('正在启动录制...');
+  gr.start()
+    .then((res: any) => {
+      if (res.error?.code) {
+        display.text(`录屏错误: ${res.error.code} ${res.error.message}`);
+        return;
+      }
+      gr.on('timeUpdate', (r: any) => {
+        writeTime = Math.min(r.currentTime, 60000);
+      });
+      display.text('录制已开始');
+    })
+    .catch((err: any) => {
+      display.text(`启动失败: ${err?.errMsg || err?.message || err}`);
     });
-    console.log('录制已开始');
-  });
 }
 
 /** 暂停录制 */
 export function pause() {
-  wx.showLoading({ title: '正在暂停录屏' });
-  gr.pause().then((res: any) => {
-    wx.hideLoading();
-    if (res.error?.code) { wx.showModal({ content: res.errMsg, showCancel: false }); return; }
-    console.log('已暂停');
-  });
+  if (!gr) {
+    display.text('录制器未就绪');
+    return;
+  }
+  gr.pause()
+    .then((res: any) => {
+      if (res.error?.code) {
+        display.text(`暂停错误: ${res.error.message}`);
+        return;
+      }
+      display.text('已暂停录制');
+    })
+    .catch((err: any) => {
+      display.text(`暂停失败: ${err?.errMsg || err}`);
+    });
 }
 
 /** 继续录制 */
 export function resume() {
-  wx.showLoading({ title: '继续录屏' });
-  gr.resume().then((res: any) => {
-    wx.hideLoading();
-    if (res.error?.code) { wx.showModal({ content: res.errMsg, showCancel: false }); return; }
-    console.log('已继续');
-  });
+  if (!gr) {
+    display.text('录制器未就绪');
+    return;
+  }
+  gr.resume()
+    .then((res: any) => {
+      if (res.error?.code) {
+        display.text(`恢复错误: ${res.error.message}`);
+        return;
+      }
+      display.text('已继续录制');
+    })
+    .catch((err: any) => {
+      display.text(`恢复失败: ${err?.errMsg || err}`);
+    });
 }
 
 /** 停止录制 */
 export function stopGameRecord() {
-  if (writeTime < 2000) {
-    wx.showToast({ title: '录屏时间需大于2秒', icon: 'none' });
+  if (!gr) {
+    display.text('录制器未就绪');
     return;
   }
-  wx.showLoading({ title: '正在结束录屏' });
-  gr.stop().then((res: any) => {
-    wx.hideLoading();
-    if (res.error?.code) { wx.showModal({ content: res.errMsg, showCancel: false }); return; }
-    gr.off('timeUpdate');
-    console.log('录制完成, 时长:', writeTime, 'ms');
+  if (writeTime < 2000) {
+    display.text('录屏时间需大于2秒才能停止');
+    return;
+  }
+  gr.stop()
+    .then((res: any) => {
+      if (res.error?.code) {
+        display.text(`停止错误: ${res.error.message}`);
+        return;
+      }
+      gr.off('timeUpdate');
+      display.text(formatObj({ 录制时长: `${writeTime}ms`, 状态: '录制完成' }));
 
-    // 创建分享录制视频按钮
-    if (!shareButton) {
-      shareButton = wx.createGameRecorderShareButton({
-        style: { left: 100, top: 400, height: 40, backgroundColor: '#ffffff', color: '#576b95' } as any,
-        text: '分享录制视频',
-        share: {
-          query: 'test=test',
-          timeRange: [[0, writeTime]],
-        } as any,
+      // 创建分享录制视频按钮
+      if (!shareButton) {
+        shareButton = wx.createGameRecorderShareButton({
+          style: {
+            left: 100,
+            top: 400,
+            height: 40,
+            backgroundColor: '#ffffff',
+            color: '#576b95',
+          } as any,
+          text: '分享录制视频',
+          share: {
+            query: 'test=test',
+            timeRange: [[0, writeTime]],
+          } as any,
+        });
+      } else {
+        shareButton.share.timeRange = [[0, writeTime]];
+      }
+      shareButton.show();
+      shareButton.onTap((r: any) => {
+        display.text(
+          formatObj({
+            分享结果: r.error ? `错误: ${r.error.message}` : '分享完成',
+          })
+        );
       });
-    } else {
-      shareButton.share.timeRange = [[0, writeTime]];
-    }
-    shareButton.show();
-    shareButton.onTap((r: any) => { console.log('分享结果:', r); });
-  });
+    })
+    .catch((err: any) => {
+      display.text(`停止失败: ${err?.errMsg || err}`);
+    });
 }
 
 /** 放弃录制 */
 export function abort() {
-  wx.showLoading({ title: '正在放弃录制' });
-  gr.abort().then((res: any) => {
-    wx.hideLoading();
-    if (res.error?.code) { wx.showModal({ content: res.errMsg, showCancel: false }); return; }
-    gr.off('timeUpdate');
-    console.log('已放弃');
+  if (!gr) {
+    display.text('录制器未就绪');
+    return;
+  }
+  gr.abort()
+    .then((res: any) => {
+      if (res.error?.code) {
+        display.text(`放弃错误: ${res.error.message}`);
+        return;
+      }
+      gr.off('timeUpdate');
+      writeTime = 0;
+      display.text('已放弃录制');
+    })
+    .catch((err: any) => {
+      display.text(`放弃失败: ${err?.errMsg || err}`);
+    });
+}
+
+/** 通过 API 分享对局回放（支持分享到游戏圈/会话） */
+export function operateGameRecorderVideo() {
+  if (typeof (wx as any).operateGameRecorderVideo !== 'function') {
+    display.text('当前环境不支持 wx.operateGameRecorderVideo');
+    return;
+  }
+  if (writeTime < 2000) {
+    display.text('请先录制至少2秒的对局回放');
+    return;
+  }
+  (wx as any).operateGameRecorderVideo({
+    title: '对局回放',
+    desc: '精彩瞬间',
+    query: 'from=gameRecorder',
+    bgm: 'js/api/game-recorder/getGameRecorder/bgm.mp3',
+    timeRange: [[0, Math.min(writeTime, 60000)]],
+    volume: 0.8,
+    atempo: 1,
+    audioMix: true,
+    success() {
+      display.text('分享对局回放成功');
+    },
+    fail(err: any) {
+      display.text(`分享失败: ${err.errMsg}`);
+    },
   });
 }
 
@@ -102,7 +198,12 @@ export function showShareButton() {
 }
 
 export function onUnload() {
-  if (shareButton) { shareButton.hide(); shareButton = null; }
-  if (gr) { gr.off('timeUpdate'); }
+  if (shareButton) {
+    shareButton.hide();
+    shareButton = null;
+  }
+  if (gr) {
+    gr.off('timeUpdate');
+  }
   writeTime = 0;
 }

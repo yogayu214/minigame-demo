@@ -13,8 +13,12 @@ export function accessFile() {
   const path = wx.env.USER_DATA_PATH + '/opTest.txt';
   wx.getFileSystemManager().access({
     path,
-    success() { display.data({ '路径': path, '状态': '✓ 文件存在' }); },
-    fail() { display.data({ '路径': path, '状态': '✗ 文件不存在' }); },
+    success() {
+      display.text(`路径: ${path}\n状态: 文件存在`);
+    },
+    fail() {
+      display.text(`路径: ${path}\n状态: 文件不存在`);
+    },
   });
 }
 
@@ -23,7 +27,11 @@ export function accessDir() {
   const path = wx.env.USER_DATA_PATH + '/testDir';
   wx.getFileSystemManager().access({
     path,
-    success() { display.data({ '路径': path, '状态': '✓ 目录存在' }); },
-    fail() { display.data({ '路径': path, '状态': '✗ 目录不存在' }); },
+    success() {
+      display.text(`路径: ${path}\n状态: 目录存在`);
+    },
+    fail() {
+      display.text(`路径: ${path}\n状态: 目录不存在`);
+    },
   });
 }

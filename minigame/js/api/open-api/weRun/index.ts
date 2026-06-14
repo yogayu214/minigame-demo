@@ -13,12 +13,9 @@ export const setDisplay = display.setter;
 export function getWeRunData() {
   wx.getWeRunData({
     success(res: any) {
-      display.data({
-        encryptedData: String(res.encryptedData || '').slice(0, 40) + '...',
-        iv: res.iv || '-',
-        cloudID: res.cloudID || '-',
-        说明: '需服务端用 session_key 解密后才能拿到步数',
-      });
+      display.text(
+        `encryptedData: ${String(res.encryptedData || '').slice(0, 40)}...\niv: ${res.iv || '-'}\ncloudID: ${res.cloudID || '-'}\n说明: 需服务端用 session_key 解密后才能拿到步数`
+      );
     },
     fail(err: any) {
       display.text(`获取失败：${err.errMsg}`);

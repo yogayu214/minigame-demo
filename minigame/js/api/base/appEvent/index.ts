@@ -7,6 +7,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -27,10 +28,11 @@ export function listenOnError() {
   errorCount = 0;
   errorListener = (res: any) => {
     errorCount += 1;
-    display.data({
-      onError触发次数: String(errorCount),
-      最近错误: String(res.message || res),
-    });
+    const data: Record<string, any> = {
+      onError触发次数: errorCount,
+      最近错误: res.message || res,
+    };
+    display.text(formatObj(data));
   };
   wx.onError(errorListener);
   display.text('已注册 onError，点击"触发错误"测试');
@@ -61,10 +63,11 @@ export function listenOnUnhandledRejection() {
   rejectionCount = 0;
   rejectionListener = (res: any) => {
     rejectionCount += 1;
-    display.data({
-      Rejection触发次数: String(rejectionCount),
-      最近原因: String(res.reason),
-    });
+    const data: Record<string, any> = {
+      Rejection触发次数: rejectionCount,
+      最近原因: res.reason,
+    };
+    display.text(formatObj(data));
   };
   wx.onUnhandledRejection(rejectionListener);
   display.text('已注册 onUnhandledRejection');
@@ -89,10 +92,10 @@ export function stopOnUnhandledRejection() {
 /** 监听音频中断（来电、其他 App 抢占音频时触发） */
 export function listenAudioInterruption() {
   audioBeginListener = () => {
-    display.text('🎵 音频被中断（Begin）');
+    display.text('音频被中断（Begin）');
   };
   audioEndListener = () => {
-    display.text('🎵 音频中断结束（End）');
+    display.text('音频中断结束（End）');
   };
   wx.onAudioInterruptionBegin(audioBeginListener);
   wx.onAudioInterruptionEnd(audioEndListener);

@@ -8,6 +8,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -22,12 +23,14 @@ export function createOffscreen() {
   const ctx = offCanvas.getContext('2d');
   ctx.fillStyle = '#ff0000';
   ctx.fillRect(0, 0, 200, 100);
-  display.data({
-    width: String(offCanvas.width),
-    height: String(offCanvas.height),
-    contextType: String(ctx.constructor?.name || '2d'),
-    操作: '已绘制 200x100 红色矩形',
-  });
+  display.text(
+    formatObj({
+      width: offCanvas.width,
+      height: offCanvas.height,
+      contextType: ctx.constructor?.name || '2d',
+      操作: '已绘制 200x100 红色矩形',
+    })
+  );
 }
 
 /** 把离屏 canvas 转成临时图片 */
@@ -40,7 +43,12 @@ export function toTempFile() {
     fileType: 'png',
     quality: 1,
     success(res: any) {
-      display.data({ 临时图片: res.tempFilePath, 操作: '已生成 PNG' });
+      display.text(
+        formatObj({
+          临时图片: res.tempFilePath,
+          操作: '已生成 PNG',
+        })
+      );
     },
     fail(err: any) {
       display.text(`生成失败：${err.errMsg}`);
@@ -56,7 +64,7 @@ export function previewOffscreen() {
   }
   offCanvas.toTempFilePath?.({
     success(res: any) {
-      wx.previewImage({ urls: [res.tempFilePath] });
+      display.image(res.tempFilePath);
     },
   });
 }

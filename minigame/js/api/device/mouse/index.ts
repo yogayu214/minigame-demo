@@ -21,17 +21,19 @@ export function listenAll() {
     display.text('已在监听');
     return;
   }
-  downListener = (res: any) => {
-    display.data({ 事件: 'mousedown', button: String(res.button), x: String(res.x), y: String(res.y) });
-  };
-  upListener = (res: any) => {
-    display.data({ 事件: 'mouseup', button: String(res.button), x: String(res.x), y: String(res.y) });
-  };
+  downListener = (res: any) =>
+    display.text(
+      `事件: mousedown\n按键: ${res.button}\nx: ${res.x}\ny: ${res.y}`
+    );
+  upListener = (res: any) =>
+    display.text(
+      `事件: mouseup\n按键: ${res.button}\nx: ${res.x}\ny: ${res.y}`
+    );
   moveListener = (res: any) => {
     const now = Date.now();
-    if (now - lastMoveAt < 100) return;  // 节流
+    if (now - lastMoveAt < 100) return; // 节流
     lastMoveAt = now;
-    display.data({ 事件: 'mousemove', x: String(res.x), y: String(res.y) });
+    display.text(`事件: mousemove\nx: ${res.x}\ny: ${res.y}`);
   };
   wx.onMouseDown(downListener);
   wx.onMouseUp(upListener);
@@ -45,7 +47,7 @@ export function stopAll() {
   if (upListener) wx.offMouseUp(upListener);
   if (moveListener) wx.offMouseMove(moveListener);
   downListener = upListener = moveListener = null;
-  display.text('✓ 已停止所有鼠标监听');
+  display.text('已停止所有鼠标监听');
 }
 
 export function onUnload() {

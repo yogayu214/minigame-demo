@@ -71,6 +71,11 @@ const signIn = [
             path: 'navigate/navigateToMiniProgram/index',
           },
           {
+            label: '返回上一个小程序',
+            name: 'navigateBackMiniProgram',
+            path: 'navigate/navigateBackMiniProgram/index',
+          },
+          {
             label: '退出小程序',
             name: 'exitMiniProgram',
             path: 'navigate/exitMiniProgram/index',
@@ -87,29 +92,44 @@ const signIn = [
             path: 'share/onShareAppMessage/index',
           },
           {
-            label: '主动转发',
+            label: '主动分享',
             name: 'shareAppMessage',
             path: 'share/shareAppMessage/index',
           },
           {
-            label: '朋友圈分享',
-            name: 'shareTimeLine',
-            path: 'share/shareTimeLine/index',
+            label: '转发菜单控制',
+            name: 'shareMenu',
+            path: 'share/shareMenu/index',
           },
           {
-            label: '带 query 转发好友',
-            name: 'setMessageToFriendQuery',
-            path: 'share/setMessageToFriendQuery/index',
-          },
-          {
-            label: '群活动分享',
-            name: 'shareActivity',
-            path: 'share/shareActivity/index',
+            label: '分享到好友',
+            name: 'shareMessageToFriend',
+            path: 'share/shareMessageToFriend/index',
           },
           {
             label: '图片分享菜单',
             name: 'showShareImageMenu',
             path: 'share/showShareImageMenu/index',
+          },
+          {
+            label: '获取转发信息',
+            name: 'getShareInfo',
+            path: 'share/getShareInfo/index',
+          },
+          {
+            label: '复制链接',
+            name: 'copyUrl',
+            path: 'share/copyUrl/index',
+          },
+          {
+            label: '收藏',
+            name: 'addToFavorites',
+            path: 'share/addToFavorites/index',
+          },
+          {
+            label: 'PC 接力',
+            name: 'handoff',
+            path: 'share/handoff/index',
           },
         ],
       },
@@ -118,24 +138,19 @@ const signIn = [
         name: 'ui',
         children: [
           {
-            label: '显示操作菜单',
-            name: 'showActionSheet',
-            path: 'ui/showActionSheet/index',
+            label: '交互',
+            name: 'uiInteraction',
+            path: 'ui/interaction/index',
           },
           {
-            label: '显示模态弹窗',
-            name: 'showModal',
-            path: 'ui/showModal/index',
-          },
-          {
-            label: '显示消息提示框',
-            name: 'showToast',
-            path: 'ui/showToast/index',
-          },
-          {
-            label: '菜单 / 官方组件',
+            label: '菜单',
             name: 'uiMenu',
             path: 'ui/menu/index',
+          },
+          {
+            label: '状态栏',
+            name: 'uiStatusBar',
+            path: 'ui/statusBar/index',
           },
           {
             label: '窗口',
@@ -226,14 +241,14 @@ const signIn = [
         name: 'render',
         children: [
           {
-            label: '画布内容转换为URL',
-            name: 'toDataURL',
-            path: 'render/toDataURL/index',
+            label: '画布',
+            name: 'renderCanvas',
+            path: 'render/canvas/index',
           },
           {
-            label: '截图生成一个临时文件',
-            name: 'toTempFilePath',
-            path: 'render/toTempFilePath/index',
+            label: 'Path2D',
+            name: 'createPath2D',
+            path: 'render/createPath2D/index',
           },
           {
             label: '渲染帧率',
@@ -241,19 +256,29 @@ const signIn = [
             path: 'render/setPreferredFramesPerSecond/index',
           },
           {
+            label: '帧回调',
+            name: 'animationFrame',
+            path: 'render/animationFrame/index',
+          },
+          {
             label: '加载自定义字体文件',
             name: 'loadFont',
             path: 'render/loadFont/index',
           },
           {
-            label: '创建一个图片对象',
+            label: '获取文本行高',
+            name: 'getTextLineHeight',
+            path: 'render/getTextLineHeight/index',
+          },
+          {
+            label: '创建图片对象',
             name: 'createImage',
             path: 'render/createImage/index',
           },
           {
-            label: 'Canvas 离屏',
-            name: 'renderCanvas',
-            path: 'render/canvas/index',
+            label: '创建 ImageData',
+            name: 'createImageData',
+            path: 'render/createImageData/index',
           },
           {
             label: '光标 / 指针锁定',
@@ -272,11 +297,6 @@ const signIn = [
             path: 'media/video/index',
           },
           {
-            label: '音频',
-            name: 'voiceFrequency',
-            path: 'media/voiceFrequency/index',
-          },
-          {
             label: '录音',
             name: 'voice',
             path: 'media/voice/index',
@@ -287,7 +307,7 @@ const signIn = [
             path: 'media/camera/index',
           },
           {
-            label: '内部音频',
+            label: 'innerAudio',
             name: 'innerAudio',
             path: 'media/innerAudio/index',
           },
@@ -297,14 +317,14 @@ const signIn = [
             path: 'media/webAudio/index',
           },
           {
+            label: '媒体音频播放器',
+            name: 'mediaAudioPlayer',
+            path: 'media/mediaAudioPlayer/index',
+          },
+          {
             label: '录音管理器',
             name: 'recorder',
             path: 'media/recorder/index',
-          },
-          {
-            label: '直播推流',
-            name: 'livePusher',
-            path: 'media/livePusher/index',
           },
           {
             label: '实时语音',
@@ -477,11 +497,6 @@ const signIn = [
             path: 'file/readdir/index',
           },
           {
-            label: '操作文件',
-            name: 'operationFile',
-            path: 'file/operationFile/index',
-          },
-          {
             label: '获取文件信息',
             name: 'getFileInfo',
             path: 'file/getFileInfo/index',
@@ -513,6 +528,17 @@ const signIn = [
           },
         ],
       },
+      {
+        label: '第三方平台',
+        name: 'extConfig',
+        children: [
+          {
+            label: '获取配置',
+            name: 'getExtConfig',
+            path: 'extConfig/getExtConfig/index',
+          },
+        ],
+      },
 
       // ========== 开放能力 ==========
       {
@@ -520,14 +546,24 @@ const signIn = [
         name: 'open-api',
         children: [
           {
-            label: '微信登录',
+            label: '用户信息',
+            name: 'getUserInfo',
+            path: 'open-api/getUserInfo/index',
+          },
+          {
+            label: '登录',
             name: 'login',
             path: 'open-api/login/index',
           },
           {
-            label: '获取用户信息',
-            name: 'getUserInfo',
-            path: 'open-api/getUserInfo/index',
+            label: '授权',
+            name: 'authorize',
+            path: 'open-api/authorize/index',
+          },
+          {
+            label: '开放数据',
+            name: 'openData',
+            path: 'open-api/openData/index',
           },
           {
             label: '开放数据域',
@@ -535,59 +571,9 @@ const signIn = [
             path: 'open-api/openDataContext/index',
           },
           {
-            label: '关系链互动',
-            name: 'relationalChaininteractiveData',
-            path: 'open-api/relationalChaininteractiveData/index',
-          },
-          {
-            label: '定向分享',
-            name: 'directedSharing',
-            path: 'open-api/directedSharing/index',
-          },
-          {
-            label: '一次性订阅',
-            name: 'requestSubscribeMessage',
-            path: 'open-api/requestSubscribeMessage/index',
-          },
-          {
-            label: '永久订阅',
-            name: 'requestSubscribeSystemMessage',
-            path: 'open-api/requestSubscribeSystemMessage/index',
-          },
-          {
-            label: '对局匹配',
-            name: 'matchedPattern',
-            path: 'open-api/matchedPattern/index',
-          },
-          {
-            label: '实时语音',
-            name: 'VoIPChat',
-            path: 'open-api/VoIPChat/index',
-          },
-          {
-            label: 'PC接力',
-            name: 'startHandoff',
-            path: 'open-api/startHandoff/index',
-          },
-          {
-            label: '二维码',
-            name: 'appletCode',
-            path: 'open-api/appletCode/index',
-          },
-          {
-            label: 'UnionID',
-            name: 'UnionID',
-            path: 'open-api/UnionID/index',
-          },
-          {
-            label: '游戏圈',
-            name: 'createGameClubButton',
-            path: 'open-api/createGameClubButton/index',
-          },
-          {
-            label: '客服服务',
-            name: 'customerService',
-            path: 'open-api/customerService/index',
+            label: '意见反馈',
+            name: 'customerMessage',
+            path: 'open-api/customerMessage/index',
           },
           {
             label: '设置',
@@ -595,39 +581,14 @@ const signIn = [
             path: 'open-api/setting/index',
           },
           {
-            label: '账号信息',
-            name: 'accountInfo',
-            path: 'open-api/accountInfo/index',
+            label: '游戏圈',
+            name: 'createGameClubButton',
+            path: 'open-api/createGameClubButton/index',
           },
           {
-            label: '用户授权',
-            name: 'authorize',
-            path: 'open-api/authorize/index',
-          },
-          {
-            label: '视频号 / 直播',
-            name: 'channels',
-            path: 'open-api/channels/index',
-          },
-          {
-            label: '收货地址',
-            name: 'chooseAddress',
-            path: 'open-api/chooseAddress/index',
-          },
-          {
-            label: '客服会话 / 反馈',
-            name: 'customerMessage',
-            path: 'open-api/customerMessage/index',
-          },
-          {
-            label: '群相关',
-            name: 'groupInfo',
-            path: 'open-api/group/index',
-          },
-          {
-            label: '隐私授权',
-            name: 'privacy',
-            path: 'open-api/privacy/index',
+            label: '客服消息',
+            name: 'customerService',
+            path: 'open-api/customerService/index',
           },
           {
             label: '微信运动',
@@ -635,9 +596,59 @@ const signIn = [
             path: 'open-api/weRun/index',
           },
           {
-            label: '业务视图',
-            name: 'openBusinessView',
-            path: 'open-api/openBusinessView/index',
+            label: 'OPENLINK',
+            name: 'openLink',
+            path: 'open-api/openLink/index',
+          },
+          {
+            label: '平台组件',
+            name: 'platformComponent',
+            path: 'open-api/platformComponent/index',
+          },
+          {
+            label: '微信小店',
+            name: 'storeGift',
+            path: 'open-api/storeGift/index',
+          },
+          {
+            label: '卡券',
+            name: 'card',
+            path: 'open-api/card/index',
+          },
+          {
+            label: '我的小程序',
+            name: 'myMiniProgram',
+            path: 'open-api/myMiniProgram/index',
+          },
+          {
+            label: '人脸检测',
+            name: 'facial',
+            path: 'open-api/facial/index',
+          },
+          {
+            label: '账号信息',
+            name: 'accountInfo',
+            path: 'open-api/accountInfo/index',
+          },
+          {
+            label: '视频号',
+            name: 'channels',
+            path: 'open-api/channels/index',
+          },
+          {
+            label: '微信群',
+            name: 'groupInfo',
+            path: 'open-api/group/index',
+          },
+          {
+            label: '隐私信息授权',
+            name: 'privacy',
+            path: 'open-api/privacy/index',
+          },
+          {
+            label: '订阅消息',
+            name: 'requestSubscribeMessage',
+            path: 'open-api/requestSubscribeMessage/index',
           },
         ],
       },
@@ -649,21 +660,6 @@ const signIn = [
             label: '米大师支付',
             name: 'midasPay',
             path: 'pay/midas/index',
-          },
-          {
-            label: '海外支付',
-            name: 'overseasPay',
-            path: 'pay/overseasPay/index',
-          },
-          {
-            label: '商户转账',
-            name: 'merchantTransfer',
-            path: 'pay/merchantTransfer/index',
-          },
-          {
-            label: '店礼物 / 红包',
-            name: 'storeGift',
-            path: 'pay/storeGift/index',
           },
         ],
       },
@@ -729,30 +725,13 @@ const signIn = [
             name: 'createCustomAd',
             path: 'ad/createCustomAd/index',
           },
-        ],
-      },
-      {
-        label: '推荐',
-        name: 'recommend',
-        children: [
           {
-            label: 'Banner 推荐',
-            name: 'createGameBanner',
-            path: 'recommend/createGameBanner/index',
-          },
-          {
-            label: 'Icon 推荐',
-            name: 'createGameIcon',
-            path: 'recommend/createGameIcon/index',
-          },
-          {
-            label: 'Portal 推荐',
-            name: 'createGamePortal',
-            path: 'recommend/createGamePortal/index',
+            label: '直投广告状态',
+            name: 'directAdStatus',
+            path: 'ad/directAdStatus/index',
           },
         ],
       },
-
       // ========== 工具与高级 ==========
       {
         label: '工具',
@@ -769,17 +748,6 @@ const signIn = [
         label: 'Worker',
         name: 'worker',
         path: 'worker/index',
-      },
-      {
-        label: 'WASM',
-        name: 'wasm',
-        children: [
-          {
-            label: 'WXWebAssembly',
-            name: 'wxWebAssembly',
-            path: 'wasm/wxWebAssembly/index',
-          },
-        ],
       },
       {
         label: '聊天工具',
@@ -830,28 +798,6 @@ const signIn = [
       },
 
       // ========== 服务端 & 性能 ==========
-      {
-        label: '服务端API',
-        name: 'server',
-        children: [
-          {
-            label: '云函数综合演示',
-            name: 'serverCloudFunctions',
-            path: 'server/cloudFunctions/index',
-          },
-        ],
-      },
-      {
-        label: '性能',
-        name: 'perf',
-        children: [
-          {
-            label: '用户目录文件性能',
-            name: 'perfFilePerf',
-            path: 'perf/filePerf/index',
-          },
-        ],
-      },
     ],
   },
 ];
@@ -862,142 +808,178 @@ const apiEntry = require('../libs/apiEntry');
 
 // 走 rich-renderer 的页面：key 是路由 name，value 是对应的 rich-config 路径
 const richPages: Record<string, string> = {
-  'worker':                      '../libs/rich-configs/worker',
-  'setPreferredFramesPerSecond': '../libs/rich-configs/setPreferredFramesPerSecond',
-  'accelerometerChange':         '../libs/rich-configs/accelerometerChange',
-  'compassChange':               '../libs/rich-configs/compassChange',
-  'gyroscopeChange':             '../libs/rich-configs/gyroscopeChange',
-  'deviceMotionChange':          '../libs/rich-configs/deviceMotionChange',
-  'screenBrightness':            '../libs/rich-configs/screenBrightness',
+  worker: '../libs/rich-configs/worker',
+  setPreferredFramesPerSecond:
+    '../libs/rich-configs/setPreferredFramesPerSecond',
+  accelerometerChange: '../libs/rich-configs/accelerometerChange',
+  compassChange: '../libs/rich-configs/compassChange',
+  gyroscopeChange: '../libs/rich-configs/gyroscopeChange',
+  deviceMotionChange: '../libs/rich-configs/deviceMotionChange',
+  screenBrightness: '../libs/rich-configs/screenBrightness',
 };
 
 // 走通用 display 工厂的页面：key 是路由 name，value 是业务模块路径
 // 业务模块需 export setDisplay（通过 createDisplay() 生成）
 const displayPages: Record<string, string> = {
   // base/
-  'baseSystem':               'base/system/index',
-  'baseEnv':                  'base/env/index',
-  'baseUpdate':               'base/update/index',
-  'baseLifeCycle':            'base/lifeCycle/index',
-  'baseAppEvent':             'base/appEvent/index',
-  'basePerformance':          'base/performance/index',
-  'baseLoadSubpackage':       'base/loadSubpackage/index',
-  'baseDebug':                'base/debug/index',
-  'baseCrypto':               'base/crypto/index',
+  baseSystem: 'base/system/index',
+  baseEnv: 'base/env/index',
+  baseUpdate: 'base/update/index',
+  baseLifeCycle: 'base/lifeCycle/index',
+  baseAppEvent: 'base/appEvent/index',
+  basePerformance: 'base/performance/index',
+  baseLoadSubpackage: 'base/loadSubpackage/index',
+  baseDebug: 'base/debug/index',
+  baseCrypto: 'base/crypto/index',
   // navigate/
-  'restartMiniProgram':       'navigate/restartMiniProgram/index',
-  'navigateToMiniProgram':    'navigate/navigateToMiniProgram/index',
-  'exitMiniProgram':          'navigate/exitMiniProgram/index',
-  // util / wasm / perf / data-analysis / pay / server
-  'utilEncode':               'util/encode/index',
-  'wxWebAssembly':            'wasm/wxWebAssembly/index',
-  'perfFilePerf':             'perf/filePerf/index',
-  'dataAnalysisReport':       'data-analysis/report/index',
-  'dataAnalysisLogManager':   'data-analysis/logManager/index',
-  'midasPay':                 'pay/midas/index',
-  'overseasPay':              'pay/overseasPay/index',
-  'merchantTransfer':         'pay/merchantTransfer/index',
-  'storeGift':                'pay/storeGift/index',
-  'serverCloudFunctions':     'server/cloudFunctions/index',
+  restartMiniProgram: 'navigate/restartMiniProgram/index',
+  navigateToMiniProgram: 'navigate/navigateToMiniProgram/index',
+  navigateBackMiniProgram: 'navigate/navigateBackMiniProgram/index',
+  exitMiniProgram: 'navigate/exitMiniProgram/index',
+  // util / data-analysis / pay
+  utilEncode: 'util/encode/index',
+  dataAnalysisReport: 'data-analysis/report/index',
+  dataAnalysisLogManager: 'data-analysis/logManager/index',
+  midasPay: 'pay/midas/index',
   // game-server / ai / ad
-  'gameServerManagerBasic':   'game-server/gameServerManager/index',
-  'aiInference':              'ai/aiInference/index',
-  'vkSession':                'ai/vkSession/index',
-  'createCustomAd':           'ad/createCustomAd/index',
+  gameServerManagerBasic: 'game-server/gameServerManager/index',
+  aiInference: 'ai/aiInference/index',
+  vkSession: 'ai/vkSession/index',
+  'visionkit-basic': 'ai/visionkit-basic/index',
+  'visionkit-basic-v2': 'ai/visionkit-basic-v2/index',
+  'plane-ar': 'ai/plane-ar/index',
+  createCustomAd: 'ad/createCustomAd/index',
   // device 新增
-  'bluetooth':                'device/bluetooth/index',
-  'memoryWarning':            'device/memoryWarning/index',
-  'mouse':                    'device/mouse/index',
-  'scanCode':                 'device/scanCode/index',
-  'gamePad':                  'device/gamePad/index',
-  'keyboard':                 'device/keyboard/index',
-  'touch':                    'device/touch/index',
-  'wheel':                    'device/wheel/index',
+  bluetooth: 'device/bluetooth/index',
+  memoryWarning: 'device/memoryWarning/index',
+  mouse: 'device/mouse/index',
+  scanCode: 'device/scanCode/index',
+  gamePad: 'device/gamePad/index',
+  keyboard: 'device/keyboard/index',
+  touch: 'device/touch/index',
+  wheel: 'device/wheel/index',
   // file 新增
-  'fileSystemManager':        'file/fileSystemManager/index',
-  'saveFileToDisk':           'file/saveFileToDisk/index',
+  fileSystemManager: 'file/fileSystemManager/index',
+  saveFileToDisk: 'file/saveFileToDisk/index',
   // media 新增
-  'innerAudio':               'media/innerAudio/index',
-  'webAudio':                 'media/webAudio/index',
-  'recorder':                 'media/recorder/index',
-  'livePusher':               'media/livePusher/index',
-  'voipChat':                 'media/voipChat/index',
-  'videoDecoder':             'media/videoDecoder/index',
-  'mediaImage':               'media/image/index',
+  innerAudio: 'media/innerAudio/index',
+  webAudio: 'media/webAudio/index',
+  mediaAudioPlayer: 'media/mediaAudioPlayer/index',
+  recorder: 'media/recorder/index',
+  voipChat: 'media/voipChat/index',
+  videoDecoder: 'media/videoDecoder/index',
+  mediaImage: 'media/image/index',
   // network 新增
-  'tcpSocket':                'network/tcp/index',
-  'udpSocket':                'network/udp/index',
+  tcpSocket: 'network/tcp/index',
+  udpSocket: 'network/udp/index',
   // open-api 新增
-  'accountInfo':              'open-api/accountInfo/index',
-  'authorize':                'open-api/authorize/index',
-  'channels':                 'open-api/channels/index',
-  'chooseAddress':            'open-api/chooseAddress/index',
-  'customerMessage':          'open-api/customerMessage/index',
-  'groupInfo':                'open-api/group/index',
-  'privacy':                  'open-api/privacy/index',
-  'weRun':                    'open-api/weRun/index',
-  'openBusinessView':         'open-api/openBusinessView/index',
+  accountInfo: 'open-api/accountInfo/index',
+  facial: 'open-api/facial/index',
+  myMiniProgram: 'open-api/myMiniProgram/index',
+  card: 'open-api/card/index',
+  openLink: 'open-api/openLink/index',
+  platformComponent: 'open-api/platformComponent/index',
+  storeGift: 'open-api/storeGift/index',
+  authorize: 'open-api/authorize/index',
+  channels: 'open-api/channels/index',
+  customerMessage: 'open-api/customerMessage/index',
+  groupInfo: 'open-api/group/index',
+  privacy: 'open-api/privacy/index',
+  weRun: 'open-api/weRun/index',
+  openData: 'open-api/openData/index',
   // render 新增
-  'renderCanvas':             'render/canvas/index',
-  'cursor':                   'render/cursor/index',
+  renderCanvas: 'render/canvas/index',
+  cursor: 'render/cursor/index',
+  createPath2D: 'render/createPath2D/index',
+  animationFrame: 'render/animationFrame/index',
+  loadFont: 'render/loadFont/index',
+  getTextLineHeight: 'render/getTextLineHeight/index',
+  createImage: 'render/createImage/index',
+  createImageData: 'render/createImageData/index',
   // share 新增
-  'setMessageToFriendQuery':  'share/setMessageToFriendQuery/index',
-  'shareActivity':            'share/shareActivity/index',
-  'showShareImageMenu':       'share/showShareImageMenu/index',
+  shareMenu: 'share/shareMenu/index',
+  showShareImageMenu: 'share/showShareImageMenu/index',
+  getShareInfo: 'share/getShareInfo/index',
+  copyUrl: 'share/copyUrl/index',
+  addToFavorites: 'share/addToFavorites/index',
+  shareMessageToFriend: 'share/shareMessageToFriend/index',
+  handoff: 'share/handoff/index',
   // storage 新增
-  'backgroundFetch':          'storage/backgroundFetch/index',
-  'bufferUrl':                'storage/bufferUrl/index',
+  backgroundFetch: 'storage/backgroundFetch/index',
+  bufferUrl: 'storage/bufferUrl/index',
   // ui 新增
-  'uiMenu':                   'ui/menu/index',
-  'uiWindow':                 'ui/window/index',
+  uiInteraction: 'ui/interaction/index',
+  uiMenu: 'ui/menu/index',
+  uiStatusBar: 'ui/statusBar/index',
+  uiWindow: 'ui/window/index',
   // 已有
-  'getBatteryInfo':           'device/getBatteryInfo/index',
-  'getNetworkType':           'device/getNetworkType/index',
-  'clipboardData':            'device/clipboardData/index',
-  'onNetworkStatusChange':    'device/onNetworkStatusChange/index',
-  'deviceOrientationChange':  'device/deviceOrientationChange/index',
-  'getUpdateManager':         'device/getUpdateManager/index',
-  'getLocation':              'location/getLocation/index',
-  'request':                  'network/request/index',
-  'downloadFile':             'network/downloadFile/index',
-  'uploadFile':               'network/uploadFile/index',
-  'login':                    'open-api/login/index',
-  'getUserInfo':              'open-api/getUserInfo/index',
-  'setting':                  'open-api/setting/index',
-  'requestSubscribeMessage':  'open-api/requestSubscribeMessage/index',
-  'UnionID':                  'open-api/UnionID/index',
-  'appletCode':               'open-api/appletCode/index',
-  'storageOp':                'storage/storage/index',
-  'showActionSheet':          'ui/showActionSheet/index',
-  'voice':                    'media/voice/index',
-  'camera':                   'media/camera/index',
-  'readdir':                  'file/readdir/index',
-  'saveFile':                 'file/saveFile/index',
-  'access':                   'file/access/index',
-  'stat':                     'file/stat/index',
-  'getFileInfo':              'file/getFileInfo/index',
-  'dir':                      'file/dir/index',
-  'unzip':                    'file/unzip/index',
+  getBatteryInfo: 'device/getBatteryInfo/index',
+  getNetworkType: 'device/getNetworkType/index',
+  clipboardData: 'device/clipboardData/index',
+  onNetworkStatusChange: 'device/onNetworkStatusChange/index',
+  deviceOrientationChange: 'device/deviceOrientationChange/index',
+  getUpdateManager: 'device/getUpdateManager/index',
+  vibrate: 'device/vibrate/index',
+  setKeepScreenOn: 'device/setKeepScreenOn/index',
+  getLocation: 'location/getLocation/index',
+  request: 'network/request/index',
+  downloadFile: 'network/downloadFile/index',
+  uploadFile: 'network/uploadFile/index',
+  login: 'open-api/login/index',
+  getUserInfo: 'open-api/getUserInfo/index',
+  setting: 'open-api/setting/index',
+  requestSubscribeMessage: 'open-api/requestSubscribeMessage/index',
+  storageOp: 'storage/storage/index',
+  // ui
+  voice: 'media/voice/index',
+  camera: 'media/camera/index',
+  readdir: 'file/readdir/index',
+  saveFile: 'file/saveFile/index',
+  access: 'file/access/index',
+  stat: 'file/stat/index',
+  getFileInfo: 'file/getFileInfo/index',
+  dir: 'file/dir/index',
+  unzip: 'file/unzip/index',
+  getGameRecorder: 'game-recorder/getGameRecorder/index',
+  getExtConfig: 'extConfig/getExtConfig/index',
+  directAdStatus: 'ad/directAdStatus/index',
+  createBannerAd: 'ad/createBannerAd/index',
+  createGridAd: 'ad/createGridAd/index',
+  createInterstitialAd: 'ad/createInterstitialAd/index',
+  createRewardedVideoAd: 'ad/createRewardedVideoAd/index',
+  'face-detect': 'ai/face-detect/index',
+  customerService: 'open-api/customerService/index',
 };
 
 // 走 sub-minigame 分包的页面：key 是路由 name，value 是分包名
 const subMinigamePages: Record<string, string> = {
-  'groupTask': 'chattool',
-  'getGameServerManager': 'lockstep',
+  groupTask: 'chattool',
+  getGameServerManager: 'lockstep',
 };
 
 // 分包入口元数据：分包名 → { modulePath, backFn }
 // - modulePath：loadSubpackage 成功后 require 的入口文件
 // - backFn：供 delPage 路径调用的反向清理方法名（主动销毁整个分包时用）
-const subMinigameEntries: Record<string, { modulePath: string; backFn: string }> = {
-  'chattool': { modulePath: '../../sub-chattool/index', backFn: 'navigateBack' },
-  'lockstep': { modulePath: '../../sub-lockstep/index',  backFn: 'exitToMain'   },
+const subMinigameEntries: Record<
+  string,
+  { modulePath: string; backFn: string }
+> = {
+  chattool: { modulePath: '../../sub-chattool/index', backFn: 'navigateBack' },
+  lockstep: { modulePath: '../../sub-lockstep/index', backFn: 'exitToMain' },
 };
 
 // 组件库引用（传给分包使用）
 const components = require('../libs/component/index');
 
-function loadPage(name: string, path: string, PIXI: any, app: any, params: any, label?: string, treePage?: any) {
+function loadPage(
+  name: string,
+  path: string,
+  PIXI: any,
+  app: any,
+  params: any,
+  label?: string,
+  treePage?: any
+) {
   // 路径 C：sub-minigame 分包（异步加载，接管 stage，拥有独立路由）
   if (subMinigamePages[name]) {
     const subpackageName = subMinigamePages[name];
@@ -1016,31 +998,39 @@ function loadPage(name: string, path: string, PIXI: any, app: any, params: any, 
       success() {
         wx.hideLoading();
         const mod = require(entry.modulePath);
-        mod.launch(PIXI, app, params, () => {
-          // 分包返回主 demo 时：弹出 treeView，恢复上一页
-          const routerObj = window.router as any;
-          if (routerObj.treeView.length >= 2) {
-            const pageName = routerObj.treeView.pop();
-            if (treePage[pageName]?.page) {
-              treePage[pageName].page.visible = false;
-              app.stage.removeChild(treePage[pageName].page);
-              treePage[pageName].page.destroy(true);
+        mod.launch(
+          PIXI,
+          app,
+          params,
+          () => {
+            // 分包返回主 demo 时：弹出 treeView，恢复上一页
+            const routerObj = window.router as any;
+            if (routerObj.treeView.length >= 2) {
+              const pageName = routerObj.treeView.pop();
+              if (treePage[pageName]?.page) {
+                treePage[pageName].page.visible = false;
+                app.stage.removeChild(treePage[pageName].page);
+                treePage[pageName].page.destroy(true);
+              }
+              treePage[pageName].page = null;
+              treePage[pageName].init = false;
+              const prevName = routerObj.getNowPageName();
+              if (treePage[prevName]?.page) {
+                treePage[prevName].page.visible = true;
+              }
             }
-            treePage[pageName].page = null;
-            treePage[pageName].init = false;
-            const prevName = routerObj.getNowPageName();
-            if (treePage[prevName]?.page) {
-              treePage[prevName].page.visible = true;
-            }
-          }
-        }, components); // 注入组件库（chattool 用，lockstep 忽略）
+          },
+          components
+        ); // 注入组件库（chattool 用，lockstep 忽略）
       },
       fail(err: any) {
         wx.hideLoading();
         console.error('分包加载失败:', err);
         wx.showModal({ content: '分包加载失败', showCancel: false });
       },
-      complete() { /* 类型补齐，运行时无副作用 */ },
+      complete() {
+        /* 类型补齐，运行时无副作用 */
+      },
     });
 
     // 存 onUnload（主动 delPage 时触发）
@@ -1049,7 +1039,9 @@ function loadPage(name: string, path: string, PIXI: any, app: any, params: any, 
         try {
           const mod = require(entry.modulePath);
           mod[entry.backFn] && mod[entry.backFn]();
-        } catch (e) { /* 分包可能还没加载 */ }
+        } catch (e) {
+          /* 分包可能还没加载 */
+        }
       };
     }
     return container;
@@ -1059,6 +1051,17 @@ function loadPage(name: string, path: string, PIXI: any, app: any, params: any, 
     const { config } = require(richPages[name]);
     // rich-renderer 的 onUnload 在 goBack.callBack 里已由 rich-renderer 自己调用，
     // 但 delPage 路径需要额外存一份供 router 调用
+    if (treePage && config.onUnload) {
+      treePage[name]._onUnload = () => config.onUnload(null);
+    }
+    return richRenderer(PIXI, app, params, config);
+  }
+
+  // 开放数据域专用渲染（集成 sharedCanvas 显示）
+  if (name === 'openDataContext') {
+    const mod = require(path);
+    const { createOpenDataContextConfig } = require('../libs/rich-configs/openDataContext');
+    const config = createOpenDataContextConfig(mod, label);
     if (treePage && config.onUnload) {
       treePage[name]._onUnload = () => config.onUnload(null);
     }
@@ -1084,11 +1087,11 @@ function loadPage(name: string, path: string, PIXI: any, app: any, params: any, 
 }
 
 function router(PIXI, app, parameter) {
-  let treePage = {};
+  const treePage = {};
   function regroup(circularArr) {
     circularArr = circularArr.slice(0);
     while (circularArr.length) {
-      let page = circularArr.shift();
+      const page = circularArr.shift();
       parameter = { ...parameter, name: page.name, isTabBar: !!page.tabBar };
       page.path &&
         (treePage[page.name] = {
@@ -1117,7 +1120,7 @@ function router(PIXI, app, parameter) {
   window.router = new (function () {
     this.treeView = ['APIentry'];
     this.navigateTo = function (newPage, query, res) {
-      let lastOne = this.treeView.length - 1,
+      const lastOne = this.treeView.length - 1,
         name = this.treeView[lastOne];
       if (name === newPage) return;
 
@@ -1130,11 +1133,19 @@ function router(PIXI, app, parameter) {
       try {
         if (!treePage[newPage].init) {
           console.warn('!!! newPage', newPage, treePage[newPage].path);
-          treePage[newPage].page = loadPage(newPage, treePage[newPage].path, PIXI, app, {
-            ...treePage[newPage].parameter,
-            ...query,
-            ...res,
-          }, treePage[newPage].label, treePage);
+          treePage[newPage].page = loadPage(
+            newPage,
+            treePage[newPage].path,
+            PIXI,
+            app,
+            {
+              ...treePage[newPage].parameter,
+              ...query,
+              ...res,
+            },
+            treePage[newPage].label,
+            treePage
+          );
           treePage[newPage].init = true;
         }
 
@@ -1164,10 +1175,14 @@ function router(PIXI, app, parameter) {
     };
     this.delPage = function () {
       if (this.treeView.length < 2) return;
-      let name = this.treeView.pop();
+      const name = this.treeView.pop();
       // 先调业务层清理（video/camera/worker/socket 等资源销毁）
       if (treePage[name]._onUnload) {
-        try { treePage[name]._onUnload(); } catch (e) { console.error('onUnload error:', e); }
+        try {
+          treePage[name]._onUnload();
+        } catch (e) {
+          console.error('onUnload error:', e);
+        }
         treePage[name]._onUnload = null;
       }
       treePage[name].page.visible = false;

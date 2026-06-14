@@ -8,7 +8,11 @@
  * - wx.updateShareMenu + wx.shareAppMessageToGroup — 动态消息分享到群
  */
 
-import { getGroupInfo, shareAppMessageToGroup, showToast } from '../shared/util';
+import {
+  getGroupInfo,
+  shareAppMessageToGroup,
+  showToast,
+} from '../shared/util';
 
 let activityId = '';
 let isUsingSpecify = false;
@@ -17,10 +21,14 @@ let taskTitle = '';
 
 // ===== setter：UI 层绑定 =====
 let _onParticipantUpdate: ((count: number) => void) | null = null;
-export function setOnParticipantUpdate(fn: (count: number) => void) { _onParticipantUpdate = fn; }
+export function setOnParticipantUpdate(fn: (count: number) => void) {
+  _onParticipantUpdate = fn;
+}
 
 let _onPublishSuccess: (() => void) | null = null;
-export function setOnPublishSuccess(fn: () => void) { _onPublishSuccess = fn; }
+export function setOnPublishSuccess(fn: () => void) {
+  _onPublishSuccess = fn;
+}
 
 // ===== API 调用 =====
 
@@ -43,7 +51,6 @@ export function selectAllParticipant() {
 /** 选择指定群成员参与 */
 export function selectSpecifyParticipant() {
   isUsingSpecify = true;
-  // @ts-ignore
   wx.selectGroupMembers({
     success(res: any) {
       participant = res.members;
@@ -57,16 +64,19 @@ export function selectSpecifyParticipant() {
 
 /** 创建活动ID */
 function createActivityID(): Promise<void> {
-  return wx.cloud.callFunction({
-    name: 'openapi',
-    data: { action: 'createActivityId' },
-  }).then((resp: any) => {
-    if (resp.result) {
-      activityId = resp.result.activityId;
-    }
-  }).catch((err: any) => {
-    console.error('createActivityId fail:', err);
-  });
+  return wx.cloud
+    .callFunction({
+      name: 'openapi',
+      data: { action: 'createActivityId' },
+    })
+    .then((resp: any) => {
+      if (resp.result) {
+        activityId = resp.result.activityId;
+      }
+    })
+    .catch((err: any) => {
+      console.error('createActivityId fail:', err);
+    });
 }
 
 /** 发布任务（完整流程：校验 → 创建ID → 获取群信息 → 写库 → 分享到群） */
@@ -92,9 +102,11 @@ export async function publish() {
     // 单聊时强制获取参与双方
     if (groupInfo.chatType === 1 && participant.length === 0) {
       await new Promise<void>((resolve, reject) => {
-        // @ts-ignore
         wx.selectGroupMembers({
-          success(res: any) { participant = res.members; resolve(); },
+          success(res: any) {
+            participant = res.members;
+            resolve();
+          },
           fail: reject,
         });
       });
@@ -127,7 +139,9 @@ export async function publish() {
         activityId = '';
         _onPublishSuccess?.();
       },
-      fail() { showToast('分享失败'); },
+      fail() {
+        showToast('分享失败');
+      },
     });
   } catch (err) {
     console.error('publish fail:', err);

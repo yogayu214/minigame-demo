@@ -6,14 +6,18 @@
 let monitorFunc: any = null;
 let _onData: ((res: { x: number; y: number; z: number }) => void) | null = null;
 /** 由 rich-configs 绑定 */
-export function setOnData(fn: ((res: any) => void) | null) { _onData = fn; }
+export function setOnData(fn: ((res: any) => void) | null) {
+  _onData = fn;
+}
 
 /** 开始监听陀螺仪数据 */
 export function startListening() {
   wx.startGyroscope();
   if (monitorFunc) return;
   wx.onGyroscopeChange(
-    (monitorFunc = (res: any) => { if (_onData) _onData(res); })
+    (monitorFunc = (res: any) => {
+      if (_onData) _onData(res);
+    })
   );
 }
 

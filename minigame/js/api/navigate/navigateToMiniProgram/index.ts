@@ -10,6 +10,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -21,15 +22,17 @@ export function navigateToMiniProgram() {
   wx.navigateToMiniProgram({
     appId: DEMO_APPID,
     success(res: any) {
-      display.text('✓ 已跳转');
+      display.text('已跳转');
       console.log('[navigateToMiniProgram] success', res);
     },
     fail(err: any) {
-      display.data({
-        状态: '✗ 跳转失败',
-        原因: err.errMsg,
-        提示: '需要在 mp 后台配置跳转白名单',
-      });
+      display.text(
+        formatObj({
+          状态: '跳转失败',
+          原因: err.errMsg,
+          提示: '需要在 mp 后台配置跳转白名单',
+        })
+      );
     },
   });
 }
@@ -42,14 +45,16 @@ export function navigateWithExtra() {
     envVersion: 'release',
     extraData: { from: 'minigame-demo2', ts: Date.now() },
     success(res: any) {
-      display.text('✓ 已跳转（带参数）');
+      display.text('已跳转（带参数）');
       console.log('[navigateToMiniProgram] success', res);
     },
     fail(err: any) {
-      display.data({
-        状态: '✗ 跳转失败',
-        原因: err.errMsg,
-      });
+      display.text(
+        formatObj({
+          状态: '跳转失败',
+          原因: err.errMsg,
+        })
+      );
     },
   });
 }
@@ -61,15 +66,17 @@ export function navigateToTrial() {
     envVersion: 'trial',
     path: '?test=123',
     success(res: any) {
-      display.text('✓ 已跳转体验版');
+      display.text('已跳转体验版');
       console.log('[navigateToMiniProgram] success', res);
     },
     fail(err: any) {
-      display.data({
-        状态: '✗ 跳转失败',
-        原因: err.errMsg,
-        提示: '体验版需要目标小程序存在 trial 版本',
-      });
+      display.text(
+        formatObj({
+          状态: '跳转失败',
+          原因: err.errMsg,
+          提示: '体验版需要目标小程序存在 trial 版本',
+        })
+      );
     },
   });
 }

@@ -1,6 +1,6 @@
 /**
  * 系统信息
- * wx.getSystemInfoSync / wx.getSystemInfoAsync / wx.getWindowInfo /
+ * wx.getSystemInfoSync / wx.getSystemInfo / wx.getSystemInfoAsync / wx.getWindowInfo /
  * wx.getSystemSetting / wx.getDeviceInfo / wx.getDeviceBenchmarkInfo /
  * wx.getAppBaseInfo / wx.getAppAuthorizeSetting /
  * wx.openSystemBluetoothSetting / wx.openAppAuthorizeSetting
@@ -12,62 +12,84 @@ import { createDisplay } from '../../../libs/display-slot';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-/** 把任意对象拍平成 Record<string, string> 供 display.data 展示 */
-function toDisplay(obj: any): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!obj || typeof obj !== 'object') return out;
-  for (const key of Object.keys(obj)) {
-    const v = (obj as any)[key];
-    if (v === null || v === undefined) {
-      out[key] = '-';
-    } else if (typeof v === 'object') {
-      // 嵌套对象（如 host、safeArea）转 JSON 字符串
-      try {
-        out[key] = JSON.stringify(v);
-      } catch {
-        out[key] = String(v);
-      }
-    } else {
-      out[key] = String(v);
-    }
-  }
-  return out;
-}
-
 /** 同步获取系统信息 */
 export function getSystemInfoSync() {
-  display.data(toDisplay(wx.getSystemInfoSync()));
+  const info = wx.getSystemInfoSync();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
+}
+
+/** 异步获取系统信息（回调风格） */
+export function getSystemInfo() {
+  wx.getSystemInfo({
+    success(res: any) {
+      display.text(
+        Object.keys(res)
+          .map((k) => `${k}: ${res[k]}`)
+          .join('\n')
+      );
+    },
+    fail(err: any) {
+      display.text(`获取失败：${err.errMsg}`);
+    },
+  });
 }
 
 /** 异步获取系统信息 */
 export function getSystemInfoAsync() {
   wx.getSystemInfoAsync({
     success(res: any) {
-      display.data(toDisplay(res));
+      display.text(
+        Object.keys(res)
+          .map((k) => `${k}: ${res[k]}`)
+          .join('\n')
+      );
     },
   });
 }
 
 /** 获取窗口信息 */
 export function getWindowInfo() {
-  display.data(toDisplay(wx.getWindowInfo()));
+  const info = wx.getWindowInfo();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
 }
 
 /** 获取设备设置（蓝牙/Wi-Fi/定位等开关） */
 export function getSystemSetting() {
-  display.data(toDisplay(wx.getSystemSetting()));
+  const info = wx.getSystemSetting();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
 }
 
 /** 获取设备基础信息 */
 export function getDeviceInfo() {
-  display.data(toDisplay(wx.getDeviceInfo()));
+  const info = wx.getDeviceInfo();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
 }
 
 /** 获取设备性能档位 */
 export function getDeviceBenchmarkInfo() {
   wx.getDeviceBenchmarkInfo({
     success(res: any) {
-      display.data(toDisplay(res));
+      display.text(
+        Object.keys(res)
+          .map((k) => `${k}: ${res[k]}`)
+          .join('\n')
+      );
     },
     fail(err: any) {
       display.text(`获取失败：${err.errMsg}`);
@@ -77,12 +99,22 @@ export function getDeviceBenchmarkInfo() {
 
 /** 获取微信 App 基础信息 */
 export function getAppBaseInfo() {
-  display.data(toDisplay(wx.getAppBaseInfo()));
+  const info = wx.getAppBaseInfo();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
 }
 
 /** 获取微信 App 授权设置 */
 export function getAppAuthorizeSetting() {
-  display.data(toDisplay(wx.getAppAuthorizeSetting()));
+  const info = wx.getAppAuthorizeSetting();
+  display.text(
+    Object.keys(info)
+      .map((k) => `${k}: ${(info as any)[k]}`)
+      .join('\n')
+  );
 }
 
 /** 跳转系统蓝牙设置页（仅 Android） */

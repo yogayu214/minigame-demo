@@ -21,14 +21,12 @@ export function onMemoryWarning() {
   warningCount = 0;
   listener = (res: any) => {
     warningCount += 1;
-    display.data({
-      触发次数: String(warningCount),
-      警告等级: String(res.level),
-      说明: '5=临界 10=低 15=中 20=高',
-    });
+    display.text(
+      `触发次数: ${warningCount}\n警告等级: ${res.level}\n说明: 5=临界 10=低 15=中 20=高`
+    );
   };
   wx.onMemoryWarning(listener);
-  display.text('✓ 已注册 onMemoryWarning（系统主动触发，难手工模拟）');
+  display.text('已注册 onMemoryWarning（系统主动触发，难手工模拟）');
 }
 
 /** 停止监听 */
@@ -36,7 +34,7 @@ export function offMemoryWarning() {
   if (listener) {
     wx.offMemoryWarning(listener);
     listener = null;
-    display.text('✓ 已停止监听');
+    display.text('已停止监听');
   }
 }
 

@@ -12,7 +12,9 @@ export const setDisplay = display.setter;
 export function switchToLandscape() {
   wx.setDeviceOrientation({
     value: 'landscape',
-    success() { display.text('当前方向：横屏'); },
+    success() {
+      display.text('当前方向：横屏');
+    },
   });
 }
 
@@ -20,6 +22,8 @@ export function switchToLandscape() {
 export function switchToPortrait() {
   wx.setDeviceOrientation({
     value: 'portrait',
-    success() { display.text('当前方向：竖屏'); },
+    success() {
+      display.text('当前方向：竖屏');
+    },
   });
 }

@@ -57,7 +57,7 @@ export interface CreateShareCanvasOption {
 export interface ShareAppMessageToGroupOption {
   activityId: string;
   participant: string[];
-  chooseType: number;   // 1: 指定人, 2: 所有人
+  chooseType: number; // 1: 指定人, 2: 所有人
   taskTitle: string;
   success?: (res: any) => void;
   fail?: (err: any) => void;

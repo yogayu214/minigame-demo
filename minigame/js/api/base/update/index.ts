@@ -18,6 +18,18 @@ function ensureManager() {
   return updateManager;
 }
 
+/** 跳转到更新微信页面（当前微信版本过低时） */
+export function updateWeChatApp() {
+  wx.updateWeChatApp({
+    success() {
+      display.text('已跳转更新微信页面');
+    },
+    fail(err: any) {
+      display.text(`无需更新或调用失败：${err.errMsg}`);
+    },
+  });
+}
+
 /** 检查小游戏是否有新版本 */
 export function checkForUpdate() {
   const mgr = ensureManager();
@@ -30,15 +42,16 @@ export function checkForUpdate() {
 export function onUpdateReady() {
   const mgr = ensureManager();
   mgr.onUpdateReady(() => {
-    wx.showModal({
-      title: '更新提示',
-      content: '新版本已准备好，是否重启应用？',
-      success(res: any) {
-        if (res.confirm) mgr.applyUpdate();
-      },
-    });
+    display.text('新版本已准备好，点击 applyUpdate 即可重启应用');
   });
   display.text('已注册 onUpdateReady 监听');
+}
+
+/** 应用新版本并重启小游戏 */
+export function applyUpdate() {
+  const mgr = ensureManager();
+  mgr.applyUpdate();
+  display.text('已调用 applyUpdate');
 }
 
 /** 监听新版本下载失败 */
@@ -48,18 +61,6 @@ export function onUpdateFailed() {
     display.text('✗ 新版本下载失败');
   });
   display.text('已注册 onUpdateFailed 监听');
-}
-
-/** 跳转到更新微信页面（当前微信版本过低时） */
-export function updateWeChatApp() {
-  wx.updateWeChatApp({
-    success() {
-      display.text('已跳转更新微信页面');
-    },
-    fail(err: any) {
-      display.text(`无需更新或调用失败：${err.errMsg}`);
-    },
-  });
 }
 
 export function onUnload() {

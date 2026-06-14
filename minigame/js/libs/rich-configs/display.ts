@@ -110,6 +110,7 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       card.interactive = true;
       // 阻止点卡片穿透到 overlay 关闭弹窗
       (card as any).touchstart = (e: any) => e.stopPropagation();
+      (card as any).touchend = (e: any) => e.stopPropagation();
 
       // 卡片底
       const cardBg = new PIXI.Graphics();
@@ -221,7 +222,21 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       const hideModal = () => {
         modal.visible = false;
       };
-      (overlay as any).touchend = () => hideModal();
+      (overlay as any).touchstart = (e: any) => {
+        e.stopPropagation();
+        // 记录触摸起点，用于判断是点击还是滑动
+        overlay._touchStartY = e.data.global.y;
+        overlay._touchStartTime = e.data.originalEvent.timeStamp;
+      };
+      (overlay as any).touchend = (e: any) => {
+        e.stopPropagation();
+        // 只有短按且位移很小时才视为"点击关闭"
+        const dy = Math.abs(e.data.global.y - (overlay._touchStartY ?? 0));
+        const dt = e.data.originalEvent.timeStamp - (overlay._touchStartTime ?? 0);
+        if (dy < 10 && dt < 300) {
+          hideModal();
+        }
+      };
       (closeBtn as any).touchend = (e: any) => {
         e.stopPropagation();
         hideModal();

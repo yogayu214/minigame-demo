@@ -4,7 +4,7 @@
  * wx.onTouchEnd / wx.offTouchEnd / wx.onTouchCancel / wx.offTouchCancel
  * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/device/touch-event/wx.onTouchStart.html
  *
- * 注意：UI 框架（PIXI 按钮）自身会消费触摸，本演示直接监听 wx 全局触摸事件。
+ * 注意：全局触摸监听会拦截 UI 交互，因此 5 秒后自动停止监听。
  */
 
 import { createDisplay } from '../../../libs/display-slot';
@@ -13,16 +13,9 @@ const display = createDisplay();
 export const setDisplay = display.setter;
 
 const listeners: Record<string, any> = {};
-let lastTime = 0;
+let autoStopTimer: ReturnType<typeof setTimeout> | null = null;
 
-function throttle(fn: () => void) {
-  const now = Date.now();
-  if (now - lastTime < 80) return;
-  lastTime = now;
-  fn();
-}
-
-/** 监听所有触摸事件 */
+/** 监听所有触摸事件（5秒后自动停止，避免拦截UI交互） */
 export function listenAll() {
   if (listeners.start) {
     display.text('已在监听');
@@ -30,32 +23,50 @@ export function listenAll() {
   }
   listeners.start = (res: any) => {
     const t = res.touches?.[0];
-    display.data({ 事件: 'touchstart', x: String(t?.clientX), y: String(t?.clientY), 触点数: String(res.touches?.length || 0) });
+    display.text(
+      `事件: touchstart\nx: ${t?.clientX}\ny: ${t?.clientY}\n触点数: ${res.touches?.length || 0}`
+    );
   };
-  listeners.move = (res: any) => throttle(() => {
+  listeners.end = (res: any) =>
+    display.text(
+      `事件: touchend\nchangedTouches: ${res.changedTouches?.length || 0}`
+    );
+  listeners.cancel = () => display.text('事件: touchcancel\n说明: 被打断');
+
+  // touchmove 仅记录到变量，不频繁刷新 display，避免阻塞 UI
+  let lastMoveInfo = '';
+  listeners.move = (res: any) => {
     const t = res.touches?.[0];
-    display.data({ 事件: 'touchmove', x: String(t?.clientX), y: String(t?.clientY) });
-  });
-  listeners.end = (res: any) => {
-    display.data({ 事件: 'touchend', changedTouches: String(res.changedTouches?.length || 0) });
+    lastMoveInfo = `x: ${t?.clientX}, y: ${t?.clientY}`;
   };
-  listeners.cancel = () => display.data({ 事件: 'touchcancel', 说明: '被打断' });
 
   wx.onTouchStart(listeners.start);
   wx.onTouchMove(listeners.move);
   wx.onTouchEnd(listeners.end);
   wx.onTouchCancel(listeners.cancel);
-  display.text('已注册触摸 4 事件，请在屏幕上滑动');
+  display.text('已注册触摸事件，5秒后自动停止\n请在屏幕上触摸');
+
+  // 5秒后自动停止监听，恢复 UI 交互
+  autoStopTimer = setTimeout(() => {
+    stopAll();
+    display.text(
+      `触摸监听已自动停止\n最后一次 touchmove: ${lastMoveInfo || '无'}`
+    );
+  }, 5000);
 }
 
 /** 停止所有触摸监听 */
 export function stopAll() {
+  if (autoStopTimer) {
+    clearTimeout(autoStopTimer);
+    autoStopTimer = null;
+  }
   if (listeners.start) wx.offTouchStart(listeners.start);
   if (listeners.move) wx.offTouchMove(listeners.move);
   if (listeners.end) wx.offTouchEnd(listeners.end);
   if (listeners.cancel) wx.offTouchCancel(listeners.cancel);
   Object.keys(listeners).forEach((k) => delete listeners[k]);
-  display.text('✓ 已停止触摸监听');
+  display.text('已停止触摸监听');
 }
 
 export function onUnload() {

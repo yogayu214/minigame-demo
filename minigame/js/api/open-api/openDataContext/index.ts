@@ -1,111 +1,163 @@
 /**
  * 开放数据域
- * 好友排行榜 / 群排行榜 / 分数上报 / 订阅消息
+ * 主域通过 wx.getOpenDataContext().postMessage() 向子域发送消息，
+ * 子域（open-data-context/index.ts）通过 wx.onMessage 监听并渲染到 sharedCanvas。
+ * 主域需要将 sharedCanvas 绘制到 PIXI 舞台上才能看到子域内容。
  *
- * 注意：排行榜的 UI 渲染依赖开放数据域 + SharedCanvas + PIXI ticker，
- * 属于 rich-renderer 路径，此处通过 setter 暴露状态变化给外层。
+ * 支持的事件：
+ *   showFriendRank        - 显示好友排行榜
+ *   showGroupRank         - 显示群排行榜（需 shareTicket）
+ *   setUserRecord         - 上报分数到子域
+ *   relationalChaininteractiveData - 关系链互动
+ *   directedSharing       - 定向分享
+ *   PCHandoff              - PC 接力
+ *   showFriendsOnlineStatus - 好友在线状态
+ *   close                  - 关闭开放数据域画布
+ *
+ * 官方文档：
+ *   https://developers.weixin.qq.com/minigame/dev/api/open-api/data/wx.getOpenDataContext.html
  */
 
-// ===== setter：排行榜显示/隐藏由外层 UI 管理 =====
-let _onRankShow: (() => void) | null = null;
-let _onRankHide: (() => void) | null = null;
-export function setOnRankShow(fn: () => void) { _onRankShow = fn; }
-export function setOnRankHide(fn: () => void) { _onRankHide = fn; }
+import { createDisplay } from '../../../libs/display-slot';
 
-let friendRankShow = false;
+const display = createDisplay();
+export const setDisplay = display.setter;
 
-/** 分享到群聊（附带群排行榜入口） */
-export function shareToGroup() {
-  if (friendRankShow) return;
-  wx.shareAppMessage({
-    title: '高手如云，看看群里你排第几',
-    query: 'showGroup=1&pathName=openDataContext',
-    imageUrl: canvas.toTempFilePathSync({ x: 0, y: 0, width: canvas.width, height: (canvas.width * 4) / 5 }),
-  });
-  wx.showToast({ title: '若分享成功，请从群里点击查看群排行', icon: 'none', duration: 2000 });
-}
+let messageFn: any = null;
 
-/** 上报随机分数到开放数据域 */
-export function setUserRecord() {
-  if (friendRankShow) return;
-  const score = Math.floor(Math.random() * 1000 + 1);
-  wx.setUserCloudStorage({
-    KVDataList: [{
-      key: 'rankid',
-      value: JSON.stringify({ wxgame: { score, update_time: parseInt(String(+new Date() / 1000)) } }),
-    }],
-    success() {
-      wx.showToast({ title: `分数上报成功: ${score}分`, icon: 'none', duration: 2000 });
-    },
-  });
+/** 获取开放数据域实例 */
+export function getOpenDataContext() {
+  try {
+    const ctx = wx.getOpenDataContext();
+    display.text(
+      `获取成功，postMessage: ${typeof ctx?.postMessage === 'function' ? '可用' : '不可用'}`
+    );
+  } catch (e: any) {
+    display.text(`获取失败: ${e.message}`);
+  }
 }
 
 /** 显示好友排行榜 */
 export function showFriendRank() {
-  if (friendRankShow) return;
-  friendRankShow = true;
-  wx.getOpenDataContext().postMessage({ event: 'showFriendRank' });
-  _onRankShow?.();
-}
-
-/** 显示好友在线状态 */
-export function showFriendsOnlineStatus() {
-  if (friendRankShow) return;
-  friendRankShow = true;
-  wx.getOpenDataContext().postMessage({ event: 'showFriendsOnlineStatus' });
-  _onRankShow?.();
-}
-
-/** 显示群排行榜（从分享卡片进入时调用） */
-export function showGroupRank(shareTicket: string) {
-  if (friendRankShow) return;
-  friendRankShow = true;
-  wx.getOpenDataContext().postMessage({ event: 'showGroupRank', shareTicket });
-  _onRankShow?.();
-}
-
-/** 关闭排行榜 */
-export function closeRank() {
-  friendRankShow = false;
-  wx.getOpenDataContext().postMessage({ event: 'close' });
-  wx.triggerGC(); // 主动垃圾回收
-  _onRankHide?.();
-}
-
-/** 订阅系统消息（好友互动提醒 / 排行榜超越提醒） */
-export function subscribe() {
-  wx.requestSubscribeSystemMessage({
-    msgTypeList: ['SYS_MSG_TYPE_INTERACTIVE', 'SYS_MSG_TYPE_RANK'],
-    success(res: any) {
-      let tips = '成功订阅';
-      if (res.SYS_MSG_TYPE_INTERACTIVE === 'accept') tips += '好友互动提醒';
-      if (res.SYS_MSG_TYPE_RANK === 'accept') {
-        if (tips !== '成功订阅') tips += '和';
-        tips += '排行榜好友超越提醒';
-      }
-      wx.showToast({ title: tips, icon: 'none', duration: 2000 });
-    },
-    fail(res: any) {
-      wx.showToast({ title: res.errMsg, icon: 'none', duration: 2000 });
-    },
-  });
-}
-
-/** 检测是否需要显示群排行榜（从分享入口进来时） */
-export function detectGroupRank(options: any) {
-  if (options?.shareTicket && options?.query?.showGroup === '1') {
-    showGroupRank(options.shareTicket);
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'showFriendRank',
+    });
+    display.text('已发送 showFriendRank 消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
   }
 }
 
-export function onLoad() {
-  // 监听 onShow 以处理从分享卡片返回的情况
-  wx.onShow(detectGroupRank);
+/** 显示群排行榜 */
+export function showGroupRank() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'showGroupRank',
+      shareTicket: '',
+    });
+    display.text('已发送 showGroupRank 消息（需从群分享入口进入才能获取数据）');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 上报分数到子域 */
+export function setUserRecord() {
+  const score = Math.floor(Math.random() * 1000 + 1);
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'setUserRecord',
+      value: score,
+    });
+    display.text(`已发送 setUserRecord 消息，分数: ${score}`);
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 关系链互动（好友排行 + 互动按钮） */
+export function relationalChainInteractiveData() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'relationalChaininteractiveData',
+    });
+    display.text('已发送关系链互动消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 定向分享（可能感兴趣的好友） */
+export function directedSharing() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'directedSharing',
+    });
+    display.text('已发送定向分享消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** PC 接力 */
+export function pcHandoff() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'PCHandoff',
+    });
+    display.text('已发送 PC 接力消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 好友在线状态 */
+export function showFriendsOnlineStatus() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'showFriendsOnlineStatus',
+    });
+    display.text('已发送好友在线状态消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 关闭开放数据域画布 */
+export function closeCanvas() {
+  try {
+    wx.getOpenDataContext().postMessage({
+      event: 'close',
+    });
+    display.text('已发送关闭画布消息到开放数据域');
+  } catch (e: any) {
+    display.text(`发送失败: ${e.message}`);
+  }
+}
+
+/** 监听开放数据域发回的消息 */
+export function onMessage() {
+  if (messageFn) {
+    display.text('已存在监听，无需重复绑定');
+    return;
+  }
+  messageFn = (res: any) => {
+    display.text(
+      `onMessage: ${
+        typeof res === 'object'
+          ? JSON.stringify(res).slice(0, 200)
+          : String(res)
+      }`
+    );
+  };
+  wx.onMessage(messageFn);
+  display.text('已监听开放数据域消息');
 }
 
 export function onUnload() {
-  wx.offShow(detectGroupRank);
-  if (friendRankShow) closeRank();
-  _onRankShow = null;
-  _onRankHide = null;
+  if (messageFn) {
+    (wx as any).offMessage?.(messageFn);
+    messageFn = null;
+  }
 }
