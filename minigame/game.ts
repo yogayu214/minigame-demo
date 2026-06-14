@@ -11,14 +11,22 @@ declare global {
     query?: any;
   }
   const canvas: HTMLCanvasElement & {
-    toTempFilePathSync(options?: { x?: number; y?: number; width?: number; height?: number; destWidth?: number; destHeight?: number; fileType?: string; quality?: number }): string;
+    toTempFilePathSync(options?: {
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      destWidth?: number;
+      destHeight?: number;
+      fileType?: string;
+      quality?: number;
+    }): string;
     toTempFilePath(options?: any): void;
   };
 }
 
 import './js/vendor/weapp-adapter';
 import * as PIXI from './js/vendor/pixi.min';
-import pmgressBar from './js/libs/pmgressBar';
 import share from './js/libs/share';
 import { resolvePathName } from './js/libs/sceneMap';
 
@@ -31,7 +39,7 @@ wx.updateShareMenu({
 const { pixelRatio, windowWidth, windowHeight } = wx.getSystemInfoSync();
 
 // 初始化canvas
-let app = new PIXI.Application({
+const app = new PIXI.Application({
   width: windowWidth * pixelRatio,
   height: windowHeight * pixelRatio,
   view: canvas,
@@ -54,11 +62,6 @@ PIXI.interaction.InteractionManager.prototype.mapPositionToPoint = (
 
 PIXI.ratio = (windowWidth * pixelRatio) / 750;
 
-let loadingFn = pmgressBar(PIXI, app, {
-  width: windowWidth * pixelRatio,
-  height: windowHeight * pixelRatio,
-});
-
 PIXI.loader
   .add([
     'images/official.png',
@@ -72,7 +75,7 @@ PIXI.loader
     wx.loadSubpackage({
       name: 'api',
       success() {
-        let router = require('./js/api/game'),
+        const router = require('./js/api/game'),
           options = wx.getLaunchOptionsSync(),
           query = options.query;
 
@@ -87,29 +90,41 @@ PIXI.loader
         // 解析 scene 参数或直接用 pathName
         const launchPathName = resolvePathName(query);
         if (launchPathName) {
-          window.router.navigateTo(launchPathName, { ...query, pathName: launchPathName }, options);
+          window.router.navigateTo(
+            launchPathName,
+            { ...query, pathName: launchPathName },
+            options
+          );
         }
 
         wx.onShow((res) => {
-          let q = Object.assign(window.query || {}, res.query);
+          const q = Object.assign(window.query || {}, res.query);
           const showPathName = resolvePathName(q);
-          const noNavigateToRequired = !['VoIPChat'].includes(showPathName || '');
+          const noNavigateToRequired = !['VoIPChat'].includes(
+            showPathName || ''
+          );
 
           if (showPathName) {
             noNavigateToRequired && window.router.navigateBack();
 
             !window.query &&
               !noNavigateToRequired &&
-              window.router.navigateTo(showPathName, { ...q, pathName: showPathName }, res);
+              window.router.navigateTo(
+                showPathName,
+                { ...q, pathName: showPathName },
+                res
+              );
 
             noNavigateToRequired &&
-              window.router.navigateTo(showPathName, { ...q, pathName: showPathName }, res);
+              window.router.navigateTo(
+                showPathName,
+                { ...q, pathName: showPathName },
+                res
+              );
           }
 
           noNavigateToRequired && (window.query = null);
         });
-
-        loadingFn(100);
       },
       fail() {
         console.error('loadSubpackage fail');
@@ -117,7 +132,5 @@ PIXI.loader
       complete() {
         console.log('loadSubpackage complete');
       },
-    }).onProgressUpdate((res) => {
-      loadingFn(res.progress);
     });
   });

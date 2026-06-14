@@ -219,11 +219,20 @@ function pixiScroll(PIXI, app, property) {
         copyText.position.set(middleText.x + middleText.width, middleText.y);
 
         copyText.interactive = true;
-        copyText.on('pointerup', () => {
-            wx.setClipboardData({
-                data: 'https://github.com/wechat-miniprogram/minigame-demo',
-            });
-        });
+        let copyRecordY = 0;
+        copyText.touchstart = (e) => {
+            copyRecordY = e.data.global.y;
+        };
+        copyText.touchend = (e) => {
+            if (Math.abs(e.data.global.y - copyRecordY) < 5) {
+                wx.setClipboardData({
+                    data: 'https://github.com/wechat-miniprogram/minigame-demo',
+                    fail(err) {
+                        wx.showToast({ title: err.errMsg, icon: 'none' });
+                    },
+                });
+            }
+        };
 
         div.addChild(text, middleText, copyText);
         this.drawHeight = text.y + text.height + 90 * PIXI.ratio;
