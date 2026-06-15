@@ -70,6 +70,7 @@ export function inviteFriend() {
 /**
  * 离开房间（带确认弹窗）
  * 根据当前模式（匹配 / 创建）和角色（房主 / 成员）调用对应 API
+ * 不管 API 是否成功，用户点了确认就应退出到主 demo
  */
 export function leaveRoom() {
     wx.showModal({
@@ -78,17 +79,26 @@ export function leaveRoom() {
         success: (res) => {
             if ( !res.confirm ) return;
 
+            // 延迟 require 避免循环依赖
+            const { exitToMain } = require('../index');
+
             if ( databus.matchPattern ) {
                 gameServer.cancelMatch({ match_id: 'CuQJHh6u_WqqGQ1UEzMhnfeIIgqdgCAqw12FNbl6l3E' });
-                gameServer.clear();
+                exitToMain();
                 return;
             }
 
-            if ( databus.selfMemberInfo.role === config.roleMap.owner ) {
-                gameServer.ownerLeaveRoom();
-            } else {
-                gameServer.memberLeaveRoom();
+            // 尝试离开房间（服务端清理，不管成功失败都退回主 demo）
+            const accessInfo = gameServer.accessInfo;
+            if ( accessInfo ) {
+                if ( databus.selfMemberInfo && databus.selfMemberInfo.role === config.roleMap.owner ) {
+                    gameServer.server.ownerLeaveRoom({ accessInfo, assignToMinPosNum: true }).catch(() => {});
+                } else {
+                    gameServer.server.memberLeaveRoom({ accessInfo }).catch(() => {});
+                }
             }
+
+            exitToMain();
         },
     });
 }

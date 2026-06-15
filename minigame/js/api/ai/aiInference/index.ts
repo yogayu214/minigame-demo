@@ -13,36 +13,58 @@ let session: any = null;
 
 /** 查询设备 AI 推理能力（GPU/NPU 等） */
 export function getInferenceEnvInfo() {
-  wx.getInferenceEnvInfo({
-    success(res: any) {
-      display.text(
-        `version: ${res.ver || '-'}\n支持GPU: ${res.gpuSupport != null ? res.gpuSupport : '-'}\n支持NPU: ${res.npuSupport != null ? res.npuSupport : '-'}\n最大模型大小: ${res.maxModelSize || '-'}`
-      );
-    },
-    fail(err: any) {
-      display.text(`查询失败：${err.errMsg}`);
-    },
-  });
+  const tip =
+    '⚠️ 此功能需要在真机上运行，模拟器不支持，\n' +
+    'Demo 中调用将失败。\n\n' +
+    '文档：developers.weixin.qq.com/minigame/dev/api/ai/inference/wx.getInferenceEnvInfo.html';
+
+  display.text(tip);
+
+  // 2s 后发起真实调用，展示失败结果
+  setTimeout(() => {
+    wx.getInferenceEnvInfo({
+      success(res: any) {
+        display.text(
+          `version: ${res.ver || '-'}\n支持GPU: ${res.gpuSupport != null ? res.gpuSupport : '-'}\n支持NPU: ${res.npuSupport != null ? res.npuSupport : '-'}\n最大模型大小: ${res.maxModelSize || '-'}`
+        );
+      },
+      fail(err: any) {
+        display.text(`调用失败：${err.errMsg}`);
+      },
+    });
+  }, 2000);
 }
 
 /** 创建推理 session（需先准备 .onnx 模型） */
 export function createInferenceSession() {
-  session = (wx as any).createInferenceSession({
-    model: 'inference/demo.onnx', // 需放置 onnx 模型
-    precisionLevel: 4,
-    allowQuantize: false,
-  });
-  if (session.onLoad) {
-    session.onLoad(() => {
-      display.text('推理 session 已加载');
+  const tip =
+    '⚠️ 此功能需要在真机上运行，且需准备 .onnx 模型文件，\n' +
+    'Demo 中调用将失败。\n\n' +
+    '接入流程：\n' +
+    '1. 准备 onnx 模型文件放入小游戏包内\n' +
+    '2. 在真机上调用 wx.createInferenceSession\n\n' +
+    '文档：developers.weixin.qq.com/minigame/dev/api/ai/inference/wx.createInferenceSession.html';
+
+  display.text(tip);
+
+  // 2s 后发起真实调用，展示失败结果
+  setTimeout(() => {
+    session = (wx as any).createInferenceSession({
+      model: 'inference/demo.onnx',
+      precisionLevel: 4,
+      allowQuantize: false,
     });
-  }
-  if (session.onError) {
-    session.onError((err: any) => {
-      display.text(`加载失败：${err.errMsg || err.message}`);
-    });
-  }
-  display.text('createInferenceSession 已调用，等待 onLoad...');
+    if (session.onLoad) {
+      session.onLoad(() => {
+        display.text('推理 session 已加载');
+      });
+    }
+    if (session.onError) {
+      session.onError((err: any) => {
+        display.text(`调用失败：${err.errMsg || err.message}`);
+      });
+    }
+  }, 2000);
 }
 
 /** 销毁推理 session */

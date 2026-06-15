@@ -137,7 +137,6 @@ export const SCENE_MAP: Record<string, string> = {
   '115': 'getGameRecorder',
   // ===== 游戏服务 =====
   '116': 'getGameServerManager',
-  '117': 'gameServerManagerBasic',
   // ===== 广告 =====
   '118': 'createBannerAd',
   '119': 'createGridAd',

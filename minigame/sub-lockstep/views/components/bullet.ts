@@ -65,13 +65,19 @@ export default class Bullet extends PIXI.Sprite {
     }
 
     renderUpdate(dt) {
-        if ( this.x !== this.preditX || this.y !== this.preditY ) {
-            let dis = getDistance({ x: this.x, y: this.y}, { x: this.preditX, y: this.preditY});
-            let temp = dt / ( 1000 / 30) * ( this.speed * ( 1000 / 30) );
-            let percent = getNumInRange(temp / dis, 0, 1);
+        try {
+            if ( this.x !== this.preditX || this.y !== this.preditY ) {
+                let dis = getDistance({ x: this.x, y: this.y}, { x: this.preditX, y: this.preditY});
+                let temp = dt / ( 1000 / 30) * ( this.speed * ( 1000 / 30) );
+                let percent = getNumInRange(temp / dis, 0, 1);
 
-            this.x += (this.preditX - this.x) * percent;
-            this.y += (this.preditY - this.y) * percent;
+                this.x += (this.preditX - this.x) * percent;
+                this.y += (this.preditY - this.y) * percent;
+            }
+        } catch(e) {
+            // 对象可能已被 destroy
+        }
+    }
         }
     }
 

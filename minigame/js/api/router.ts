@@ -687,11 +687,6 @@ const signIn = [
             // 源码参考：github.com/wechat-miniprogram/minigame-lockstep-demo
             path: 'game-server/getGameServerManager/index',
           },
-          {
-            label: 'GameServerManager 基础',
-            name: 'gameServerManagerBasic',
-            path: 'game-server/gameServerManager/index',
-          },
         ],
       },
 
@@ -726,7 +721,7 @@ const signIn = [
             path: 'ad/createCustomAd/index',
           },
           {
-            label: '直投广告状态',
+            label: '直玩广告状态',
             name: 'directAdStatus',
             path: 'ad/directAdStatus/index',
           },
@@ -842,7 +837,6 @@ const displayPages: Record<string, string> = {
   dataAnalysisLogManager: 'data-analysis/logManager/index',
   midasPay: 'pay/midas/index',
   // game-server / ai / ad
-  gameServerManagerBasic: 'game-server/gameServerManager/index',
   aiInference: 'ai/aiInference/index',
   vkSession: 'ai/vkSession/index',
   'visionkit-basic': 'ai/visionkit-basic/index',
@@ -861,6 +855,8 @@ const displayPages: Record<string, string> = {
   // file 新增
   fileSystemManager: 'file/fileSystemManager/index',
   saveFileToDisk: 'file/saveFileToDisk/index',
+  rename: 'file/rename/index',
+  savedFile: 'file/savedFile/index',
   // media 新增
   innerAudio: 'media/innerAudio/index',
   webAudio: 'media/webAudio/index',
@@ -870,6 +866,7 @@ const displayPages: Record<string, string> = {
   videoDecoder: 'media/videoDecoder/index',
   mediaImage: 'media/image/index',
   // network 新增
+  WebSocket: 'network/webSocket/index',
   tcpSocket: 'network/tcp/index',
   udpSocket: 'network/udp/index',
   // open-api 新增

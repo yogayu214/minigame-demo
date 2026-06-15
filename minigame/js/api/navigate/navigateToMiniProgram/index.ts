@@ -15,7 +15,7 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const DEMO_APPID = 'wx6d5a6c4a1cdd4e8a';
+const DEMO_APPID = 'wx7a727ff7d940bb3f';
 
 /** 直接跳转 */
 export function navigateToMiniProgram() {

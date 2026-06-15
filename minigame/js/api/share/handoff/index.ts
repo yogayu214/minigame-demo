@@ -16,22 +16,16 @@ export const setDisplay = display.setter;
 
 let handoffFn: any = null;
 
-/** 设置接力 query */
+/** 设置接力 query（同步接口，返回 Boolean） */
 export function setHandoffQuery() {
-  wx.setHandoffQuery({
-    query: 'from=demo&ts=' + Date.now(),
-    success() {
-      display.text('已设置接力 query');
-    },
-    fail(err: any) {
-      display.text(
-        formatObj({
-          状态: '设置失败',
-          原因: err.errMsg,
-        })
-      );
-    },
-  } as any);
+  const query = 'from=demo&ts=' + Date.now();
+  const ok = (wx as any).setHandoffQuery(query);
+  display.text(
+    formatObj({
+      query,
+      设置结果: ok ? '成功' : '失败',
+    })
+  );
 }
 
 /** 监听接力事件 */
@@ -59,18 +53,26 @@ export function offHandoff() {
   }
 }
 
-/** 检查接力是否可用 */
+/** 检查接力是否可用（异步接口） */
 export function checkHandoffEnabled() {
-  const enabled = wx.checkHandoffEnabled?.();
-  if (typeof enabled === 'undefined') {
-    display.text('checkHandoffEnabled 不可用（需基础库 >= 2.26.0）');
-    return;
-  }
-  display.text(
-    formatObj({
-      接力可用: String(!!enabled),
-    })
-  );
+  (wx as any).checkHandoffEnabled({
+    success(res: any) {
+      display.text(
+        formatObj({
+          接力可用: String(!!res.isEnabled),
+          errCode: res.errCode ?? '-',
+        })
+      );
+    },
+    fail(err: any) {
+      display.text(
+        formatObj({
+          状态: '查询失败',
+          原因: err.errMsg,
+        })
+      );
+    },
+  });
 }
 
 export function onUnload() {

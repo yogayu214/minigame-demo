@@ -13,8 +13,28 @@ export const setDisplay = display.setter;
 
 /** 请求一次性订阅消息 */
 export function requestSubscribeMessage() {
+  // ★ 请先在小游戏后台获取模板 ID 并替换下方占位符，否则调用会报错
+  const tmplIds = ['模板ID_需要替换'];
+  if (tmplIds[0] === '模板ID_需要替换') {
+    display.text('请先在小游戏后台「订阅消息」页面获取模板 ID，\n替换代码中的「模板ID_需要替换」后再试。\n2s 后仍将调用 API 演示流程...');
+    setTimeout(() => {
+      wx.requestSubscribeMessage({
+        tmplIds,
+        success(res: any) {
+          const lines = Object.keys(res)
+            .map((k) => `${k}: ${res[k]}`)
+            .join('\n');
+          display.text(`一次性订阅结果:\n${lines}`);
+        },
+        fail(err: any) {
+          display.text(`一次性订阅失败: ${err.errMsg}`);
+        },
+      });
+    }, 2000);
+    return;
+  }
   wx.requestSubscribeMessage({
-    tmplIds: ['模板ID_需要替换'],
+    tmplIds,
     success(res: any) {
       const lines = Object.keys(res)
         .map((k) => `${k}: ${res[k]}`)

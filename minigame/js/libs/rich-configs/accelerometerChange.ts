@@ -7,6 +7,8 @@ import * as logic from '../../api/device/accelerometerChange/index';
 import { createSensorButtons } from './sensor-buttons';
 import type { RichConfig } from '../rich-renderer';
 
+let _start: (() => void) | null = null;
+
 export const config: RichConfig = {
   title: '重力感应',
   apiName: 'on/off/AccelerometerChange',
@@ -42,6 +44,7 @@ export const config: RichConfig = {
       logic.startListening,
       logic.stopListening
     );
+    _start = start;
 
     // 绑定传感器数据到 UI 更新
     logic.setOnData((res: any) => {
@@ -70,6 +73,6 @@ export const config: RichConfig = {
   // 按钮已在 buildTopView 里创建，actions 为空
   actions: [],
 
-  onLoad: logic.startListening,
+  onLoad: () => _start?.(),
   onUnload: logic.onUnload,
 };

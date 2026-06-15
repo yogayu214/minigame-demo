@@ -13,17 +13,28 @@ let inited = false;
 
 /** 初始化人脸检测 */
 export function initFaceDetect() {
-  (wx as any).initFaceDetect({
-    success() {
-      inited = true;
-      display.text('initFaceDetect 成功\n请点击 faceDetect 检测');
-    },
-    fail(err: any) {
-      display.text(
-        `initFaceDetect 失败\n${err?.errMsg || '请确认在真机上运行'}`
-      );
-    },
-  });
+  const tip =
+    '⚠️ 此功能需要在真机上运行，且需要相机权限，\n' +
+    '模拟器不支持。\n\n' +
+    '接入流程：\n' +
+    '1. 在 game.json 中配置 requiredBackgroundModes: ["camera"]\n' +
+    '2. 在真机上调用 wx.initFaceDetect\n\n' +
+    '文档：developers.weixin.qq.com/minigame/dev/api/ai/facedetect/wx.initFaceDetect.html';
+
+  display.text(tip);
+
+  // 2s 后发起真实调用，展示失败结果
+  setTimeout(() => {
+    (wx as any).initFaceDetect({
+      success() {
+        inited = true;
+        display.text('initFaceDetect 成功\n请点击 faceDetect 检测');
+      },
+      fail(err: any) {
+        display.text(`调用失败：${err?.errMsg || '请确认在真机上运行'}`);
+      },
+    });
+  }, 2000);
 }
 
 /** 人脸检测（需先 initFaceDetect） */

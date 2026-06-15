@@ -166,6 +166,7 @@ export default class JoyStick extends PIXI.Container {
 		}
 
         const position = evt.data.getLocalPosition(this.parent);
+        if ( !position ) return;
 		let bx = position.x;
 		let by = position.y;
 
@@ -229,6 +230,7 @@ export default class JoyStick extends PIXI.Container {
         this.currIdentifier = evt.data.identifier;
 
         const position = evt.data.getLocalPosition(this.parent);
+        if ( !position ) return;
 		let bx = position.x;
 		let by = position.y;
 
@@ -241,7 +243,7 @@ export default class JoyStick extends PIXI.Container {
 		this.button.y = limit.resultY - this.button.radius;
 
         if ( !this.hasDisable ) {
-            this.eventFilter(limit);
+			this.eventFilter(limit);
         }
 	}
 }

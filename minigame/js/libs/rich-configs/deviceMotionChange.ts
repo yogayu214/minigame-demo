@@ -7,6 +7,8 @@ import * as logic from '../../api/device/deviceMotionChange/index';
 import { createSensorButtons } from './sensor-buttons';
 import type { RichConfig } from '../rich-renderer';
 
+let _start: (() => void) | null = null;
+
 export const config: RichConfig = {
   title: '监听设备方向',
   apiName: 'on/off/DeviceMotionChange',
@@ -35,6 +37,7 @@ export const config: RichConfig = {
       logic.startListening,
       logic.stopListening
     );
+    _start = start;
 
     logic.setOnData((res: any) => {
       text.turnText(`α：${res.alpha} rad\nβ：${res.beta} rad\nγ：${res.gamma} rad`);
@@ -51,6 +54,6 @@ export const config: RichConfig = {
 
   actions: [],
 
-  onLoad: logic.startListening,
+  onLoad: () => _start?.(),
   onUnload: logic.onUnload,
 };

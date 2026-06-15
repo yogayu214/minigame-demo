@@ -26,9 +26,10 @@ class DataBus {
      * 此后不进入帧循环
      */
     removeBullets(bullet) {
-        this.bullets.splice(this.bullets.indexOf(bullet), 1);
+        const idx = this.bullets.indexOf(bullet);
+        if (idx !== -1) this.bullets.splice(idx, 1);
 
-        bullet.parent.removeChild(bullet);
+        if (bullet.parent) bullet.parent.removeChild(bullet);
     }
 }
 

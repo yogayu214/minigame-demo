@@ -27,6 +27,17 @@ export default class Player extends PIXI.extras.AnimatedSprite {
             return PIXI.Texture.from(item);
         });
 
+        // 诊断：输出纹理信息，帮助定位"被邀请方看不到角色"问题
+        console.log('[lockstep][Player] textures:', alienImages.map((src, i) => ({
+            src,
+            width: textureArray[i].width,
+            height: textureArray[i].height,
+            hasBaseTexture: !!textureArray[i].baseTexture,
+            baseTextureW: textureArray[i].baseTexture ? textureArray[i].baseTexture.width : 'N/A',
+            baseTextureH: textureArray[i].baseTexture ? textureArray[i].baseTexture.height : 'N/A',
+            loaded: textureArray[i].baseTexture ? textureArray[i].baseTexture.hasLoaded : 'N/A',
+        })));
+
         super(textureArray);
 
         this.init();
@@ -78,12 +89,17 @@ export default class Player extends PIXI.extras.AnimatedSprite {
     }
 
     setPos(x, y) {
-        if ( x !== undefined ) {
-            this.position.x = x;
-        }
+        // 注意：不要因为 position 为空就静默跳过，否则角色会停留在 (0,0) 不可见
+        try {
+            if ( x !== undefined ) {
+                this.position.x = x;
+            }
 
-        if ( y !== undefined ) {
-            this.position.y = y;
+            if ( y !== undefined ) {
+                this.position.y = y;
+            }
+        } catch(e) {
+            console.warn('[lockstep][Player] setPos error:', e);
         }
     }
 
@@ -131,25 +147,29 @@ export default class Player extends PIXI.extras.AnimatedSprite {
      * 逻辑帧也会计算该逻辑帧最终的表现数据
      */
     renderUpdate(dt) {
-        if ( this.x !== this.preditX || this.y !== this.preditY ) {
-            let dis = getDistance({ x: this.x, y: this.y}, { x: this.preditX, y: this.preditY});
-            let temp = dt / ( 1000 / 30) * ( 0.2 * ( 1000 / 30) );
-            let percent = getNumInRange(temp / dis, 0, 1);
+        try {
+            if ( this.x !== this.preditX || this.y !== this.preditY ) {
+                let dis = getDistance({ x: this.x, y: this.y}, { x: this.preditX, y: this.preditY});
+                let temp = dt / ( 1000 / 30) * ( 0.2 * ( 1000 / 30) );
+                let percent = getNumInRange(temp / dis, 0, 1);
 
-            this.x += (this.preditX - this.x) * percent;
-            this.y += (this.preditY - this.y) * percent;
-        }
+                this.x += (this.preditX - this.x) * percent;
+                this.y += (this.preditY - this.y) * percent;
+            }
 
-        if ( this.currDegree !== this.frameDegree ) {
-            const dis = getMove(this.currDegree, this.frameDegree);
+            if ( this.currDegree !== this.frameDegree ) {
+                const dis = getMove(this.currDegree, this.frameDegree);
 
-            let temp = dt / ( 1000 / 30) * 10;
-            let percent = getNumInRange(temp / Math.abs(dis), 0, 1);
+                let temp = dt / ( 1000 / 30) * 10;
+                let percent = getNumInRange(temp / Math.abs(dis), 0, 1);
 
-            this.currDegree += dis * percent;
+                this.currDegree += dis * percent;
 
-            this.currDegree = limitNumInRange(this.currDegree, 0, 360);
-            this.rotation  = convertDegree2Radian(this.currDegree);
+                this.currDegree = limitNumInRange(this.currDegree, 0, 360);
+                this.rotation  = convertDegree2Radian(this.currDegree);
+            }
+        } catch(e) {
+            // 对象可能已被 destroy，忽略
         }
     }
 

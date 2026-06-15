@@ -33,11 +33,19 @@ export default class Battle extends PIXI.Container {
 
     launch() {
         console.log('[lockstep][battle] launch');
+
+        // 防重入：如果 onGameStart 被触发两次，runScene 会 destroy 旧场景，
+        // 但 databus.playerList 中的引用仍然指向已 destroy 的对象，
+        // 导致 renderUpdate 访问 null position 崩溃
+        if (databus.playerList.length > 0) {
+            console.warn('[lockstep][battle] ⚠️ launch 时 playerList 非空 (len=' + databus.playerList.length + ')，清理残留');
+            databus.playerList = [];
+            databus.playerMap = {};
+            databus.bullets = [];
+        }
+
         this.debug = new Debug();
         this.addChild(this.debug);
-
-        this.initPlayer();
-        console.log('[lockstep][battle] players:', databus.playerList.length, 'selfClientId:', databus.selfClientId);
 
         // ===== 虚拟摇杆：变化 → logic.sendMoveDirection/Stop =====
         this.joystick = new JoyStick((e) => {
@@ -77,7 +85,10 @@ export default class Battle extends PIXI.Container {
         // ===== 把 server 下发的玩家指令映射到本地 Player 对象 =====
         gameServer.setPlayerAction((obj) => {
             const player = databus.playerMap[obj.n];
-            if (!player) return;
+            if (!player) {
+                console.warn('[lockstep][battle] ⚠️ playerMap missing clientId:', obj.n, 'action:', obj.e, '→ skipped');
+                return;
+            }
             switch (obj.e) {
                 case battleLogic.msgType.SHOOT:
                     player.shoot();
@@ -91,6 +102,9 @@ export default class Battle extends PIXI.Container {
                     break;
             }
         });
+
+        // ===== 确保 roomInfo 包含所有玩家后再初始化玩家对象 =====
+        this._ensureRoomInfoThenInit();
     }
 
     appendBackBtn() {
@@ -107,8 +121,47 @@ export default class Battle extends PIXI.Container {
         battleLogic.confirmLeaveGame(content, isCancel);
     }
 
+    /**
+     * 初始化玩家（与原项目保持一致：直接使用当前 roomInfo）
+     * 不再异步 getRoomInfo，避免在等待期间帧同步空转导致异常
+     */
+    _ensureRoomInfoThenInit() {
+        const memberList = gameServer.roomInfo && gameServer.roomInfo.memberList || [];
+
+        if (memberList.length < 2) {
+            console.error('[lockstep][battle] ❌ memberList 只有', memberList.length, '人！',
+                'roomInfo:', JSON.stringify(gameServer.roomInfo ? {
+                    roomId: gameServer.roomInfo.roomId,
+                    state: gameServer.roomInfo.state,
+                    memberCount: (gameServer.roomInfo.memberList || []).length,
+                    members: (gameServer.roomInfo.memberList || []).map(m => ({ id: m.clientId, role: m.role })),
+                } : 'null'));
+        }
+
+        // 无论 memberList 是否完整都直接初始化（与原项目一致）
+        // 原项目没有做任何 memberList 检查，直接信任 onGameStart 时的 roomInfo
+        this._doInitPlayer();
+    }
+
+    _doInitPlayer() {
+        this.initPlayer();
+        console.log('[lockstep][battle] ✅ players created:', databus.playerList.length,
+            'selfClientId:', databus.selfClientId);
+        // 诊断：输出每个 player 的关键渲染属性
+        databus.playerList.forEach((p, i) => {
+            console.log('[lockstep][battle]   player[' + i + '] clientId=', p.userData ? p.userData.clientId : '?',
+                'pos=(', p.x, ',', p.y, ') size=', p.width, 'x', p.height,
+                'visible=', p.visible, 'alpha=', p.alpha,
+                'renderable=', p.renderable,
+                'textureW=', p.texture ? p.texture.width : '?', 'textureH=', p.texture ? p.texture.height : '?',
+                'parent=', !!p.parent);
+        });
+    }
+
     initPlayer() {
-        const memberList = gameServer.roomInfo.memberList || [];
+        const memberList = gameServer.roomInfo && gameServer.roomInfo.memberList || [];
+        console.log('[lockstep][battle] initPlayer memberList:', memberList.length,
+            JSON.stringify(memberList.map(m => ({ clientId: m.clientId, role: m.role }))));
 
         memberList.forEach((member, index) => {
             const { role, clientId, nickname, isReady } = member;
@@ -233,6 +286,7 @@ export default class Battle extends PIXI.Container {
     }
 
     preditUpdate(dt) {
+        if (databus.gameover) return;
         databus.playerList.forEach(player => player.preditUpdate(dt));
         databus.bullets.forEach(bullet => bullet.preditUpdate(dt));
     }

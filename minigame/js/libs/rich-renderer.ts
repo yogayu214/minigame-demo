@@ -55,7 +55,11 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   if (topView) container.addChild(topView);
 
   // 按钮列表（在 topView 下方，支持滚动）
-  const topViewBottom = topView ? (topView.y || 0) + (topView.height || 0) : 0;
+  // 注意：Container.height = localBounds.maxY - localBounds.minY，
+  // 当子元素不从 y=0 开始时，topView.y + topView.height 不等于实际底部，
+  // 需要用 getBounds() 获取全局边界来正确计算
+  const topViewBounds = topView ? topView.getBounds() : null;
+  const topViewBottom = topViewBounds ? topViewBounds.y + topViewBounds.height : 0;
   const baseY = Math.max(
     topViewBottom + 40 * PIXI.ratio,
     underline ? (underline.y || 0) + (underline.height || 0) + 80 * PIXI.ratio : 0
@@ -70,76 +74,80 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const btnGap = 20 * PIXI.ratio;
   const totalBtnH = config.actions.length * (btnH + btnGap) - btnGap;
 
-  // 滚动容器
-  const scrollWrapper = new PIXI.Container();
-  scrollWrapper.x = 0;
-  scrollWrapper.y = scrollY;
-  scrollWrapper.interactive = true;
+  // 仅当有按钮时才创建滚动容器（否则 scrollWrapper 的 interactive/hitArea
+  // 会拦截触摸事件，导致 topView 中的滑块等组件无法操作）
+  if (config.actions.length > 0) {
+    // 滚动容器
+    const scrollWrapper = new PIXI.Container();
+    scrollWrapper.x = 0;
+    scrollWrapper.y = scrollY;
+    scrollWrapper.interactive = true;
 
-  // 内容层（存放按钮）
-  const scrollInner = new PIXI.Container();
+    // 内容层（存放按钮）
+    const scrollInner = new PIXI.Container();
 
-  // 遮罩
-  const scrollMask = new PIXI.Graphics();
-  scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
-  scrollInner.mask = scrollMask;
+    // 遮罩
+    const scrollMask = new PIXI.Graphics();
+    scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
+    scrollInner.mask = scrollMask;
 
-  // 透明命中区（保证空白可拖动滚动）
-  const hitArea = new PIXI.Graphics();
-  hitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
-  hitArea.interactive = true;
+    // 透明命中区（保证空白可拖动滚动）
+    const hitArea = new PIXI.Graphics();
+    hitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
+    hitArea.interactive = true;
 
-  scrollWrapper.addChild(hitArea, scrollInner, scrollMask);
+    scrollWrapper.addChild(hitArea, scrollInner, scrollMask);
 
-  // 按钮居中偏移
-  const btnX = (obj.width - btnW) / 2;
+    // 按钮居中偏移
+    const btnX = (obj.width - btnW) / 2;
 
-  config.actions.forEach((action, i) => {
-    const btn = p_button(PIXI, {
-      width: btnW,
-      height: btnH,
-      color: 0x05c25f,
-      y: i * (btnH + btnGap),
+    config.actions.forEach((action, i) => {
+      const btn = p_button(PIXI, {
+        width: btnW,
+        height: btnH,
+        color: 0x05c25f,
+        y: i * (btnH + btnGap),
+      });
+      btn.x = btnX;
+      btn.myAddChildFn(
+        p_text(PIXI, {
+          content: action.label,
+          fontSize: 30 * PIXI.ratio,
+          fill: 0xffffff,
+          fontWeight: 'bold',
+          relative_middle: { containerWidth: btn.width, containerHeight: btn.height },
+        })
+      );
+      btn.onClickFn(() => {
+        try { action.handler(); } catch (e: any) {
+          wx.showModal({ title: '错误', content: e.errMsg || String(e), showCancel: false });
+        }
+      });
+      scrollInner.addChild(btn);
     });
-    btn.x = btnX;
-    btn.myAddChildFn(
-      p_text(PIXI, {
-        content: action.label,
-        fontSize: 30 * PIXI.ratio,
-        fill: 0xffffff,
-        fontWeight: 'bold',
-        relative_middle: { containerWidth: btn.width, containerHeight: btn.height },
-      })
-    );
-    btn.onClickFn(() => {
-      try { action.handler(); } catch (e: any) {
-        wx.showModal({ title: '错误', content: e.errMsg || String(e), showCancel: false });
-      }
-    });
-    scrollInner.addChild(btn);
-  });
 
-  container.addChild(scrollWrapper);
+    container.addChild(scrollWrapper);
 
-  // 滚动逻辑（仅当内容超出可视区域时启用）
-  if (totalBtnH > scrollH) {
-    const scroller = new Scroller((_l: number, t: number) => {
-      scrollInner.y = -t;
-    });
-    scroller.contentSize(obj.width, scrollH, obj.width, totalBtnH);
+    // 滚动逻辑（仅当内容超出可视区域时启用）
+    if (totalBtnH > scrollH) {
+      const scroller = new Scroller((_l: number, t: number) => {
+        scrollInner.y = -t;
+      });
+      scroller.contentSize(obj.width, scrollH, obj.width, totalBtnH);
 
-    (scrollWrapper as any).touchstart = (e: any) => {
-      e.stopPropagation();
-      scroller.doTouchStart(e.data.global.x, e.data.global.y);
-    };
-    (scrollWrapper as any).touchmove = (e: any) => {
-      e.stopPropagation();
-      scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
-    };
-    (scrollWrapper as any).touchend = (e: any) => {
-      e.stopPropagation();
-      scroller.doTouchEnd(e.data.originalEvent.timeStamp);
-    };
+      (scrollWrapper as any).touchstart = (e: any) => {
+        e.stopPropagation();
+        scroller.doTouchStart(e.data.global.x, e.data.global.y);
+      };
+      (scrollWrapper as any).touchmove = (e: any) => {
+        e.stopPropagation();
+        scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
+      };
+      (scrollWrapper as any).touchend = (e: any) => {
+        e.stopPropagation();
+        scroller.doTouchEnd(e.data.originalEvent.timeStamp);
+      };
+    }
   }
 
   // 返回按钮回调
@@ -152,14 +160,10 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   if (underline) container.addChild(underline);
   container.addChild(logo, logoName);
 
-  // 滑块触摸结束清理
-  container.interactive = true;
-  (container as any).touchend = () => {
-    // 通知各子元素 touchmove 结束（供滑块组件使用）
-    container.children.forEach((child: any) => {
-      if (child.touchmove !== undefined) child.touchmove = null;
-    });
-  };
+  // 滑块触摸结束清理已移除：
+  // 之前的递归 clearTouchmoveDeep 会把弹窗滚动器的 touchmove 也清掉，
+  // 导致弹窗内容无法上下滑动。滑块拖不动的问题已通过 getBounds() 修复
+  // topViewBottom 计算，scrollWrapper 的 hitArea 不再遮挡滑块。
 
   app.stage.addChild(container);
 

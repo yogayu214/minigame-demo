@@ -7,6 +7,8 @@ import * as logic from '../../api/device/gyroscopeChange/index';
 import { createSensorButtons } from './sensor-buttons';
 import type { RichConfig } from '../rich-renderer';
 
+let _start: (() => void) | null = null;
+
 export const config: RichConfig = {
   title: '监听陀螺仪数据',
   apiName: 'on/off/GyroscopeChange',
@@ -35,6 +37,7 @@ export const config: RichConfig = {
       logic.startListening,
       logic.stopListening
     );
+    _start = start;
 
     logic.setOnData((res: any) => {
       text.turnText(
@@ -53,6 +56,6 @@ export const config: RichConfig = {
 
   actions: [],
 
-  onLoad: logic.startListening,
+  onLoad: () => _start?.(),
   onUnload: logic.onUnload,
 };

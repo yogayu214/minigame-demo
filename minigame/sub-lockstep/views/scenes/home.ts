@@ -16,7 +16,7 @@ export default class Home extends PIXI.Container {
         super();
     }
 
-    /** 两个操作按钮：快速开始 / 创建对战房间 */
+    /** 创建对战房间按钮 */
     appendOpBtn() {
         this.addChild(
             createText({
@@ -26,15 +26,9 @@ export default class Home extends PIXI.Container {
                 style: { fontSize: 64, fill: '#515151' },
             }),
             createBtn({
-                img: 'sub-lockstep/images/quickStart.png',
-                x: config.GAME_WIDTH / 2,
-                y: 442,
-                onclick: () => homeLogic.quickStart(),
-            }),
-            createBtn({
                 img: 'sub-lockstep/images/createRoom.png',
                 x: config.GAME_WIDTH / 2,
-                y: 582,
+                y: 512,
                 onclick: () => {
                     if (this.handling) return;
                     this.handling = true;

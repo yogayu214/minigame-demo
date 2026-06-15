@@ -44,6 +44,10 @@ module.exports = function(PIXI, deploy = {}) {
                 e.currentTarget.touchmove = e => {
                     callBack(e);
                 };
+                e.currentTarget.touchend = () => {
+                    e.currentTarget.touchmove = null;
+                    e.currentTarget.touchend = null;
+                };
             };
         };
 

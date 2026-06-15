@@ -233,6 +233,13 @@ class GameServer {
     /** 游戏开始：通知 view 层切到 Battle 场景 + 启动统计心跳 */
     onGameStart(from) {
         console.log('[lockstep][gs] onGameStart triggered, from:', from);
+
+        // 防重入：微信框架可能重复触发 onGameStart（如广播 + 服务端回调各一次）
+        if (this.hasGameStart) {
+            console.warn('[lockstep][gs] ⚠️ onGameStart 重复触发，已忽略');
+            return;
+        }
+
         this.event.emit('onGameStart');
         this.hasGameStart = true;
 
