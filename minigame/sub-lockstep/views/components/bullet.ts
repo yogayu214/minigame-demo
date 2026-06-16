@@ -78,8 +78,6 @@ export default class Bullet extends PIXI.Sprite {
             // 对象可能已被 destroy
         }
     }
-        }
-    }
 
     frameUpdate(dt) {
         this.frameX += this.speedX * dt;
