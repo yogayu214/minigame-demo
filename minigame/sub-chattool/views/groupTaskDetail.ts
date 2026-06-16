@@ -36,7 +36,7 @@ export default function (PIXI: any, app: any, query: any) {
 
   // ========== 已参与/未参与 Tab ==========
   const tabBox = p_box(PIXI, { width: r(343), height: r(40), x: r(16), y: r(150) });
-  const participatedTab = p_button(PIXI, { width: r(170), height: r(40), alpha: 0 });
+  const participatedTab = p_button(PIXI, { x: 0, width: r(170), height: r(40), alpha: 0, parentWidth: r(343) });
   const participatedTabText = p_text(PIXI, { content: '已参与', fontSize: r(16), fill: 0x07c160, relative_middle: { containerWidth: r(170), containerHeight: r(40) } });
   participatedTab.myAddChildFn(participatedTabText);
   participatedTab.onClickFn(() => {
@@ -45,7 +45,7 @@ export default function (PIXI: any, app: any, query: any) {
     notParticipatedTabText.turnColors('rgba(0,0,0,0.5)');
   });
 
-  const notParticipatedTab = p_button(PIXI, { x: r(170), width: r(170), height: r(40), alpha: 0 });
+  const notParticipatedTab = p_button(PIXI, { x: r(170), width: r(170), height: r(40), alpha: 0, parentWidth: r(343) });
   const notParticipatedTabText = p_text(PIXI, { content: '未参与', fontSize: r(16), fill: 'rgba(0,0,0,0.5)', relative_middle: { containerWidth: r(170), containerHeight: r(40) } });
   notParticipatedTab.myAddChildFn(notParticipatedTabText);
   notParticipatedTab.onClickFn(() => {

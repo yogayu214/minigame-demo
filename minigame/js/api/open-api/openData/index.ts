@@ -1,17 +1,14 @@
 /**
  * 开放数据（主域可调用部分）
- * wx.setUserCloudStorage / wx.getUserCloudStorage / wx.getUserCloudStorageKeys /
- * wx.removeUserCloudStorage / wx.modifyFriendInteractiveStorage /
- * wx.getUserInteractiveStorage / wx.onInteractiveStorageModified /
- * wx.offInteractiveStorageModified / wx.setMessageToFriendQuery / wx.shareAppMessage
  *
- * 注意：getFriendCloudStorage / getGroupCloudStorage / getPotentialFriendList /
- * getRelationFriendList / getGroupInfo / getGroupMembersInfo / getSharedCanvas /
- * sendGiftToFriend / getFriendSendGiftStatus 等仅限开放数据域（子域）调用，
- * 请在「开放数据域」页面通过 postMessage 触发。
- *
+ * 以下 API 可在主域直接调用：
+ *   wx.setUserCloudStorage   - 上报用户托管数据
+ *   wx.removeUserCloudStorage - 删除用户托管数据
+ *   wx.getUserInteractiveStorage - 获取用户互动数据（需真机，返回加密数据）
+ *   wx.onInteractiveStorageModified - 监听互动数据修改（需真机）
+ *   wx.offInteractiveStorageModified - 取消监听互动数据修改（需真机）
  * 官方文档：
- *   https://developers.weixin.qq.com/minigame/dev/api/open-api/data/wx.setUserCloudStorage.html
+ *   https://developers.weixin.qq.com/minigame/dev/guide/open-ability/open-data.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
@@ -48,36 +45,7 @@ export function setUserCloudStorage() {
   });
 }
 
-/** 获取用户托管数据 */
-export function getUserCloudStorage() {
-  wx.getUserCloudStorage({
-    keyList: ['score'],
-    success(res: any) {
-      display.text(
-        formatObj({
-          KVDataList: res.KVDataList,
-        })
-      );
-    },
-    fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
-    },
-  });
-}
-
-/** 获取用户托管数据的 key 列表 */
-export function getUserCloudStorageKeys() {
-  wx.getUserCloudStorageKeys({
-    success(res: any) {
-      display.text(`keys: ${JSON.stringify(res.keys)}`);
-    },
-    fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
-    },
-  });
-}
-
-/** 删除用户托管数据 */
+/** 删除用户托管数据（主域和子域均可调用） */
 export function removeUserCloudStorage() {
   wx.removeUserCloudStorage({
     keyList: ['score'],
@@ -92,29 +60,7 @@ export function removeUserCloudStorage() {
 
 // ===== 互动数据 =====
 
-/** 修改好友互动数据 */
-export function modifyFriendInteractiveStorage() {
-  if (typeof (wx as any).modifyFriendInteractiveStorage !== 'function') {
-    display.text('此 API 需在真机上测试，且需填写好友 openId');
-    return;
-  }
-  display.text('提示: 请先在 demo 代码中填写好友 openId');
-  setTimeout(() => {
-    (wx as any).modifyFriendInteractiveStorage({
-      openId: '', // 好友 openId，需替换
-      num: 1,
-      operation: 'add',
-      success() {
-        display.text('已修改好友互动数据');
-      },
-      fail(err: any) {
-        display.text(`修改失败: ${err.errMsg}`);
-      },
-    });
-  }, 2000);
-}
-
-/** 获取用户互动数据 */
+/** 获取用户互动数据（主域可调用，需真机） */
 export function getUserInteractiveStorage() {
   if (typeof (wx as any).getUserInteractiveStorage !== 'function') {
     display.text('此 API 需在真机上测试');
@@ -125,7 +71,8 @@ export function getUserInteractiveStorage() {
     success(res: any) {
       display.text(
         formatObj({
-          KVDataList: res.KVDataList,
+          iv: res.iv,
+          encryptedData: res.encryptedData,
         })
       );
     },
@@ -135,7 +82,7 @@ export function getUserInteractiveStorage() {
   });
 }
 
-/** 监听互动数据修改 */
+/** 监听互动数据修改（主域可调用，需真机） */
 export function onInteractiveStorageModified() {
   if (typeof (wx as any).onInteractiveStorageModified !== 'function') {
     display.text('此 API 需在真机上测试');
@@ -153,7 +100,7 @@ export function onInteractiveStorageModified() {
   display.text('已监听互动数据修改事件');
 }
 
-/** 取消监听互动数据修改 */
+/** 取消监听互动数据修改（主域可调用，需真机） */
 export function offInteractiveStorageModified() {
   if (typeof (wx as any).offInteractiveStorageModified !== 'function') {
     display.text('此 API 需在真机上测试');
@@ -166,30 +113,6 @@ export function offInteractiveStorageModified() {
   } else {
     display.text('当前无监听，无需取消');
   }
-}
-
-// ===== 分享 =====
-
-/** 分享消息给好友 */
-export function shareMessageToFriend() {
-  if (typeof wx.setMessageToFriendQuery !== 'function') {
-    display.text('此 API 需在真机上测试');
-    return;
-  }
-  const ok = wx.setMessageToFriendQuery({
-    shareMessageToFriendScene: 1,
-    query: 'from=openData&ts=' + Date.now(),
-  });
-  wx.shareAppMessage({
-    title: '来自开放数据域的分享',
-    imageUrl: '',
-  });
-  display.text(
-    formatObj({
-      setMessageToFriendQuery返回: String(ok),
-      说明: '已设置 query 并触发分享',
-    })
-  );
 }
 
 export function onUnload() {

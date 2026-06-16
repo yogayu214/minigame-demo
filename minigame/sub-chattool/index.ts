@@ -41,8 +41,13 @@ export function launch(PIXI: any, app: any, params: any, onReturn: () => void, i
   _returnToMain = onReturn;
   deps = injectedDeps;
 
-  // 进入群任务列表页
-  navigateTo('groupTask', params);
+  // 如果是从分享链接进入（带 activityId），直接跳到详情页
+  if (params.activityId) {
+    navigateTo('groupTaskDetail', params);
+  } else {
+    // 正常入口：群任务列表页
+    navigateTo('groupTask', params);
+  }
 }
 
 /** 内部导航：进入子页面 */

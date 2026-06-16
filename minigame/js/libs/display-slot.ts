@@ -44,5 +44,8 @@ export function createDisplay(): DisplaySlot {
     clear() {
       api?.clear();
     },
+    showCanvas() {
+      api?.showCanvas?.();
+    },
   };
 }

@@ -76,10 +76,13 @@ export function getGroupInfo(): Promise<GroupInfo> {
 }
 
 /**
- * 获取群任务详情页面路径
+ * 获取群任务分享页面路径
+ * 注意：必须指向分包入口 groupTask，不能指向 groupTaskDetail，
+ * 因为主路由 treePage 中只注册了 'groupTask' 这个入口名。
+ * activityId 等参数通过 query 传递给 chattool 内部路由。
  */
 export function getGroupTaskDetailPath(activityId: string) {
-  return `?pathName=groupTaskDetail&activityId=${activityId}`;
+  return `?pathName=groupTask&activityId=${activityId}`;
 }
 
 /**

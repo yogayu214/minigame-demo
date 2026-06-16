@@ -225,6 +225,67 @@ function LayoutWithTplAndStyle(xml: any, style: any) {
   Layout.layout(sharedContext);
 }
 
+/** 转义 XML 属性中的特殊字符 */
+function escapeXml(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** 渲染 API 调用结果到 sharedCanvas */
+function renderApiResult(title: string, data: Record<string, any>) {
+  const scale = (screenWidth / 375) * pixelRatio;
+  function r(value: number) {
+    return value * scale;
+  }
+
+  let rowsXml = '';
+  for (const [key, value] of Object.entries(data)) {
+    const valStr = typeof value === 'object'
+      ? JSON.stringify(value).substring(0, 300)
+      : String(value).substring(0, 300);
+    rowsXml += `<view class="row"><text class="key" value="${escapeXml(key)}"></text><text class="val" value="${escapeXml(valStr)}"></text></view>`;
+  }
+
+  const xml = `<view id="container"><text class="title" value="${escapeXml(title)}"></text>${rowsXml}</view>`;
+
+  const style = {
+    container: {
+      left: 0,
+      top: r(8),
+      width: r(375),
+      height: r(500),
+      flexDirection: 'column',
+      padding: r(16),
+      paddingTop: r(40), // 避开顶部标题栏遮挡
+    },
+    title: {
+      fontSize: r(18),
+      fontWeight: 'bold',
+      color: '#333333',
+      marginBottom: r(12),
+    },
+    row: {
+      flexDirection: 'row',
+      marginBottom: r(8),
+    },
+    key: {
+      fontSize: r(14),
+      color: '#666666',
+      width: r(120),
+    },
+    val: {
+      fontSize: r(14),
+      color: '#333333',
+      flex: 1,
+    },
+  };
+
+  LayoutWithTplAndStyle(xml, style);
+}
+
 // 仅仅渲染一些提示，比如数据加载中、当前无授权等
 function renderTips(tips = '', subTips = '', boxData: {
   left: number,
@@ -418,6 +479,78 @@ function init() {
       // 渲染群活动成员参与信息
       case 'renderGroupTaskMembersInfo':
         renderGroupTaskMembers(data);
+        break;
+      // 获取用户托管数据（仅限子域调用）
+      case 'getUserCloudStorage':
+        wx.getUserCloudStorage({
+          keyList: data.keyList || ['score'],
+          success(res: any) {
+            console.log('[子域] getUserCloudStorage success:', res);
+            renderApiResult('getUserCloudStorage', {
+              keys: (res.KVDataList || []).map((item: any) => item.key).join(', '),
+              KVDataList: res.KVDataList,
+            });
+          },
+          fail(err: any) {
+            console.warn('[子域] getUserCloudStorage fail:', err);
+            renderApiResult('getUserCloudStorage 失败', { errMsg: err.errMsg });
+          },
+        });
+        break;
+      // 获取用户托管数据的 key 列表（仅限子域调用）
+      case 'getUserCloudStorageKeys':
+        wx.getUserCloudStorageKeys({
+          success(res: any) {
+            console.log('[子域] getUserCloudStorageKeys success:', res);
+            renderApiResult('getUserCloudStorageKeys', {
+              keys: (res.keys || []).join(', '),
+            });
+          },
+          fail(err: any) {
+            console.warn('[子域] getUserCloudStorageKeys fail:', err);
+            renderApiResult('getUserCloudStorageKeys 失败', { errMsg: err.errMsg });
+          },
+        });
+        break;
+      // 修改好友互动数据（仅限子域调用）
+      case 'modifyFriendInteractiveStorage':
+        (wx as any).modifyFriendInteractiveStorage({
+          key: data.key || '1',
+          opNum: data.opNum || 1,
+          operation: data.operation || 'add',
+          toUser: data.toUser || '',
+          quiet: data.quiet || false,
+          success(res: any) {
+            console.log('[子域] modifyFriendInteractiveStorage success:', res);
+            renderApiResult('modifyFriendInteractiveStorage', {
+              结果: '成功',
+              errMsg: res.errMsg || '',
+            });
+          },
+          fail(err: any) {
+            console.warn('[子域] modifyFriendInteractiveStorage fail:', err);
+            renderApiResult('modifyFriendInteractiveStorage 失败', { errMsg: err.errMsg });
+          },
+        });
+        break;
+      // 分享消息给好友（仅限子域调用）
+      case 'shareMessageToFriend':
+        (wx as any).shareMessageToFriend({
+          openId: data.openId || '',
+          title: data.title || '',
+          imageUrl: data.imageUrl || '',
+          success(res: any) {
+            console.log('[子域] shareMessageToFriend success:', res);
+            renderApiResult('shareMessageToFriend', {
+              结果: '成功',
+              errMsg: res.errMsg || '',
+            });
+          },
+          fail(err: any) {
+            console.warn('[子域] shareMessageToFriend fail:', err);
+            renderApiResult('shareMessageToFriend 失败', { errMsg: err.errMsg });
+          },
+        });
         break;
     }
   });

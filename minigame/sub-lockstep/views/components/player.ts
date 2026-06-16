@@ -27,17 +27,6 @@ export default class Player extends PIXI.extras.AnimatedSprite {
             return PIXI.Texture.from(item);
         });
 
-        // 诊断：输出纹理信息，帮助定位"被邀请方看不到角色"问题
-        console.log('[lockstep][Player] textures:', alienImages.map((src, i) => ({
-            src,
-            width: textureArray[i].width,
-            height: textureArray[i].height,
-            hasBaseTexture: !!textureArray[i].baseTexture,
-            baseTextureW: textureArray[i].baseTexture ? textureArray[i].baseTexture.width : 'N/A',
-            baseTextureH: textureArray[i].baseTexture ? textureArray[i].baseTexture.height : 'N/A',
-            loaded: textureArray[i].baseTexture ? textureArray[i].baseTexture.hasLoaded : 'N/A',
-        })));
-
         super(textureArray);
 
         this.init();

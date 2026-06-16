@@ -145,23 +145,10 @@ export default class Battle extends PIXI.Container {
 
     _doInitPlayer() {
         this.initPlayer();
-        console.log('[lockstep][battle] ✅ players created:', databus.playerList.length,
-            'selfClientId:', databus.selfClientId);
-        // 诊断：输出每个 player 的关键渲染属性
-        databus.playerList.forEach((p, i) => {
-            console.log('[lockstep][battle]   player[' + i + '] clientId=', p.userData ? p.userData.clientId : '?',
-                'pos=(', p.x, ',', p.y, ') size=', p.width, 'x', p.height,
-                'visible=', p.visible, 'alpha=', p.alpha,
-                'renderable=', p.renderable,
-                'textureW=', p.texture ? p.texture.width : '?', 'textureH=', p.texture ? p.texture.height : '?',
-                'parent=', !!p.parent);
-        });
     }
 
     initPlayer() {
         const memberList = gameServer.roomInfo && gameServer.roomInfo.memberList || [];
-        console.log('[lockstep][battle] initPlayer memberList:', memberList.length,
-            JSON.stringify(memberList.map(m => ({ clientId: m.clientId, role: m.role }))));
 
         memberList.forEach((member, index) => {
             const { role, clientId, nickname, isReady } = member;

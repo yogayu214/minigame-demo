@@ -86,7 +86,7 @@ export function createOpenDataContextConfig(
         sharedSprite.width = obj.width;
         sharedSprite.height = obj.height;
         sharedSprite.x = 0;
-        sharedSprite.y = 0;
+        sharedSprite.y = 120 * PIXI.ratio; // 下移避开标题栏遮挡（FPS/drawcall等）
         sharedSprite.visible = false;
         root.addChild(sharedSprite);
 
@@ -429,6 +429,15 @@ export function createOpenDataContextConfig(
         clear() {
           clearAll();
           hideModal();
+        },
+        /** 显示 sharedCanvas，供 UI 渲染类函数调用 */
+        showCanvas() {
+          // 先关闭文字弹窗（如果有）
+          hideModal();
+          clearAll();
+          // 显示 sharedCanvas
+          sharedCanvasShowed = true;
+          if (sharedSprite) sharedSprite.visible = true;
         },
       };
 

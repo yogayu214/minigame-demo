@@ -36,6 +36,8 @@ export interface DisplayApi {
   image(src: string): void;
   /** 清空展示区 */
   clear(): void;
+  /** 显示 sharedCanvas（开放数据域专用，其他页面空实现） */
+  showCanvas?(): void;
 }
 
 export interface DisplayModule {

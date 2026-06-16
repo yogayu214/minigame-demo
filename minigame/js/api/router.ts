@@ -1121,6 +1121,13 @@ function router(PIXI, app, parameter) {
         name = this.treeView[lastOne];
       if (name === newPage) return;
 
+      // 防崩：页面不在路由树中时给出明确提示
+      if (!treePage[newPage]) {
+        console.error('!!! navigateTo 未知页面:', newPage, '可用页面:', Object.keys(treePage));
+        wx.showModal({ content: `找不到页面: ${newPage}`, showCancel: false });
+        return;
+      }
+
       if (typeof treePage[newPage].path === 'function')
         return treePage[newPage].path();
 
