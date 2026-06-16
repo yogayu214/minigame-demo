@@ -20,10 +20,10 @@ export function listenGamepad() {
     return;
   }
   connectListener = (res: any) => {
-    display.text(`事件: connected\nid: ${res.id}\nmapping: ${res.mapping}`);
+    display.text(`事件: connected\nid: ${res?.id}\nmapping: ${res?.mapping}`);
   };
   disconnectListener = (res: any) => {
-    display.text(`事件: disconnected\nid: ${res.id}`);
+    display.text(`事件: disconnected\nid: ${res?.id}`);
   };
   wx.onGamepadConnected(connectListener);
   wx.onGamepadDisconnected(disconnectListener);

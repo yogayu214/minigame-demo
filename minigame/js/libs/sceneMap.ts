@@ -139,9 +139,8 @@ export const SCENE_MAP: Record<string, string> = {
   '116': 'getGameServerManager',
   // ===== 广告 =====
   '118': 'createBannerAd',
-  '119': 'createGridAd',
-  '120': 'createRewardedVideoAd',
-  '121': 'createInterstitialAd',
+  '119': 'createRewardedVideoAd',
+  '120': 'createInterstitialAd',
   '122': 'createCustomAd',
   // ===== 推荐 =====
   '123': 'createGameBanner',

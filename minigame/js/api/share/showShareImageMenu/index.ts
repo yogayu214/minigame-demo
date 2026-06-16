@@ -25,7 +25,7 @@ export function showShareImageMenu() {
         display.text('已弹出图片分享菜单');
       },
       fail(err: any) {
-        display.text(`弹出失败：${err.errMsg}`);
+        display.text(`弹出失败：${err?.errMsg || '未知错误'}`);
       },
     });
   } catch (e: any) {

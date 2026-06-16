@@ -52,7 +52,7 @@ export function start() {
       );
     })
     .catch((err: any) => {
-      display.text(`启动失败: ${err.errMsg || err}`);
+      display.text(`启动失败: ${err?.errMsg || err}`);
     });
 }
 
@@ -68,7 +68,7 @@ export function stop() {
       display.text('已停止');
     })
     .catch((err: any) => {
-      display.text(`停止失败: ${err.errMsg || err}`);
+      display.text(`停止失败: ${err?.errMsg || err}`);
     });
 }
 
@@ -82,7 +82,7 @@ export function destroy() {
         player = null;
       })
       .catch((err: any) => {
-        display.text(`销毁失败: ${err.errMsg || err}`);
+        display.text(`销毁失败: ${err?.errMsg || err}`);
       });
   }
 }

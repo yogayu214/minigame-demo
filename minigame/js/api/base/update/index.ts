@@ -21,11 +21,8 @@ function ensureManager() {
 /** 跳转到更新微信页面（当前微信版本过低时） */
 export function updateWeChatApp() {
   wx.updateWeChatApp({
-    success() {
-      display.text('已跳转更新微信页面');
-    },
     fail(err: any) {
-      display.text(`无需更新或调用失败：${err.errMsg}`);
+      display.text(`无需更新或调用失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

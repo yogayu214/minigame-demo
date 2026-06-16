@@ -16,7 +16,7 @@ export function checkIsAddedToMyMiniProgram() {
       display.text(`是否已添加: ${res.added ? '是' : '否'}`);
     },
     fail(err: any) {
-      display.text(`查询失败: ${err.errMsg}`);
+      display.text(`查询失败: ${err?.errMsg || '未知错误'}`);
     },
   } as any);
 }

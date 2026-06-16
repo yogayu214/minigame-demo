@@ -17,7 +17,7 @@ export function getFileInfo() {
       display.text(`路径: ${path}\n文件大小: ${res.size} 字节`);
     },
     fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
+      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

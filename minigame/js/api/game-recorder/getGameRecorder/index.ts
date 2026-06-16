@@ -122,7 +122,7 @@ export function stopGameRecord() {
           } as any,
         });
       } else {
-        shareButton.share.timeRange = [[0, writeTime]];
+        shareButton.share!.timeRange = [[0, writeTime]];
       }
       shareButton.show();
       shareButton.onTap((r: any) => {
@@ -182,7 +182,7 @@ export function operateGameRecorderVideo() {
       display.text('分享对局回放成功');
     },
     fail(err: any) {
-      display.text(`分享失败: ${err.errMsg}`);
+      display.text(`分享失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -29,20 +29,22 @@ export function loadSubpackage() {
       );
     },
     fail(err: any) {
-      display.text(`加载失败：${err.errMsg}`);
+      display.text(`加载失败：${err?.errMsg || '未知错误'}`);
     },
     complete() {},
   });
 
-  task.onProgressUpdate((res: any) => {
-    display.text(
-      formatObj({
-        进度: `${res.progress}%`,
-        已下载: `${res.totalBytesWritten} B`,
-        总大小: `${res.totalBytesExpectedToWrite} B`,
-      })
-    );
-  });
+  if (task && task.onProgressUpdate) {
+    task.onProgressUpdate((res: any) => {
+      display.text(
+        formatObj({
+          进度: `${res.progress}%`,
+          已下载: `${res.totalBytesWritten} B`,
+          总大小: `${res.totalBytesExpectedToWrite} B`,
+        })
+      );
+    });
+  }
 }
 
 /** 预下载分包（不执行，仅下载） */
@@ -54,18 +56,20 @@ export function preDownloadSubpackage() {
       display.text('预下载完成');
     },
     fail(err: any) {
-      display.text(`预下载失败：${err.errMsg}`);
+      display.text(`预下载失败：${err?.errMsg || '未知错误'}`);
     },
     complete() {},
   });
 
-  task.onProgressUpdate((res: any) => {
-    display.text(
-      formatObj({
-        预下载进度: `${res.progress}%`,
-        已下载: `${res.totalBytesWritten} B`,
-        总大小: `${res.totalBytesExpectedToWrite} B`,
-      })
-    );
-  });
+  if (task && task.onProgressUpdate) {
+    task.onProgressUpdate((res: any) => {
+      display.text(
+        formatObj({
+          预下载进度: `${res.progress}%`,
+          已下载: `${res.totalBytesWritten} B`,
+          总大小: `${res.totalBytesExpectedToWrite} B`,
+        })
+      );
+    });
+  }
 }

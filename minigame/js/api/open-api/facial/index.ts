@@ -25,14 +25,18 @@ export function checkIsSupportFacialRecognition() {
 
 /** 请求人脸核验（verifyId 需从服务端获取） */
 export function requestFacialVerify() {
+  if (typeof (wx as any).requestFacialVerify !== 'function') {
+    display.text('当前版本不支持 requestFacialVerify');
+    return;
+  }
   (wx as any).requestFacialVerify({
     verifyId: '',
     success(res: any) {
-      display.text(`人脸核验结果: ${res.errMsg}`);
+      display.text(`人脸核验结果: ${res?.errMsg || '成功'}`);
     },
     fail(err: any) {
       setTimeout(() => {
-        display.text(`人脸核验失败: ${err.errMsg}\n提示: verifyId 需从服务端获取`);
+        display.text(`人脸核验失败: ${err?.errMsg || '未知错误'}\n提示: verifyId 需从服务端获取`);
       }, 2000);
     },
   });

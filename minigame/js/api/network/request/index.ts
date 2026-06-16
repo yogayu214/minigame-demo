@@ -35,7 +35,7 @@ export function sendRequest() {
       display.text(
         formatObj({
           状态: '请求失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -68,4 +68,11 @@ export function onHeadersReceived() {
     );
   });
   display.text('已注册 headersReceived 监听');
+}
+
+export function onUnload() {
+  if (requestTask) {
+    requestTask.abort();
+    requestTask = null;
+  }
 }

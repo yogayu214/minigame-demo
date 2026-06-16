@@ -19,7 +19,7 @@ export function openCustomerService() {
       display.text('已打开微信客服会话');
     },
     fail(err: any) {
-      display.text(`打开失败：${err.errMsg}`);
+      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

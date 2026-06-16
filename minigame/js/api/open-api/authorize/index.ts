@@ -17,7 +17,7 @@ export function authorizeUserInfo() {
       display.text('scope.userInfo 已授权');
     },
     fail(err: any) {
-      display.text(`授权失败：${err.errMsg}`);
+      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -30,7 +30,7 @@ export function authorizeRecord() {
       display.text('scope.record 已授权');
     },
     fail(err: any) {
-      display.text(`授权失败：${err.errMsg}`);
+      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -43,7 +43,7 @@ export function authorizeAlbum() {
       display.text('scope.writePhotosAlbum 已授权');
     },
     fail(err: any) {
-      display.text(`授权失败：${err.errMsg}`);
+      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -52,12 +52,12 @@ export function authorizeAlbum() {
 export function getSetting() {
   wx.getSetting({
     success(res: any) {
-      const auth = res.authSetting || {};
+      const auth = res?.authSetting || {};
       const lines = Object.keys(auth).map((k) => `${k}: ${auth[k]}`);
       display.text(lines.length ? lines.join('\n') : '暂无授权信息');
     },
     fail(err: any) {
-      display.text(`查询失败：${err.errMsg}`);
+      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -19,6 +19,10 @@ let officialListener: any = null;
 /** 查询胶囊菜单按钮位置 */
 export function getMenuRect() {
   const rect = wx.getMenuButtonBoundingClientRect();
+  if (!rect) {
+    display.text('获取菜单按钮位置失败');
+    return;
+  }
   display.text(
     formatObj({
       top: String(rect.top),
@@ -37,7 +41,7 @@ export function setMenuDark() {
       display.text('菜单已设为深色');
     },
     fail(err: any) {
-      display.text(`失败：${err.errMsg}`);
+      display.text(`失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

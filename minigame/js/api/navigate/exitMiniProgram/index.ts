@@ -18,7 +18,7 @@ export function exitMiniProgram() {
       console.log('[exitMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`退出失败：${err.errMsg}`);
+      display.text(`退出失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

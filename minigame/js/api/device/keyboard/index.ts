@@ -28,6 +28,9 @@ export function showKeyboard() {
     success() {
       display.text('软键盘已弹出');
     },
+    fail(err: any) {
+      display.text(`弹出键盘失败：${err?.errMsg || '未知错误'}`);
+    },
   } as any);
 }
 
@@ -36,6 +39,9 @@ export function hideKeyboard() {
   wx.hideKeyboard({
     success() {
       display.text('软键盘已隐藏');
+    },
+    fail(err: any) {
+      display.text(`隐藏键盘失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -46,6 +52,9 @@ export function updateKeyboard() {
     value: '更新-' + Date.now(),
     success() {
       display.text('已更新软键盘内容');
+    },
+    fail(err: any) {
+      display.text(`更新键盘失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

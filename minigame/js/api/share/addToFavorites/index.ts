@@ -15,16 +15,24 @@ let favoritesFn: any = null;
 
 /** 监听用户添加收藏 */
 export function onAddToFavorites() {
-  favoritesFn = () => ({
-    title: '小游戏 API 示例 - 收藏',
-    imageUrl: canvas.toTempFilePathSync({
-      x: 0,
-      y: 0,
-      width: canvas.width,
-      height: (canvas.width * 4) / 5,
-    }),
-    query: `pathName=${window.router.getNowPageName()}`,
-  });
+  favoritesFn = () => {
+    let imageUrl = '';
+    try {
+      imageUrl = canvas.toTempFilePathSync({
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: (canvas.width * 4) / 5,
+      });
+    } catch (e: any) {
+      console.error('[addToFavorites] toTempFilePathSync 失败', e);
+    }
+    return {
+      title: '小游戏 API 示例 - 收藏',
+      imageUrl,
+      query: `pathName=${window.router.getNowPageName()}`,
+    };
+  };
   (wx as any).onAddToFavorites(favoritesFn);
   display.text('已监听收藏事件');
 }

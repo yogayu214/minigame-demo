@@ -41,7 +41,9 @@ export function createCamera() {
         camera.destroy();
         camera = null;
       }
-      const { windowWidth, windowHeight } = wx.getSystemInfoSync();
+      const sysInfo = wx.getSystemInfoSync();
+      const windowWidth = sysInfo?.windowWidth || 375;
+      const windowHeight = sysInfo?.windowHeight || 667;
       const camSize = Math.min(windowWidth, 300);
       const x = (windowWidth - camSize) / 2;
       const y = windowHeight * 0.5;
@@ -117,12 +119,12 @@ export function stopRecord() {
       );
     })
     .catch((res: any) => {
-      if (res.errMsg === 'operateCamera:fail:is not recording') {
+      if (res?.errMsg === 'operateCamera:fail:is not recording') {
         display.text('输出失败：没有点击开始录制');
-      } else if (res.errMsg === 'operateCamera:fail:stop error') {
+      } else if (res?.errMsg === 'operateCamera:fail:stop error') {
         display.text('输出失败：录制的时间过短');
       } else {
-        display.text(`输出失败：${res.errMsg || '未知错误'}`);
+        display.text(`输出失败：${res?.errMsg || '未知错误'}`);
       }
     });
 }

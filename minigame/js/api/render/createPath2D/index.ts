@@ -26,7 +26,7 @@ function drawOnOffscreen(drawFn: (ctx: any, canvas: any) => void) {
       display.image(res.tempFilePath);
     },
     fail(err: any) {
-      display.text(`截图失败：${err.errMsg}`);
+      display.text(`截图失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

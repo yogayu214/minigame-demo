@@ -18,7 +18,7 @@ export function scanCode() {
       );
     },
     fail(err: any) {
-      display.text(`扫码失败：${err.errMsg}`);
+      display.text(`扫码失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -32,7 +32,7 @@ export function scanCodeCameraOnly() {
       display.text(`result: ${res.result}\nscanType: ${res.scanType}`);
     },
     fail(err: any) {
-      display.text(`扫码失败：${err.errMsg}`);
+      display.text(`扫码失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

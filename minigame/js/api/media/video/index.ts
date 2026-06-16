@@ -14,7 +14,9 @@ let video: any = null;
 export function onLoad() {
   if (video) video.destroy();
 
-  const { windowWidth, windowHeight } = wx.getSystemInfoSync();
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
   const vWidth = Math.min(windowWidth - 40, 300);
   const vHeight = vWidth * 0.56;
   const x = (windowWidth - vWidth) / 2;
@@ -43,7 +45,7 @@ export function onLoad() {
     display.text('视频缓冲中');
   });
   video.onError((res: any) => {
-    display.text(`视频错误: ${res.errMsg}`);
+    display.text(`视频错误: ${res?.errMsg || '未知错误'}`);
   });
 }
 
@@ -69,5 +71,8 @@ export function seek5() {
 
 /** 销毁 */
 export function onUnload() {
-  video.destroy();
+  if (video) {
+    video.destroy();
+    video = null;
+  }
 }

@@ -30,7 +30,7 @@ export function getShareInfo() {
       display.text(
         formatObj({
           状态: '获取失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
           提示: 'shareTicket 需从分享回调中获取，此处仅演示调用方式',
         })
       );

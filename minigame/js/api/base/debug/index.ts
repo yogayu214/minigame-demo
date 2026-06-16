@@ -18,7 +18,7 @@ export function enableDebug() {
       display.text('已开启调试，重启后右下角出现调试按钮');
     },
     fail(err: any) {
-      display.text(`开启失败：${err.errMsg}`);
+      display.text(`开启失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -31,7 +31,7 @@ export function disableDebug() {
       display.text('已关闭调试');
     },
     fail(err: any) {
-      display.text(`关闭失败：${err.errMsg}`);
+      display.text(`关闭失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -39,6 +39,7 @@ export function disableDebug() {
 /** 写入 LogManager 各级别日志 */
 export function writeLogManager() {
   const logger: any = wx.getLogManager({ level: 0 });
+  if (!logger) { display.text('获取 LogManager 失败'); return; }
   const time = Date.now();
   const logs: Record<string, any> = {
     log: { time },
@@ -56,6 +57,7 @@ export function writeLogManager() {
 /** 写入 RealtimeLogManager 实时日志 */
 export function writeRealtimeLog() {
   const logger: any = wx.getRealtimeLogManager();
+  if (!logger) { display.text('获取 RealtimeLogManager 失败'); return; }
   const logs: Record<string, any> = {
     info: 'realtime info: hello',
     warn: 'realtime warn: hello',

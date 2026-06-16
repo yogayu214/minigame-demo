@@ -29,7 +29,7 @@ export function getInferenceEnvInfo() {
         );
       },
       fail(err: any) {
-        display.text(`调用失败：${err.errMsg}`);
+        display.text(`调用失败：${err?.errMsg || '未知错误'}`);
       },
     });
   }, 2000);
@@ -49,11 +49,21 @@ export function createInferenceSession() {
 
   // 2s 后发起真实调用，展示失败结果
   setTimeout(() => {
+    if (typeof (wx as any).createInferenceSession !== 'function') {
+      display.text('当前环境不支持 createInferenceSession');
+      return;
+    }
     session = (wx as any).createInferenceSession({
       model: 'inference/demo.onnx',
       precisionLevel: 4,
       allowQuantize: false,
     });
+
+    if (!session) {
+      display.text('创建推理 session 失败');
+      return;
+    }
+
     if (session.onLoad) {
       session.onLoad(() => {
         display.text('推理 session 已加载');
@@ -61,7 +71,7 @@ export function createInferenceSession() {
     }
     if (session.onError) {
       session.onError((err: any) => {
-        display.text(`调用失败：${err.errMsg || err.message}`);
+        display.text(`调用失败：${err?.errMsg || err?.message || '未知错误'}`);
       });
     }
   }, 2000);

@@ -45,7 +45,7 @@ export function joinChat() {
         );
       },
       fail(err: any) {
-        display.text(`调用失败：${err.errMsg}`);
+        display.text(`调用失败：${err?.errMsg || '未知错误'}`);
       },
     });
   }, 2000);
@@ -58,7 +58,7 @@ export function exitChat() {
       display.text('已退出');
     },
     fail(err: any) {
-      display.text(`退出失败：${err.errMsg}`);
+      display.text(`退出失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -70,6 +70,9 @@ export function muteMic() {
     success() {
       display.text('已静音麦克风');
     },
+    fail(err: any) {
+      display.text(`静音失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -80,7 +83,7 @@ export function listenVoIPEvents() {
       formatObj({
         事件: 'stateChanged',
         code: res.code,
-        errMsg: res.errMsg,
+        errMsg: res?.errMsg,
       })
     );
   listeners.speak = (res: any) =>
@@ -98,7 +101,7 @@ export function listenVoIPEvents() {
       })
     );
   listeners.interrupt = (res: any) =>
-    display.text(formatObj({ 事件: 'interrupted', errMsg: res.errMsg }));
+    display.text(formatObj({ 事件: 'interrupted', errMsg: res?.errMsg }));
 
   wx.onVoIPChatStateChanged(listeners.state);
   wx.onVoIPChatSpeakersChanged(listeners.speak);

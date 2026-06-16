@@ -15,6 +15,9 @@ export function switchToLandscape() {
     success() {
       display.text('当前方向：横屏');
     },
+    fail(err: any) {
+      display.text(`切换横屏失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -24,6 +27,9 @@ export function switchToPortrait() {
     value: 'portrait',
     success() {
       display.text('当前方向：竖屏');
+    },
+    fail(err: any) {
+      display.text(`切换竖屏失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

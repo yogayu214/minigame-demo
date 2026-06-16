@@ -68,7 +68,7 @@ export function checkHandoffEnabled() {
       display.text(
         formatObj({
           状态: '查询失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },

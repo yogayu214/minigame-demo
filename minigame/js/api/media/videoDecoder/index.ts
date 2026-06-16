@@ -13,12 +13,17 @@ export const setDisplay = display.setter;
 const SRC =
   'https://res.wx.qq.com/wechatgame/product/webpack/userupload/20190812/video.mp4';
 let decoder: any = null;
+let frameCanvas: any = null;
 
 /** 创建解码器并开始解码 */
 export function createDecoder() {
   if (decoder) {
     decoder.remove?.();
     decoder = null;
+  }
+  if (typeof wx.createVideoDecoder !== 'function') {
+    display.text('当前环境不支持视频解码器');
+    return;
   }
   decoder = wx.createVideoDecoder();
   decoder.on?.('start', () => {
@@ -54,7 +59,11 @@ export function getFrame() {
 
   // 将帧数据绘制到 canvas 并通过 display.image 展示
   try {
-    const c = wx.createCanvas();
+    // 复用 canvas 实例，避免反复创建
+    if (!frameCanvas) {
+      frameCanvas = wx.createCanvas();
+    }
+    const c = frameCanvas;
     c.width = frame.width;
     c.height = frame.height;
     const ctx = c.getContext('2d');
@@ -112,6 +121,7 @@ export function destroyAll() {
     decoder.remove?.();
     decoder = null;
   }
+  frameCanvas = null;
   display.text('已销毁解码器');
 }
 

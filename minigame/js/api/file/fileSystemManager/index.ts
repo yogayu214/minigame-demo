@@ -33,7 +33,7 @@ export function writeFile() {
       display.text(`路径: ${PATH}\n状态: 写入成功`);
     },
     fail(err: any) {
-      display.text(`写入失败: ${err.errMsg}`);
+      display.text(`写入失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -58,7 +58,7 @@ export function readFile() {
       display.text(`内容: ${content}\n长度: ${String(res.data).length}`);
     },
     fail(err: any) {
-      display.text(`读取失败: ${err.errMsg}（请先 writeFile）`);
+      display.text(`读取失败: ${err?.errMsg || '未知错误'}（请先 writeFile）`);
     },
   });
 }
@@ -83,7 +83,7 @@ export function appendFile() {
       display.text('追加成功');
     },
     fail(err: any) {
-      display.text(`追加失败: ${err.errMsg}`);
+      display.text(`追加失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -97,7 +97,7 @@ export function copyFile() {
       display.text(`源: ${PATH}\n目标: ${COPY_PATH}\n状态: 复制成功`);
     },
     fail(err: any) {
-      display.text(`复制失败: ${err.errMsg}`);
+      display.text(`复制失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -110,7 +110,7 @@ export function unlink() {
       display.text('副本已删除');
     },
     fail(err: any) {
-      display.text(`删除失败: ${err.errMsg}`);
+      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -124,7 +124,7 @@ export function truncate() {
       display.text('已截断到 5 字节');
     },
     fail(err: any) {
-      display.text(`截断失败: ${err.errMsg}`);
+      display.text(`截断失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -147,13 +147,13 @@ export function fdReadWrite() {
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`read 失败: ${err.errMsg}`);
+          display.text(`read 失败: ${err?.errMsg || '未知错误'}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败: ${err.errMsg}（请先 writeFile）`);
+      display.text(`open 失败: ${err?.errMsg || '未知错误'}（请先 writeFile）`);
     },
   });
 }
@@ -176,13 +176,13 @@ export function fstat() {
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`fstat 失败: ${err.errMsg}`);
+          display.text(`fstat 失败: ${err?.errMsg || '未知错误'}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败: ${err.errMsg}`);
+      display.text(`open 失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -200,7 +200,7 @@ export function readCompressedFile() {
       display.text('压缩文件读取成功，长度 ' + res.data.byteLength);
     },
     fail(err: any) {
-      display.text(`读取失败: ${err.errMsg}`);
+      display.text(`读取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

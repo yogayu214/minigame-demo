@@ -22,7 +22,7 @@ export function onMemoryWarning() {
   listener = (res: any) => {
     warningCount += 1;
     display.text(
-      `触发次数: ${warningCount}\n警告等级: ${res.level}\n说明: 5=临界 10=低 15=中 20=高`
+      `触发次数: ${warningCount}\n警告等级: ${res?.level}\n说明: 5=临界 10=低 15=中 20=高`
     );
   };
   wx.onMemoryWarning(listener);

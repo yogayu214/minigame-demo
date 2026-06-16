@@ -701,11 +701,6 @@ const signIn = [
             path: 'ad/createBannerAd/index',
           },
           {
-            label: 'grid 广告',
-            name: 'createGridAd',
-            path: 'ad/createGridAd/index',
-          },
-          {
             label: '激励视频广告',
             name: 'createRewardedVideoAd',
             path: 'ad/createRewardedVideoAd/index',
@@ -720,11 +715,7 @@ const signIn = [
             name: 'createCustomAd',
             path: 'ad/createCustomAd/index',
           },
-          {
-            label: '直玩广告状态',
-            name: 'directAdStatus',
-            path: 'ad/directAdStatus/index',
-          },
+
         ],
       },
       // ========== 工具与高级 ==========
@@ -939,9 +930,7 @@ const displayPages: Record<string, string> = {
   unzip: 'file/unzip/index',
   getGameRecorder: 'game-recorder/getGameRecorder/index',
   getExtConfig: 'extConfig/getExtConfig/index',
-  directAdStatus: 'ad/directAdStatus/index',
   createBannerAd: 'ad/createBannerAd/index',
-  createGridAd: 'ad/createGridAd/index',
   createInterstitialAd: 'ad/createInterstitialAd/index',
   createRewardedVideoAd: 'ad/createRewardedVideoAd/index',
   'face-detect': 'ai/face-detect/index',

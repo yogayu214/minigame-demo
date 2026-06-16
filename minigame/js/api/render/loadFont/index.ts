@@ -15,8 +15,14 @@ export function loadFont() {
     'js/api/render/loadFont/assets/TencentSans-W7.subset.ttf'
   );
 
+  if (!fontFamily) {
+    display.text('字体加载失败：wx.loadFont 返回空值');
+    return;
+  }
+
   // 在离屏 canvas 上用加载的字体绘制文字
-  const offCanvas = wx.createCanvas();
+  let offCanvas: any = null;
+  offCanvas = wx.createCanvas();
   offCanvas.width = 300;
   offCanvas.height = 120;
   const ctx = offCanvas.getContext('2d');
@@ -43,9 +49,13 @@ export function loadFont() {
       display.text(
         formatObj({
           字体加载结果: fontFamily,
-          截图失败: err.errMsg,
+          截图失败: err?.errMsg || '未知错误',
         })
       );
     },
   });
+}
+
+export function onUnload() {
+  // 离屏 canvas 在函数内创建，模块级无法持有引用，无需特别清理
 }

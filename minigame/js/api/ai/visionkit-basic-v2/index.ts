@@ -24,10 +24,20 @@ export function createVKSession() {
 
   // 2s 后发起真实调用，展示失败结果
   setTimeout(() => {
+    if (typeof wx.createVKSession !== 'function') {
+      display.text('当前环境不支持 createVKSession');
+      return;
+    }
     session = wx.createVKSession({
       track: { plane: { mode: 3 } },
       version: 'v2',
     });
+
+    if (!session) {
+      display.text('创建 VKSession 失败');
+      return;
+    }
+
     session.start((err: any) => {
       if (err) {
         display.text(`调用失败：${err}`);

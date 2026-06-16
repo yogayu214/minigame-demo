@@ -56,7 +56,7 @@ export function chooseImage() {
           );
         },
         fail(err: any) {
-          display.text(`选择失败：${err.errMsg}`);
+          display.text(`选择失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })
@@ -85,7 +85,7 @@ export function chooseMedia() {
           );
         },
         fail(err: any) {
-          display.text(`选择失败：${err.errMsg}`);
+          display.text(`选择失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })
@@ -111,7 +111,7 @@ export function chooseMessageFile() {
       );
     },
     fail(err: any) {
-      display.text(`选择失败：${err.errMsg}`);
+      display.text(`选择失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -129,7 +129,7 @@ export function previewImage() {
       display.text('预览中');
     },
     fail(err: any) {
-      display.text(`预览失败：${err.errMsg}`);
+      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -146,7 +146,7 @@ export function previewMedia() {
       display.text('预览中');
     },
     fail(err: any) {
-      display.text(`预览失败：${err.errMsg}`);
+      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -166,7 +166,7 @@ export function compressImage() {
       );
     },
     fail(err: any) {
-      display.text(`压缩失败：${err.errMsg}`);
+      display.text(`压缩失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -185,7 +185,7 @@ export function saveImageToPhotosAlbum() {
           display.text('已保存到相册');
         },
         fail(err: any) {
-          display.text(`保存失败：${err.errMsg}`);
+          display.text(`保存失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })

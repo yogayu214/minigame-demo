@@ -24,14 +24,16 @@ export function getGameClubData() {
       display.text(`游戏圈数据: ${JSON.stringify(res).slice(0, 300)}`);
     },
     fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
+      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
 /** 创建游戏圈按钮 (GameClubButton) */
 export function createGameClubButton() {
-  const { windowWidth, windowHeight } = wx.getSystemInfoSync();
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
   clubBtn = wx.createGameClubButton({
     type: 'text',
     text: '游戏圈',
@@ -105,5 +107,12 @@ export function destroy() {
     display.text('游戏圈按钮已销毁');
   } else {
     display.text('无游戏圈按钮可销毁');
+  }
+}
+
+export function onUnload() {
+  if (clubBtn) {
+    clubBtn.destroy?.();
+    clubBtn = null;
   }
 }

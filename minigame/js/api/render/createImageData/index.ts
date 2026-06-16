@@ -47,7 +47,7 @@ export function createImageDataDemo() {
         formatObj({
           width: imageData.width,
           height: imageData.height,
-          截图失败: err.errMsg,
+          截图失败: err?.errMsg || '未知错误',
         })
       );
     },

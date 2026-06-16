@@ -18,7 +18,15 @@ export function setFabonacciIndex(n: number) {
 
 /** 初始化 Worker */
 export function onLoad() {
-  worker = wx.createWorker('workers/index.js');
+  try {
+    worker = wx.createWorker('workers/index.js');
+  } catch (e: any) {
+    console.error('createWorker error:', e);
+    wx.showModal({
+      content: `创建 Worker 失败: ${e?.message || e}`,
+      showCancel: false,
+    });
+  }
 }
 
 /** 主线程计算 fibonacci（计算期间主线程阻塞，动画会卡顿） */
@@ -37,17 +45,23 @@ export function mainThreadFib() {
 }
 
 /** Worker 线程计算 fibonacci（不阻塞主线程，动画保持流畅） */
+let _onWorkerMessage: ((res: any) => void) | null = null;
 export function workerFib() {
   if (!worker) return;
-  worker.onMessage((res: any) => {
-    if (_onResult) _onResult(res.msg);
+  // 移除旧监听，避免重复注册
+  if (_onWorkerMessage) {
+    worker.offMessage?.(_onWorkerMessage);
+  }
+  _onWorkerMessage = (res: any) => {
+    if (_onResult) _onResult(res?.msg);
     else
       wx.showModal({
         title: '计算结果',
-        content: String(res.msg),
+        content: String(res?.msg),
         showCancel: false,
       });
-  });
+  };
+  worker.onMessage(_onWorkerMessage);
   worker.postMessage({ msg: fabonacciIndex });
 }
 

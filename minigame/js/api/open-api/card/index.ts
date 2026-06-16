@@ -24,7 +24,7 @@ export function openCard() {
       display.text('已打开卡券');
     },
     fail(err: any) {
-      display.text(`打开失败: ${err.errMsg}`);
+      display.text(`打开失败: ${err?.errMsg || '未知错误'}`);
     },
   } as any);
 }
@@ -39,11 +39,11 @@ export function addCard() {
       },
     ],
     success(res: any) {
-      const cards = res.cardList || [];
+      const cards = res?.cardList || [];
       display.text(`添加结果: ${JSON.stringify(cards).slice(0, 200)}`);
     },
     fail(err: any) {
-      display.text(`添加失败: ${err.errMsg}`);
+      display.text(`添加失败: ${err?.errMsg || '未知错误'}`);
     },
   } as any);
 }

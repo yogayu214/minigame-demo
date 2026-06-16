@@ -49,7 +49,7 @@ export function getSetting() {
       }
     },
     fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
+      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -58,10 +58,10 @@ export function getSetting() {
 export function openSetting() {
   wx.openSetting({
     success(res: any) {
-      renderSettings(res.authSetting);
+      renderSettings(res?.authSetting || {});
     },
     fail(err: any) {
-      display.text(`打开失败: ${err.errMsg}`);
+      display.text(`打开失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -94,4 +94,11 @@ export function createOpenSettingButton() {
   });
   settingButton.show?.();
   display.text('设置按钮已创建');
+}
+
+export function onUnload() {
+  if (settingButton) {
+    settingButton.destroy?.();
+    settingButton = null;
+  }
 }

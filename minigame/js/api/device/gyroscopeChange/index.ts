@@ -12,7 +12,11 @@ export function setOnData(fn: ((res: any) => void) | null) {
 
 /** 开始监听陀螺仪数据 */
 export function startListening() {
-  wx.startGyroscope();
+  wx.startGyroscope({
+    fail(err: any) {
+      console.error('启动陀螺仪监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc) return;
   wx.onGyroscopeChange(
     (monitorFunc = (res: any) => {
@@ -23,7 +27,11 @@ export function startListening() {
 
 /** 停止监听陀螺仪 */
 export function stopListening() {
-  wx.stopGyroscope();
+  wx.stopGyroscope({
+    fail(err: any) {
+      console.error('停止陀螺仪监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc && wx.offGyroscopeChange) {
     wx.offGyroscopeChange(monitorFunc);
     monitorFunc = null;

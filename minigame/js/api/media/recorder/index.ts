@@ -20,17 +20,17 @@ function ensure() {
   recorder.onPause(() => display.text('录音暂停'));
   recorder.onResume(() => display.text('录音恢复'));
   recorder.onStop((res: any) => {
-    tempPath = res.tempFilePath;
+    tempPath = res?.tempFilePath || '';
     display.text(
       formatObj({
         状态: '录音结束',
-        时长: `${res.duration} ms`,
-        大小: `${res.fileSize} B`,
+        时长: `${res?.duration ?? 0} ms`,
+        大小: `${res?.fileSize ?? 0} B`,
         路径: tempPath.slice(-30),
       })
     );
   });
-  recorder.onError((err: any) => display.text(`录音错误: ${err.errMsg}`));
+  recorder.onError((err: any) => display.text(`录音错误: ${err?.errMsg || '未知错误'}`));
   return recorder;
 }
 
@@ -68,6 +68,7 @@ export function playLast() {
   const audio = wx.createInnerAudioContext();
   audio.src = tempPath;
   audio.onEnded(() => audio.destroy());
+  audio.onError(() => audio.destroy());
   audio.play();
   display.text('播放录音');
 }

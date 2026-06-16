@@ -17,7 +17,7 @@ export function requirePrivacyAuthorize() {
       display.text('用户已同意隐私协议');
     },
     fail(err: any) {
-      display.text(`授权失败：${err.errMsg}`);
+      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -29,7 +29,7 @@ export function openPrivacyContract() {
       display.text('已打开隐私协议');
     },
     fail(err: any) {
-      display.text(`打开失败：${err.errMsg}`);
+      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -43,16 +43,30 @@ export function getPrivacySetting() {
       );
     },
     fail(err: any) {
-      display.text(`查询失败：${err.errMsg}`);
+      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
+let privacyCallback: any = null;
+
 /** 监听用户操作隐私协议事件 */
 export function onNeedPrivacyAuthorization() {
-  wx.onNeedPrivacyAuthorization?.((resolve: any) => {
+  if (privacyCallback) {
+    display.text('已在监听中');
+    return;
+  }
+  privacyCallback = (resolve: any) => {
     display.text('收到 onNeedPrivacyAuthorization 回调，自动同意');
     resolve({ event: 'agree', buttonId: 'agree-btn' });
-  });
+  };
+  wx.onNeedPrivacyAuthorization?.(privacyCallback);
   display.text('已注册 onNeedPrivacyAuthorization 监听');
+}
+
+export function onUnload() {
+  if (privacyCallback) {
+    wx.offNeedPrivacyAuthorization?.(privacyCallback);
+    privacyCallback = null;
+  }
 }

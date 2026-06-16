@@ -21,7 +21,7 @@ export function openBluetoothAdapter() {
       display.text('蓝牙适配器已打开');
     },
     fail(err: any) {
-      display.text(`打开失败：${err.errMsg}`);
+      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -31,6 +31,9 @@ export function closeBluetoothAdapter() {
   (wx as any).closeBluetoothAdapter({
     success() {
       display.text('蓝牙适配器已关闭');
+    },
+    fail(err: any) {
+      display.text(`关闭失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -44,7 +47,7 @@ export function getBluetoothAdapterState() {
       );
     },
     fail(err: any) {
-      display.text(`查询失败：${err.errMsg}`);
+      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -53,7 +56,7 @@ export function getBluetoothAdapterState() {
 export function onAdapterStateChange() {
   stateListener = (res: any) => {
     display.text(
-      `事件: onBluetoothAdapterStateChange\navailable: ${res.available}\ndiscovering: ${res.discovering}`
+      `事件: onBluetoothAdapterStateChange\navailable: ${res?.available}\ndiscovering: ${res?.discovering}`
     );
   };
   wx.onBluetoothAdapterStateChange(stateListener);
@@ -76,7 +79,7 @@ export function startDevicesDiscovery() {
       display.text('已开始搜索附近设备');
     },
     fail(err: any) {
-      display.text(`搜索失败：${err.errMsg}`);
+      display.text(`搜索失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -86,6 +89,9 @@ export function stopDevicesDiscovery() {
   wx.stopBluetoothDevicesDiscovery({
     success() {
       display.text('已停止搜索');
+    },
+    fail(err: any) {
+      display.text(`停止搜索失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -97,12 +103,12 @@ export function getDevices() {
       const list = res.devices || [];
       let info = `设备数: ${list.length}`;
       list.slice(0, 5).forEach((d: any, i: number) => {
-        info += `\n设备${i + 1}: ${d.name || '-'} (${d.deviceId})`;
+        info += `\n设备${i + 1}: ${d.name || '-'} (${d.deviceId || '-'})`;
       });
       display.text(info);
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

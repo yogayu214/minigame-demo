@@ -15,19 +15,20 @@ export const setDisplay = display.setter;
 /** 获取最新的用户加密密钥 */
 export function getLatestUserKey() {
   const mgr: any = wx.getUserCryptoManager();
+  if (!mgr) { display.text('获取 CryptoManager 失败'); return; }
   mgr.getLatestUserKey({
     success(res: any) {
       display.text(
         formatObj({
-          encryptKey: shorten(res.encryptKey),
-          iv: shorten(res.iv),
-          version: String(res.version),
-          expireTime: new Date(res.expireTime * 1000).toLocaleString(),
+          encryptKey: shorten(res?.encryptKey),
+          iv: shorten(res?.iv),
+          version: String(res?.version),
+          expireTime: new Date((res?.expireTime || 0) * 1000).toLocaleString(),
         })
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -35,9 +36,11 @@ export function getLatestUserKey() {
 /** 获取 6 字节密码学安全随机数 */
 export function getRandomValues() {
   const mgr: any = wx.getUserCryptoManager();
+  if (!mgr) { display.text('获取 CryptoManager 失败'); return; }
   mgr.getRandomValues({
     length: 6,
     success(res: any) {
+      if (!res?.randomValues) { display.text('获取随机数失败：randomValues 为空'); return; }
       const bytes = new Uint8Array(res.randomValues);
       display.text(
         formatObj({
@@ -47,7 +50,7 @@ export function getRandomValues() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

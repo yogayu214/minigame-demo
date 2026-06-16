@@ -29,7 +29,7 @@ export function navigateToMiniProgram() {
       display.text(
         formatObj({
           状态: '跳转失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
           提示: '需要在 mp 后台配置跳转白名单',
         })
       );
@@ -52,7 +52,7 @@ export function navigateWithExtra() {
       display.text(
         formatObj({
           状态: '跳转失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -73,7 +73,7 @@ export function navigateToTrial() {
       display.text(
         formatObj({
           状态: '跳转失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
           提示: '体验版需要目标小程序存在 trial 版本',
         })
       );

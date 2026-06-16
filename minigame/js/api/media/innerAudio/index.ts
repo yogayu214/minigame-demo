@@ -37,7 +37,7 @@ function ensure() {
       10004: '格式错误',
       [-1]: '未知错误',
     };
-    display.text(`错误: ${errMap[err.errCode] || err.errMsg || '未知'}`);
+    display.text(`错误: ${errMap[err?.errCode] || err?.errMsg || '未知'}`);
   });
 
   // 中断恢复
@@ -110,6 +110,9 @@ export function setOption() {
     success() {
       display.text('已设置 mixWithOther=true');
     },
+    fail(err: any) {
+      display.text(`设置失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -119,10 +122,13 @@ export function getAvailableSources() {
     success(res: any) {
       display.text(
         formatObj({
-          音源数: (res.audioSources || []).length,
-          列表: (res.audioSources || []).join(', '),
+          音源数: (res?.audioSources || []).length,
+          列表: (res?.audioSources || []).join(', '),
         })
       );
+    },
+    fail(err: any) {
+      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

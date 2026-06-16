@@ -22,12 +22,12 @@ export function saveFile() {
           display.text(`状态: 保存成功\n保存路径: ${res.savedFilePath}`);
         },
         fail(err: any) {
-          display.text(`保存失败: ${err.errMsg}`);
+          display.text(`保存失败: ${err?.errMsg || '未知错误'}`);
         },
       });
     },
     fail(err: any) {
-      display.text(`写入失败: ${err.errMsg}`);
+      display.text(`写入失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

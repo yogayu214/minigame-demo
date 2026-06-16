@@ -28,7 +28,7 @@ export function setWindowSize() {
       display.text(
         formatObj({
           状态: '设置失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -93,6 +93,10 @@ export function offWindowStateChange() {
 /** 当前窗口信息 */
 export function getCurrentWindow() {
   const info: any = wx.getWindowInfo();
+  if (!info) {
+    display.text('获取窗口信息失败');
+    return;
+  }
   display.text(
     formatObj({
       width: String(info.windowWidth),

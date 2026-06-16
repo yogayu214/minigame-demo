@@ -23,7 +23,7 @@ export function readdir() {
       display.text(`目录: ${wx.env.USER_DATA_PATH}\n${list}`);
     },
     fail(err: any) {
-      display.text(`读取失败: ${err.errMsg}`);
+      display.text(`读取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

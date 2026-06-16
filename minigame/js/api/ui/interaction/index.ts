@@ -16,17 +16,38 @@ export const setDisplay = display.setter;
 
 /** 显示 success Toast */
 export function showSuccessToast() {
-  wx.showToast({ title: '操作成功', icon: 'success', duration: 1500 });
+  wx.showToast({
+    title: '操作成功',
+    icon: 'success',
+    duration: 1500,
+    fail(err: any) {
+      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+    },
+  });
 }
 
 /** 显示 loading Toast */
 export function showLoadingToast() {
-  wx.showToast({ title: '加载中', icon: 'loading', duration: 1500 });
+  wx.showToast({
+    title: '加载中',
+    icon: 'loading',
+    duration: 1500,
+    fail(err: any) {
+      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+    },
+  });
 }
 
 /** 显示无图标 Toast */
 export function showNoneToast() {
-  wx.showToast({ title: '提示信息', icon: 'none', duration: 1500 });
+  wx.showToast({
+    title: '提示信息',
+    icon: 'none',
+    duration: 1500,
+    fail(err: any) {
+      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+    },
+  });
 }
 
 /** 隐藏 Toast */
@@ -40,7 +61,12 @@ export function hideToast() {
 
 /** 显示 Loading */
 export function showLoading() {
-  wx.showLoading({ title: '加载中...' });
+  wx.showLoading({
+    title: '加载中...',
+    fail(err: any) {
+      display.text(`showLoading 失败：${err?.errMsg || '未知错误'}`);
+    },
+  });
   setTimeout(() => wx.hideLoading(), 2000);
 }
 
@@ -59,7 +85,10 @@ export function showConfirmModal() {
     title: '提示',
     content: '这是一个确认弹窗',
     success(res: any) {
-      display.text(res.confirm ? '用户点击确认' : '用户点击取消');
+      display.text(res?.confirm ? '用户点击确认' : '用户点击取消');
+    },
+    fail(err: any) {
+      display.text(`showModal 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -71,6 +100,9 @@ export function showSimpleModal() {
     content: '这是一个无取消按钮弹窗',
     showCancel: false,
     confirmColor: '#02BB00',
+    fail(err: any) {
+      display.text(`showModal 失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 

@@ -22,7 +22,7 @@ export function onWheel() {
   wheelListener = (res: any) => {
     count += 1;
     display.text(
-      `触发次数: ${count}\ndeltaX: ${res.deltaX}\ndeltaY: ${res.deltaY}\ndeltaZ: ${res.deltaZ}`
+      `触发次数: ${count}\ndeltaX: ${res?.deltaX}\ndeltaY: ${res?.deltaY}\ndeltaZ: ${res?.deltaZ}`
     );
   };
   wx.onWheel(wheelListener);

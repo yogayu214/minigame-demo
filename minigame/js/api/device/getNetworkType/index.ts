@@ -15,7 +15,7 @@ export function getNetworkType() {
       display.text(`当前网络类型：${res.networkType}`);
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

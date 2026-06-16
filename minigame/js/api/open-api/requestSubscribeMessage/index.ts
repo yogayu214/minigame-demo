@@ -27,7 +27,7 @@ export function requestSubscribeMessage() {
           display.text(`一次性订阅结果:\n${lines}`);
         },
         fail(err: any) {
-          display.text(`一次性订阅失败: ${err.errMsg}`);
+          display.text(`一次性订阅失败: ${err?.errMsg || '未知错误'}`);
         },
       });
     }, 2000);
@@ -42,7 +42,7 @@ export function requestSubscribeMessage() {
       display.text(`一次性订阅结果:\n${lines}`);
     },
     fail(err: any) {
-      display.text(`一次性订阅失败: ${err.errMsg}`);
+      display.text(`一次性订阅失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -63,7 +63,7 @@ export function requestSubscribeSystemMessage() {
       display.text(tips);
     },
     fail(err: any) {
-      display.text(`永久订阅失败: ${err.errMsg}`);
+      display.text(`永久订阅失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

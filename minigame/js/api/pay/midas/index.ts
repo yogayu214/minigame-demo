@@ -34,7 +34,7 @@ export function checkIsSupportMidasPayment() {
         display.text(
           formatObj({
             状态: '查询失败',
-            原因: err.errMsg,
+            原因: err?.errMsg || '未知错误',
           })
         );
       },
@@ -66,7 +66,7 @@ export function requestMidasPayment() {
         display.text(
           formatObj({
             状态: '支付失败',
-            原因: err.errMsg,
+            原因: err?.errMsg || '未知错误',
           })
         );
       },
@@ -97,7 +97,7 @@ export function requestMidasPaymentGameItem() {
         display.text(
           formatObj({
             状态: '道具购买失败',
-            原因: err.errMsg,
+            原因: err?.errMsg || '未知错误',
           })
         );
       },
@@ -129,7 +129,7 @@ export function requestMidasFriendPayment() {
         display.text(
           formatObj({
             状态: '好友代付失败',
-            原因: err.errMsg,
+            原因: err?.errMsg || '未知错误',
           })
         );
       },

@@ -40,7 +40,7 @@ export function setUserCloudStorage() {
       display.text(`上报成功，分数: ${score}`);
     },
     fail(err: any) {
-      display.text(`上报失败: ${err.errMsg}`);
+      display.text(`上报失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -53,7 +53,7 @@ export function removeUserCloudStorage() {
       display.text('已删除 score 托管数据');
     },
     fail(err: any) {
-      display.text(`删除失败: ${err.errMsg}`);
+      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -77,7 +77,7 @@ export function getUserInteractiveStorage() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
+      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

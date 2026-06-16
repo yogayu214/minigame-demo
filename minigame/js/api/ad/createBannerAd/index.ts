@@ -1,60 +1,51 @@
 /**
  * Banner 广告
  * wx.createBannerAd
- * 注意：adUnitId 需替换为你在 mp 后台申请的真实广告位 ID
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
+export const setDisplay = () => {};
 
 let bannerAd: any = null;
 
+const toast = (title: string) => wx.showToast({ title, icon: 'none' });
+
 /** 创建并显示 Banner 广告 */
 export function createBannerAd() {
-  const tip =
-    '⚠️ 此功能需要在 mp 后台申请真实的广告位 ID（adUnitId），\n' +
-    'Demo 中使用占位 ID，调用将失败。\n\n' +
-    '接入流程：\n' +
-    '1. 在 mp 后台创建广告位获取 adUnitId\n' +
-    '2. 调用 wx.createBannerAd 传入真实 adUnitId\n\n' +
-    '文档：developers.weixin.qq.com/minigame/dev/api/ad/wx.createBannerAd.html';
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
+  bannerAd = wx.createBannerAd({
+    adUnitId: 'adunit-2e20328227ca771b',
+    adIntervals: 30,
+    style: {
+      left: 0,
+      top: 450,
+      width: windowWidth,
+      height: 120,
+    },
+  });
 
-  display.text(tip);
+  if (!bannerAd) {
+    toast('创建 Banner 广告失败，当前环境可能不支持');
+    return;
+  }
 
-  // 2s 后发起真实调用，展示失败结果
-  setTimeout(() => {
-    const { windowWidth, windowHeight } = wx.getSystemInfoSync();
-    bannerAd = wx.createBannerAd({
-      adUnitId: 'adunit-xxxxxxxx',
-      adIntervals: 30,
-      style: {
-        left: 0,
-        top: windowHeight - 120,
-        width: windowWidth,
-        height: 120,
-      },
-    });
+  bannerAd.onLoad(() => {
+    toast('Banner 广告加载成功，点击 show 可展示');
+  });
 
-    bannerAd.onLoad(() => {
-      bannerAd.show();
-      display.text('Banner 广告加载成功，已展示');
-    });
-
-    bannerAd.onError((res: any) => {
-      display.text(`调用失败：${res.errMsg}`);
-    });
-  }, 2000);
+  bannerAd.onError((res: any) => {
+    toast(`调用失败：${res?.errMsg || '未知错误'}`);
+  });
 }
 
 /** 显示广告 */
 export function show() {
   if (bannerAd) {
     bannerAd.show();
-    display.text('Banner 广告已显示');
+    toast('Banner 广告已显示');
   } else {
-    display.text('请先创建 Banner 广告');
+    toast('请先创建 Banner 广告');
   }
 }
 
@@ -62,7 +53,7 @@ export function show() {
 export function hide() {
   if (bannerAd) {
     bannerAd.hide();
-    display.text('Banner 广告已隐藏');
+    toast('Banner 广告已隐藏');
   }
 }
 
@@ -72,12 +63,13 @@ export function destroy() {
     bannerAd.hide();
     bannerAd.destroy();
     bannerAd = null;
-    display.text('Banner 广告已销毁');
+    toast('Banner 广告已销毁');
   }
 }
 
 export function onUnload() {
   if (bannerAd) {
+    bannerAd.hide();
     bannerAd.destroy();
     bannerAd = null;
   }

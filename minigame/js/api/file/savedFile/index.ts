@@ -22,7 +22,7 @@ export function getSavedFileList() {
       display.text(`已保存 ${res.fileList.length} 个文件:\n${list}`);
     },
     fail(err: any) {
-      display.text(`获取失败: ${err.errMsg}`);
+      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -38,7 +38,7 @@ export function removeSavedFile() {
             display.text('已删除第一个已保存文件');
           },
           fail(err: any) {
-            display.text(`删除失败: ${err.errMsg}`);
+            display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
           },
         });
       } else {
@@ -46,7 +46,7 @@ export function removeSavedFile() {
       }
     },
     fail(err: any) {
-      display.text(`获取列表失败: ${err.errMsg}`);
+      display.text(`获取列表失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

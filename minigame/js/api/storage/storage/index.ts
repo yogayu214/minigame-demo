@@ -24,6 +24,9 @@ export function setStorage() {
         formatObj({ key: STORAGE_KEY, value: data, 状态: '已存储' })
       );
     },
+    fail(err: any) {
+      display.text(`存储失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -69,6 +72,9 @@ export function getStorageInfo() {
         })
       );
     },
+    fail(err: any) {
+      display.text(`获取存储信息失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -91,6 +97,9 @@ export function removeStorage() {
     success() {
       display.text(formatObj({ key: STORAGE_KEY, 状态: '已删除' }));
     },
+    fail(err: any) {
+      display.text(`删除失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -105,6 +114,9 @@ export function clearStorage() {
   wx.clearStorage({
     success() {
       display.text('已清除全部缓存');
+    },
+    fail(err: any) {
+      display.text(`清除缓存失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -18,7 +18,7 @@ export function unzipFile() {
       display.text(`解压路径: ${targetPath}\n状态: 解压成功`);
     },
     fail(err: any) {
-      display.text(`解压失败: ${err.errMsg}`);
+      display.text(`解压失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

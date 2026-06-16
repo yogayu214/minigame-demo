@@ -22,7 +22,7 @@ export function setStatusBarDark() {
       display.text(
         formatObj({
           状态: '设置失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -40,7 +40,7 @@ export function setStatusBarLight() {
       display.text(
         formatObj({
           状态: '设置失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },

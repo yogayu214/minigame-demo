@@ -19,7 +19,7 @@ export function createStoreGift() {
         display.text('已创建 StoreGift 组件');
       },
       fail(err: any) {
-        display.text(`创建失败: ${err.errMsg}`);
+        display.text(`创建失败: ${err?.errMsg || '未知错误'}`);
       },
     } as any);
     if (!storeGift) {

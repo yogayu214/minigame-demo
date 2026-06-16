@@ -17,7 +17,7 @@ export function getBatteryInfo() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

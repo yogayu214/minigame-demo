@@ -17,7 +17,7 @@ export function mkdir() {
       display.text(`路径: ${path}\n状态: 创建成功`);
     },
     fail(err: any) {
-      display.text(`创建失败: ${err.errMsg}`);
+      display.text(`创建失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -31,7 +31,7 @@ export function rmdir() {
       display.text(`路径: ${path}\n状态: 删除成功`);
     },
     fail(err: any) {
-      display.text(`删除失败: ${err.errMsg}`);
+      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -14,7 +14,11 @@ export function setOnData(fn: ((res: any) => void) | null) {
 
 /** 开始监听设备方向变化 */
 export function startListening() {
-  wx.startDeviceMotionListening();
+  wx.startDeviceMotionListening({
+    fail(err: any) {
+      console.error('启动设备方向监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc) return;
   wx.onDeviceMotionChange(
     (monitorFunc = (res: any) => {
@@ -25,7 +29,11 @@ export function startListening() {
 
 /** 停止监听设备方向 */
 export function stopListening() {
-  wx.stopDeviceMotionListening();
+  wx.stopDeviceMotionListening({
+    fail(err: any) {
+      console.error('停止设备方向监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc && wx.offDeviceMotionChange) {
     wx.offDeviceMotionChange(monitorFunc);
     monitorFunc = null;

@@ -18,7 +18,7 @@ export function getGroupEnterInfo() {
       );
     },
     fail(err: any) {
-      display.text(`查询失败：${err.errMsg}（请从群聊场景进入）`);
+      display.text(`查询失败：${err?.errMsg || '未知错误'}（请从群聊场景进入）`);
     },
   });
 }

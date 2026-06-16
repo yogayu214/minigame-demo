@@ -14,6 +14,9 @@ export function vibrateLong() {
     success() {
       display.text('长振动已触发');
     },
+    fail(err: any) {
+      display.text(`长振动失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -23,6 +26,9 @@ export function vibrateShort() {
     type: 'heavy',
     success() {
       display.text('短振动已触发 (heavy)');
+    },
+    fail(err: any) {
+      display.text(`短振动失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

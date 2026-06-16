@@ -1,46 +1,40 @@
 /**
  * 插屏广告
  * wx.createInterstitialAd
- * 注意：adUnitId 需替换为你在 mp 后台申请的真实广告位 ID
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
+export const setDisplay = () => {};
 
 let interstitialAd: any = null;
 
+const toast = (title: string) => wx.showToast({ title, icon: 'none', duration: 1000 });
+
 /** 创建插屏广告 */
 export function createInterstitialAd() {
-  const tip =
-    '⚠️ 此功能需要在 mp 后台申请真实的广告位 ID（adUnitId），\n' +
-    'Demo 中使用占位 ID，调用将失败。\n\n' +
-    '接入流程：\n' +
-    '1. 在 mp 后台创建广告位获取 adUnitId\n' +
-    '2. 调用 wx.createInterstitialAd 传入真实 adUnitId\n\n' +
-    '文档：developers.weixin.qq.com/minigame/dev/api/ad/wx.createInterstitialAd.html';
+  interstitialAd = wx.createInterstitialAd({
+    adUnitId: 'adunit-4a474184cd6eb5cc',
+  });
 
-  display.text(tip);
+  if (!interstitialAd) {
+    toast('创建插屏广告失败，当前环境可能不支持');
+    return;
+  }
 
-  // 2s 后发起真实调用，展示失败结果
-  setTimeout(() => {
-    interstitialAd = wx.createInterstitialAd({
-      adUnitId: 'adunit-xxxxxxxx',
-    });
+  interstitialAd.onLoad(() => {
+    toast('插屏广告加载成功，点击 show 展示');
+  });
 
-    interstitialAd.onLoad(() => {
-      display.text('插屏广告加载成功，点击 show 展示');
-    });
+  interstitialAd.onError((err: any) => {
+    toast(`调用失败：${err?.errMsg || '未知错误'}`);
+  });
 
-    interstitialAd.onError((err: any) => {
-      display.text(`调用失败：${err.errMsg}`);
-    });
+  interstitialAd.onClose(() => {
+    toast('插屏广告已关闭');
+  });
 
-    interstitialAd.onClose(() => {
-      display.text('插屏广告已关闭');
-    });
-  }, 2000);
+  interstitialAd.load().catch((err: any) => {
+    toast(`加载失败：${err?.errMsg || '未知错误'}`);
+  });
 }
 
 /** 显示插屏广告 */
@@ -48,10 +42,9 @@ export function show() {
   if (interstitialAd) {
     interstitialAd
       .show()
-      .then(() => display.text('插屏广告已展示'))
-      .catch((err: any) => display.text(`展示失败: ${err.errMsg}`));
+      .catch((err: any) => toast(`展示失败: ${err?.errMsg || '未知错误'}`));
   } else {
-    display.text('请先创建插屏广告');
+    toast('请先创建插屏广告');
   }
 }
 
@@ -60,7 +53,7 @@ export function destroy() {
   if (interstitialAd) {
     interstitialAd.destroy();
     interstitialAd = null;
-    display.text('插屏广告已销毁');
+    toast('插屏广告已销毁');
   }
 }
 

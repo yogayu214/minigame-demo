@@ -20,7 +20,7 @@ export function restartMiniProgram() {
       console.log('[restartMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`重启失败：${err.errMsg}`);
+      display.text(`重启失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -34,7 +34,7 @@ export function restartWithQuery() {
       console.log('[restartMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`重启失败：${err.errMsg}`);
+      display.text(`重启失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

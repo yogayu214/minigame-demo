@@ -21,7 +21,7 @@ export function setBackgroundFetchToken() {
       display.text(formatObj({ 状态: '设置 token 成功' }));
     },
     fail(err: any) {
-      display.text(formatObj({ 状态: '设置 token 失败', 原因: err.errMsg }));
+      display.text(formatObj({ 状态: '设置 token 失败', 原因: err?.errMsg || '未知错误' }));
     },
   });
 }
@@ -33,7 +33,7 @@ export function getBackgroundFetchToken() {
       display.text(formatObj({ token: res.token?.slice(0, 20) + '...' }));
     },
     fail(err: any) {
-      display.text(`查询失败：${err.errMsg}（需先在 mp 后台配置）`);
+      display.text(`查询失败：${err?.errMsg || '未知错误'}（需先在 mp 后台配置）`);
     },
   });
 }
@@ -51,7 +51,7 @@ export function getBackgroundFetchData() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -72,5 +72,8 @@ export function onBackgroundFetchData() {
 }
 
 export function onUnload() {
+  if (listener) {
+    (wx as any).offBackgroundFetchData?.(listener);
+  }
   listener = null;
 }

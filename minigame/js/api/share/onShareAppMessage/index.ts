@@ -9,16 +9,24 @@ let transpondFn: any = null;
 export function enableShare() {
   wx.showShareMenu({ withShareTicket: true });
 
-  transpondFn = () => ({
-    title: '小游戏 API 示例',
-    imageUrl: canvas.toTempFilePathSync({
-      x: 0,
-      y: 0,
-      width: canvas.width,
-      height: (canvas.width * 4) / 5,
-    }),
-    query: `pathName=${window.router.getNowPageName()}`,
-  });
+  transpondFn = () => {
+    let imageUrl = '';
+    try {
+      imageUrl = canvas.toTempFilePathSync({
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: (canvas.width * 4) / 5,
+      });
+    } catch (e: any) {
+      console.error('[onShareAppMessage] toTempFilePathSync 失败', e);
+    }
+    return {
+      title: '小游戏 API 示例',
+      imageUrl,
+      query: `pathName=${window.router.getNowPageName()}`,
+    };
+  };
   wx.onShareAppMessage(transpondFn);
   wx.showToast({ title: '已开启' });
 }

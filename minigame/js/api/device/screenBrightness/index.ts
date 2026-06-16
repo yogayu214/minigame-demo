@@ -18,15 +18,27 @@ export function setOnBrightnessChange(fn: ((value: number) => void) | null) {
 export function getScreenBrightness() {
   wx.getScreenBrightness({
     success(res: any) {
-      if (_onBrightnessChange) _onBrightnessChange(res.value);
-      else display.text(`当前屏幕亮度: ${res.value}`);
+      if (_onBrightnessChange) _onBrightnessChange(res?.value);
+      else display.text(`当前屏幕亮度: ${res?.value}`);
+    },
+    fail(err: any) {
+      display.text(`获取亮度失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
 /** 设置屏幕亮度（0~1） */
 export function setScreenBrightness(value: number) {
-  wx.setScreenBrightness({ value });
+  if (typeof value !== 'number' || value < 0 || value > 1) {
+    display.text('亮度值须在 0~1 之间');
+    return;
+  }
+  wx.setScreenBrightness({
+    value,
+    fail(err: any) {
+      display.text(`设置亮度失败：${err?.errMsg || '未知错误'}`);
+    },
+  });
   if (_onBrightnessChange) _onBrightnessChange(value);
   else display.text(`屏幕亮度已设为: ${value}`);
 }

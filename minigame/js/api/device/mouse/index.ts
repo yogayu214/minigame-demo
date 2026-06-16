@@ -23,17 +23,17 @@ export function listenAll() {
   }
   downListener = (res: any) =>
     display.text(
-      `事件: mousedown\n按键: ${res.button}\nx: ${res.x}\ny: ${res.y}`
+      `事件: mousedown\n按键: ${res?.button}\nx: ${res?.x}\ny: ${res?.y}`
     );
   upListener = (res: any) =>
     display.text(
-      `事件: mouseup\n按键: ${res.button}\nx: ${res.x}\ny: ${res.y}`
+      `事件: mouseup\n按键: ${res?.button}\nx: ${res?.x}\ny: ${res?.y}`
     );
   moveListener = (res: any) => {
     const now = Date.now();
     if (now - lastMoveAt < 100) return; // 节流
     lastMoveAt = now;
-    display.text(`事件: mousemove\nx: ${res.x}\ny: ${res.y}`);
+    display.text(`事件: mousemove\nx: ${res?.x}\ny: ${res?.y}`);
   };
   wx.onMouseDown(downListener);
   wx.onMouseUp(upListener);

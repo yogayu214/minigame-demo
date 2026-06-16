@@ -44,7 +44,7 @@ export function connect() {
     display.text(
       formatObj({
         状态: '错误',
-        原因: err.errMsg,
+        原因: err?.errMsg || '未知错误',
       })
     )
   );

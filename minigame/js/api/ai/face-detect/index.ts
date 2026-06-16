@@ -77,7 +77,7 @@ export function stopFaceDetect() {
 
 /** 页面销毁时清理 */
 export function onUnload() {
-  if (inited) {
+  if (inited && typeof (wx as any).stopFaceDetect === 'function') {
     (wx as any).stopFaceDetect({});
     inited = false;
   }

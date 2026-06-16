@@ -35,10 +35,15 @@ export function connectSocket() {
   socketTask = wx.connectSocket({
     url,
     fail(err: any) {
-      display.text(formatObj({ 状态: '连接失败', 原因: err.errMsg }));
+      display.text(formatObj({ 状态: '连接失败', 原因: err?.errMsg || '未知' }));
       socketTask = null;
     },
   });
+
+  if (!socketTask) {
+    display.text('创建 WebSocket 连接失败');
+    return;
+  }
 
   onOpen = () => {
     display.text('WebSocket 已连接');
@@ -51,7 +56,7 @@ export function connectSocket() {
     display.text(
       formatObj({
         事件: 'onError',
-        原因: err.errMsg,
+        原因: err?.errMsg || '未知',
       })
     );
     socketTask = null;
@@ -60,7 +65,7 @@ export function connectSocket() {
     display.text(
       formatObj({
         事件: 'onMessage',
-        data: String(res.data).slice(0, 100),
+        data: String(res?.data ?? '').slice(0, 100),
       })
     );
   };
@@ -86,7 +91,7 @@ export function sendMessage() {
         display.text(
           formatObj({
             状态: '发送失败',
-            原因: err.errMsg,
+            原因: err?.errMsg || '未知错误',
           })
         );
       },
@@ -98,7 +103,7 @@ export function sendMessage() {
         display.text(`已发送：${msg}`);
       },
       fail(err: any) {
-        display.text(`发送失败：${err.errMsg}`);
+        display.text(`发送失败：${err?.errMsg || '未知错误'}`);
       },
     });
   }

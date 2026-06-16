@@ -25,14 +25,19 @@ export function startRecord() {
   });
 
   recorderManager.onStop((res: any) => {
-    recordDuration = res.duration;
+    recordDuration = res?.duration || 0;
+    // 销毁旧的音频实例
+    if (innerAudioContext) {
+      innerAudioContext.destroy();
+      innerAudioContext = null;
+    }
     innerAudioContext = wx.createInnerAudioContext();
-    innerAudioContext.src = res.tempFilePath;
+    innerAudioContext.src = res?.tempFilePath || '';
     display.text(
       formatObj({
         状态: '录音完成',
-        时长: `${(res.duration / 1000).toFixed(1)}s`,
-        文件: res.tempFilePath,
+        时长: `${(recordDuration / 1000).toFixed(1)}s`,
+        文件: res?.tempFilePath || '',
       })
     );
   });
@@ -88,7 +93,7 @@ export function deleteRecord() {
     innerAudioContext = null;
   }
   recordDuration = 0;
-  wx.offAudioInterruptionEnd();
+  wx.offAudioInterruptionEnd(rebooting);
   display.text('录音已删除');
 }
 

@@ -24,7 +24,7 @@ export function navigateBackMiniProgram() {
       display.text(
         formatObj({
           状态: '返回失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
           提示: '仅在当前小游戏被其他小程序打开时可调用',
         })
       );
@@ -44,7 +44,7 @@ export function navigateBackWithExtra() {
       display.text(
         formatObj({
           状态: '返回失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },

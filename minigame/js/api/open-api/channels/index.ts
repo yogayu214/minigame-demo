@@ -28,7 +28,7 @@ export function getChannelsLiveInfo() {
         );
       },
       fail(err: any) {
-        display.text(`查询失败：${err.errMsg}`);
+        display.text(`查询失败：${err?.errMsg || '未知错误'}`);
       },
     });
   });
@@ -43,7 +43,7 @@ export function getChannelsLiveNoticeInfo() {
         display.text(`直播预告: ${JSON.stringify(res).slice(0, 200)}`);
       },
       fail(err: any) {
-        display.text(`查询失败：${err.errMsg}`);
+        display.text(`查询失败：${err?.errMsg || '未知错误'}`);
       },
     });
   });
@@ -59,7 +59,7 @@ export function reserveChannelsLive() {
         display.text('已预约直播');
       },
       fail(err: any) {
-        display.text(`预约失败：${err.errMsg}`);
+        display.text(`预约失败：${err?.errMsg || '未知错误'}`);
       },
     } as any);
   });
@@ -74,7 +74,7 @@ export function openChannelsUserProfile() {
         display.text('已打开视频号主页');
       },
       fail(err: any) {
-        display.text(`打开失败：${err.errMsg}`);
+        display.text(`打开失败：${err?.errMsg || '未知错误'}`);
       },
     });
   });
@@ -89,7 +89,7 @@ export function openChannelsLive() {
         display.text('已打开视频号直播');
       },
       fail(err: any) {
-        display.text(`打开失败：${err.errMsg}`);
+        display.text(`打开失败：${err?.errMsg || '未知错误'}`);
       },
     });
   });
@@ -105,7 +105,7 @@ export function openChannelsEvent() {
         display.text('已打开视频号活动');
       },
       fail(err: any) {
-        display.text(`打开失败：${err.errMsg}`);
+        display.text(`打开失败：${err?.errMsg || '未知错误'}`);
       },
     });
   });
@@ -121,7 +121,7 @@ export function openChannelsActivity() {
         display.text('已打开视频号活动');
       },
       fail(err: any) {
-        display.text(`打开失败：${err.errMsg}`);
+        display.text(`打开失败：${err?.errMsg || '未知错误'}`);
       },
     } as any);
   });

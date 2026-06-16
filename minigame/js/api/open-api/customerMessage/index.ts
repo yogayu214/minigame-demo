@@ -21,7 +21,7 @@ export function openCustomerServiceConversation() {
       display.text('已打开客服会话');
     },
     fail(err: any) {
-      display.text(`打开失败：${err.errMsg}`);
+      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -47,6 +47,12 @@ export function createFeedbackButton() {
       lineHeight: 40,
     },
   });
+
+  if (!feedbackButton) {
+    display.text('创建反馈按钮失败');
+    return;
+  }
+
   feedbackButton.onTap?.(() => {
     display.text('onTap 回调触发');
   });
@@ -104,5 +110,12 @@ export function destroy() {
     display.text('反馈按钮已销毁');
   } else {
     display.text('无反馈按钮可销毁');
+  }
+}
+
+export function onUnload() {
+  if (feedbackButton) {
+    feedbackButton.destroy?.();
+    feedbackButton = null;
   }
 }

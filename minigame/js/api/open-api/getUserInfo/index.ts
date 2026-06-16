@@ -14,7 +14,11 @@ let userInfoBtn: any = null;
 export function getUserInfo() {
   wx.getUserInfo({
     success(res: any) {
-      const u = res.userInfo;
+      const u = res?.userInfo;
+      if (!u) {
+        display.text('getUserInfo 成功但用户信息为空');
+        return;
+      }
       display.text(
         `getUserInfo 成功\n昵称: ${u.nickName}\n性别: ${u.gender === 1 ? '男' : u.gender === 2 ? '女' : '未知'}\n地区: ${u.country} ${u.province} ${u.city}`
       );
@@ -31,7 +35,9 @@ export function createUserInfoButton() {
     display.text('按钮已创建，请点击下方按钮');
     return;
   }
-  const { windowWidth, windowHeight } = wx.getSystemInfoSync();
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
   userInfoBtn = wx.createUserInfoButton({
     type: 'text',
     text: '点这里获取用户信息',
@@ -48,7 +54,7 @@ export function createUserInfoButton() {
       borderRadius: 4,
     },
   });
-  userInfoBtn.onTap((res: any) => {
+  userInfoBtn.onTap?.((res: any) => {
     if (res.userInfo) {
       display.image(res.userInfo.avatarUrl);
       setTimeout(() => {

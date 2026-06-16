@@ -12,7 +12,11 @@ export function setOnData(fn: ((res: any) => void) | null) {
 
 /** 开始监听罗盘数据 */
 export function startListening() {
-  wx.startCompass();
+  wx.startCompass({
+    fail(err: any) {
+      console.error('启动罗盘监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc) return;
   wx.onCompassChange(
     (monitorFunc = (res: any) => {
@@ -23,7 +27,11 @@ export function startListening() {
 
 /** 停止监听罗盘 */
 export function stopListening() {
-  wx.stopCompass();
+  wx.stopCompass({
+    fail(err: any) {
+      console.error('停止罗盘监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc && wx.offCompassChange) {
     wx.offCompassChange(monitorFunc);
     monitorFunc = null;

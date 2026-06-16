@@ -53,6 +53,12 @@ export function createSessionV1() {
       version: 'v1',
       track: { plane: { mode: 1 } },
     });
+
+    if (!session) {
+      display.text('创建 VKSession 失败');
+      return;
+    }
+
     if (typeof session.start === 'function') {
       session.start((errCode: number) => {
         display.text(

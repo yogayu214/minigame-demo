@@ -14,15 +14,12 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
 export function getEnv() {
   const env = wx.env;
-  display.text(
-    Object.keys(env)
-      .map((k) => `${k}: ${env[k]}`)
-      .join('\n')
-  );
+  display.text(formatObj(env));
 }

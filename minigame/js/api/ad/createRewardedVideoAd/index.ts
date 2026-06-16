@@ -1,65 +1,78 @@
 /**
  * 激励视频广告
  * wx.createRewardedVideoAd
- * 注意：adUnitId 需替换为你在 mp 后台申请的真实广告位 ID
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
+export const setDisplay = () => {};
 
 let rewardedVideoAd: any = null;
+let firstLoaded = false;
+
+const toast = (title: string) => wx.showToast({ title, icon: 'none', duration: 1000 });
 
 /** 创建激励视频广告 */
 export function createRewardedVideoAd() {
-  const tip =
-    '⚠️ 此功能需要在 mp 后台申请真实的广告位 ID（adUnitId），\n' +
-    'Demo 中使用占位 ID，调用将失败。\n\n' +
-    '接入流程：\n' +
-    '1. 在 mp 后台创建广告位获取 adUnitId\n' +
-    '2. 调用 wx.createRewardedVideoAd 传入真实 adUnitId\n\n' +
-    '文档：developers.weixin.qq.com/minigame/dev/api/ad/wx.createRewardedVideoAd.html';
+  rewardedVideoAd = wx.createRewardedVideoAd({
+    adUnitId: Math.round(Math.random())
+      ? 'adunit-367ee566b15d46b3' // 长视频
+      : 'adunit-52baa2f38c69b5f7', // 短视频
+  });
 
-  display.text(tip);
+  if (!rewardedVideoAd) {
+    toast('创建激励视频广告失败，当前环境可能不支持');
+    return;
+  }
 
-  // 2s 后发起真实调用，展示失败结果
-  setTimeout(() => {
-    rewardedVideoAd = wx.createRewardedVideoAd({
-      adUnitId: 'adunit-xxxxxxxx',
-    });
+  firstLoaded = false;
+  rewardedVideoAd.onLoad(() => {
+    if (!firstLoaded) {
+      firstLoaded = true;
+      toast('激励视频加载成功，点击 show 播放');
+    }
+  });
 
-    rewardedVideoAd.onLoad(() => {
-      display.text('激励视频加载成功，点击 show 播放');
-    });
+  rewardedVideoAd.onError((err: any) => {
+    toast(`调用失败：${err?.errMsg || '未知错误'}`);
+  });
 
-    rewardedVideoAd.onError((err: any) => {
-      display.text(`调用失败：${err.errMsg}`);
-    });
+  rewardedVideoAd.onClose((res: any) => {
+    if (res?.isEnded) {
+      toast('完整观看，可发放奖励');
+    } else {
+      toast('中途退出，不发放奖励');
+    }
+  });
 
-    rewardedVideoAd.onClose((res: any) => {
-      if (res.isEnded) {
-        display.text('完整观看，可发放奖励');
-      } else {
-        display.text('中途退出，不发放奖励');
-      }
-    });
-  }, 2000);
+  rewardedVideoAd.load().catch((err: any) => {
+    toast(`加载失败：${err?.errMsg || '未知错误'}`);
+  });
 }
 
 /** 播放激励视频 */
 export function show() {
   if (rewardedVideoAd) {
-    rewardedVideoAd.show().catch(() => {
-      rewardedVideoAd.load().then(() => rewardedVideoAd.show());
+    rewardedVideoAd.show().catch((err) => {
+        toast(`重新加载失败: ${err?.errMsg || '未知错误'}`);
     });
-    display.text('正在加载激励视频...');
+    toast('正在加载激励视频...');
   } else {
-    display.text('请先创建激励视频广告');
+    toast('请先创建激励视频广告');
+  }
+}
+
+/** 销毁激励视频 */
+export function destroy() {
+  if (rewardedVideoAd) {
+    rewardedVideoAd.destroy();
+    rewardedVideoAd = null;
+    toast('激励视频广告已销毁');
   }
 }
 
 /** 页面销毁时清理 */
 export function onUnload() {
-  rewardedVideoAd = null;
+  if (rewardedVideoAd) {
+    rewardedVideoAd.destroy();
+    rewardedVideoAd = null;
+  }
 }

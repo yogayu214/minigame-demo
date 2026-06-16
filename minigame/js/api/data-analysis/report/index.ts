@@ -36,18 +36,22 @@ export function reportScene() {
       display.text('reportScene 已上报');
     },
     fail(err: any) {
-      display.text(`上报失败：${err.errMsg}`);
+      display.text(`上报失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
 /** 监控上报 */
 export function reportMonitor() {
-  (wx as any).reportMonitor({
-    name: 'demo_monitor',
-    value: 1,
-  });
-  display.text('reportMonitor 已上报');
+  try {
+    (wx as any).reportMonitor({
+      name: 'demo_monitor',
+      value: 1,
+    });
+    display.text('reportMonitor 已上报');
+  } catch (e: any) {
+    display.text(`调用失败：${e?.message || e}`);
+  }
 }
 
 /** 用户分支行为上报（用于 A/B 实验） */
@@ -76,7 +80,7 @@ export function getGameExptInfo() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err.errMsg}`);
+      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

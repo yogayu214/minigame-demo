@@ -51,7 +51,7 @@ export function toTempFile() {
       );
     },
     fail(err: any) {
-      display.text(`生成失败：${err.errMsg}`);
+      display.text(`生成失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -64,7 +64,14 @@ export function previewOffscreen() {
   }
   offCanvas.toTempFilePath?.({
     success(res: any) {
-      display.image(res.tempFilePath);
+      display.image(res?.tempFilePath);
+    },
+    fail(err: any) {
+      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
+}
+
+export function onUnload() {
+  offCanvas = null;
 }

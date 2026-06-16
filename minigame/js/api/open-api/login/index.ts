@@ -17,7 +17,7 @@ export function login() {
           `登录成功\ncode: ${res.code}\n说明: 需将 code 发送到后端换取 openid`
         );
       } else {
-        display.text(`登录失败: ${res.errMsg}`);
+        display.text(`登录失败: ${res?.errMsg || '未知错误'}`);
       }
     },
     fail(err: any) {

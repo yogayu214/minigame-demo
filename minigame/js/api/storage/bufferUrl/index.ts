@@ -34,7 +34,7 @@ export function createBufferURL() {
       );
     },
     fail(err: any) {
-      display.text(`下载失败：${err.errMsg}`);
+      display.text(`下载失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

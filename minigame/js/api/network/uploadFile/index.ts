@@ -31,7 +31,7 @@ export function chooseImage() {
     },
     fail(err: any) {
       wx.hideLoading();
-      display.text(formatObj({ 状态: '下载图片失败', 原因: err.errMsg }));
+      display.text(formatObj({ 状态: '下载图片失败', 原因: err?.errMsg || '未知错误' }));
     },
   });
 }
@@ -67,7 +67,7 @@ export function uploadFile() {
       display.text(
         formatObj({
           状态: '上传失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -101,5 +101,12 @@ export function abortUpload() {
     display.text('上传已中断');
   } else {
     display.text('当前无上传任务，无需中断');
+  }
+}
+
+export function onUnload() {
+  if (uploadTask) {
+    uploadTask.abort();
+    uploadTask = null;
   }
 }

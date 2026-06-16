@@ -15,6 +15,9 @@ export function enableKeepScreenOn() {
     success() {
       display.text('已开启屏幕常亮');
     },
+    fail(err: any) {
+      display.text(`开启屏幕常亮失败：${err?.errMsg || '未知错误'}`);
+    },
   });
 }
 
@@ -24,6 +27,9 @@ export function disableKeepScreenOn() {
     keepScreenOn: false,
     success() {
       display.text('已关闭屏幕常亮');
+    },
+    fail(err: any) {
+      display.text(`关闭屏幕常亮失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -12,7 +12,12 @@ export function setOnData(fn: ((res: any) => void) | null) {
 
 /** 开始监听加速度变化 */
 export function startListening() {
-  wx.startAccelerometer({ interval: 'game' });
+  wx.startAccelerometer({
+    interval: 'game',
+    fail(err: any) {
+      console.error('启动加速度监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc) return;
   wx.onAccelerometerChange(
     (monitorFunc = (res: any) => {
@@ -23,7 +28,11 @@ export function startListening() {
 
 /** 停止监听加速度 */
 export function stopListening() {
-  wx.stopAccelerometer();
+  wx.stopAccelerometer({
+    fail(err: any) {
+      console.error('停止加速度监听失败：', err?.errMsg || '未知错误');
+    },
+  });
   if (monitorFunc && wx.offAccelerometerChange) {
     wx.offAccelerometerChange(monitorFunc);
     monitorFunc = null;

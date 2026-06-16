@@ -24,7 +24,7 @@ export function enableShareTicket() {
       display.text(
         formatObj({
           状态: '设置失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -44,7 +44,7 @@ export function enablePrivateMode() {
       display.text(
         formatObj({
           状态: '设置失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -62,7 +62,7 @@ export function showShareMenu() {
       display.text(
         formatObj({
           状态: '显示失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -79,7 +79,7 @@ export function showShareMenuBasic() {
       display.text(
         formatObj({
           状态: '显示失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -96,7 +96,7 @@ export function hideShareMenu() {
       display.text(
         formatObj({
           状态: '隐藏失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },

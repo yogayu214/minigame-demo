@@ -23,12 +23,12 @@ export function renameFile() {
           display.text('重命名成功\ntoRename.txt -> renamed.txt');
         },
         fail(err: any) {
-          display.text(`重命名失败: ${err.errMsg}`);
+          display.text(`重命名失败: ${err?.errMsg || '未知错误'}`);
         },
       });
     },
     fail(err: any) {
-      display.text(`写入失败: ${err.errMsg}`);
+      display.text(`写入失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

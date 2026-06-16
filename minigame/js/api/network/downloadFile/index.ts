@@ -27,7 +27,7 @@ export function downloadFile() {
       display.text(
         formatObj({
           状态: '下载失败',
-          原因: err.errMsg,
+          原因: err?.errMsg || '未知错误',
         })
       );
     },
@@ -61,5 +61,12 @@ export function abortDownload() {
     display.text('下载已中断');
   } else {
     display.text('当前无下载任务，无需中断');
+  }
+}
+
+export function onUnload() {
+  if (downloadTask) {
+    downloadTask.abort();
+    downloadTask = null;
   }
 }
