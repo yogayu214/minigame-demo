@@ -13,36 +13,30 @@ export const setDisplay = display.setter;
 
 /** 请求一次性订阅消息 */
 export function requestSubscribeMessage() {
-  // ★ 请先在小游戏后台获取模板 ID 并替换下方占位符，否则调用会报错
-  const tmplIds = ['模板ID_需要替换'];
-  if (tmplIds[0] === '模板ID_需要替换') {
-    display.text('请先在小游戏后台「订阅消息」页面获取模板 ID，\n替换代码中的「模板ID_需要替换」后再试。\n2s 后仍将调用 API 演示流程...');
-    setTimeout(() => {
-      wx.requestSubscribeMessage({
-        tmplIds,
-        success(res: any) {
-          const lines = Object.keys(res)
-            .map((k) => `${k}: ${res[k]}`)
-            .join('\n');
-          display.text(`一次性订阅结果:\n${lines}`);
-        },
-        fail(err: any) {
-          display.text(`一次性订阅失败: ${err?.errMsg || '未知错误'}`);
-        },
-      });
-    }, 2000);
-    return;
-  }
+  const tmplIds = ['wAniOv_NUi6TXiQWX74_1LD5E4_6EfqvaeSxUxhqllg'];
   wx.requestSubscribeMessage({
     tmplIds,
     success(res: any) {
-      const lines = Object.keys(res)
-        .map((k) => `${k}: ${res[k]}`)
-        .join('\n');
-      display.text(`一次性订阅结果:\n${lines}`);
+      if (res[tmplIds[0]] === 'accept') {
+        // 用户允许订阅，调用云函数推送消息
+        wx.cloud.callFunction({
+          name: 'pushMessage',
+          data: {
+            page: `pathName=${window.router.getNowPageName()}`,
+          },
+          success() {
+            wx.showToast({ title: '推送成功', icon: 'success' });
+          },
+          fail(err2: any) {
+            wx.showToast({ title: `推送失败: ${err2?.errMsg || '未知错误'}`, icon: 'none' });
+          },
+        });
+      } else if (res[tmplIds[0]] === 'reject') {
+        wx.showToast({ title: '你已拒绝消息订阅，可在设置中打开', icon: 'none' });
+      }
     },
-    fail(err: any) {
-      display.text(`一次性订阅失败: ${err?.errMsg || '未知错误'}`);
+    fail() {
+      wx.showToast({ title: '你已拒绝消息订阅，可在设置中打开', icon: 'none' });
     },
   });
 }
@@ -60,10 +54,10 @@ export function requestSubscribeSystemMessage() {
         if (tips !== '永久订阅成功: ') tips += '、';
         tips += '排行榜好友超越提醒';
       }
-      display.text(tips);
+      wx.showToast({ title: tips, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`永久订阅失败: ${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `永久订阅失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

@@ -5,59 +5,31 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-/** 请求用户信息授权 */
-export function authorizeUserInfo() {
-  wx.authorize({
-    scope: 'scope.userInfo',
-    success() {
-      display.text('scope.userInfo 已授权');
-    },
-    fail(err: any) {
-      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
-    },
-  });
-}
-
-/** 请求录音授权 */
-export function authorizeRecord() {
-  wx.authorize({
-    scope: 'scope.record',
-    success() {
-      display.text('scope.record 已授权');
-    },
-    fail(err: any) {
-      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
-    },
-  });
-}
-
-/** 请求写相册授权 */
-export function authorizeAlbum() {
-  wx.authorize({
-    scope: 'scope.writePhotosAlbum',
-    success() {
-      display.text('scope.writePhotosAlbum 已授权');
-    },
-    fail(err: any) {
-      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
-    },
-  });
-}
-
-/** 查询当前已授权的 scope */
-export function getSetting() {
+/** 请求写相册授权，已授权则直接调用保存 */
+export function authorizeWritePhotosAlbum() {
   wx.getSetting({
     success(res: any) {
-      const auth = res?.authSetting || {};
-      const lines = Object.keys(auth).map((k) => `${k}: ${auth[k]}`);
-      display.text(lines.length ? lines.join('\n') : '暂无授权信息');
+      if (res.authSetting['scope.writePhotosAlbum']) {
+        wx.showToast({ title: '已有相册权限，可直接保存', icon: 'none' });
+      } else {
+        wx.authorize({
+          scope: 'scope.writePhotosAlbum',
+          success() {
+            wx.showToast({ title: '相册授权成功', icon: 'none' });
+          },
+          fail(err: any) {
+            display.text(`授权失败\n${formatObj(err)}`);
+          },
+        });
+      }
     },
     fail(err: any) {
-      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
+      display.text(`查询授权设置失败\n${formatObj(err)}`);
     },
   });
 }

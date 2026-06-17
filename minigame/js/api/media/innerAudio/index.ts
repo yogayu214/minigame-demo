@@ -14,18 +14,22 @@ const SRC = 'https://wxamusic.wx.qq.com/wxag/xingji/music/bg1.mp3';
 let audio: any = null;
 let rebooting: any = null;
 
+function toast(title: string) {
+  wx.showToast({ title, icon: 'none' });
+}
+
 function ensure() {
   if (audio) return audio;
   audio = wx.createInnerAudioContext({ useWebAudioImplement: false });
   audio.src = SRC;
 
   audio.onPlay(() =>
-    display.text(formatObj({ 状态: '播放中', src: SRC.slice(-20) }))
+    toast(formatObj({ 状态: '播放中', src: SRC.slice(-20) }))
   );
-  audio.onPause(() => display.text('已暂停'));
-  audio.onStop(() => display.text('已停止'));
+  audio.onPause(() => toast('已暂停'));
+  audio.onStop(() => toast('已停止'));
   audio.onEnded(() => {
-    display.text('播放结束');
+    toast('播放结束');
     audio.offTimeUpdate();
     audio.isInterruption = false;
   });
@@ -37,7 +41,7 @@ function ensure() {
       10004: '格式错误',
       [-1]: '未知错误',
     };
-    display.text(`错误: ${errMap[err?.errCode] || err?.errMsg || '未知'}`);
+    toast(`错误: ${errMap[err?.errCode] || err?.errMsg || '未知'}`);
   });
 
   // 中断恢复
@@ -63,20 +67,19 @@ export function play() {
   const a = ensure();
   a.play();
   a.isInterruption = true;
-  display.text('开始播放');
+  toast('开始播放');
 }
 
 /** 查看播放进度 */
 export function showProgress() {
   if (!audio) {
-    display.text('请先播放音频');
+    toast('请先播放音频');
     return;
   }
-  display.text(
+  toast(
     formatObj({
       当前时间: `${audio.currentTime.toFixed(1)}s`,
       总时长: `${audio.duration.toFixed(1)}s`,
-      状态: audio.paused ? '已暂停' : '播放中',
     })
   );
 }
@@ -100,6 +103,7 @@ export function stop() {
 /** 跳到 5 秒 */
 export function seek5() {
   ensure().seek(5);
+  toast('跳到 5 秒');
 }
 
 /** 设置音频选项 */
@@ -108,10 +112,10 @@ export function setOption() {
     mixWithOther: true,
     obeyMuteSwitch: false,
     success() {
-      display.text('已设置 mixWithOther=true');
+      toast('已设置 mixWithOther=true');
     },
     fail(err: any) {
-      display.text(`设置失败：${err?.errMsg || '未知错误'}`);
+      toast(`设置失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -120,7 +124,7 @@ export function setOption() {
 export function getAvailableSources() {
   wx.getAvailableAudioSources({
     success(res: any) {
-      display.text(
+      toast(
         formatObj({
           音源数: (res?.audioSources || []).length,
           列表: (res?.audioSources || []).join(', '),
@@ -128,7 +132,7 @@ export function getAvailableSources() {
       );
     },
     fail(err: any) {
-      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
+      toast(`查询失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -15,7 +15,7 @@ let warningCount = 0;
 /** 监听内存预警 */
 export function onMemoryWarning() {
   if (listener) {
-    display.text('已在监听');
+    wx.showToast({ title: '已在监听', icon: 'none' });
     return;
   }
   warningCount = 0;
@@ -26,7 +26,7 @@ export function onMemoryWarning() {
     );
   };
   wx.onMemoryWarning(listener);
-  display.text('已注册 onMemoryWarning（系统主动触发，难手工模拟）');
+  wx.showToast({ title: '已注册 onMemoryWarning', icon: 'none' });
 }
 
 /** 停止监听 */
@@ -34,7 +34,7 @@ export function offMemoryWarning() {
   if (listener) {
     wx.offMemoryWarning(listener);
     listener = null;
-    display.text('已停止监听');
+    wx.showToast({ title: '已停止监听', icon: 'none' });
   }
 }
 

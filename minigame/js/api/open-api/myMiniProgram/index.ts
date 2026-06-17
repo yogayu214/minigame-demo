@@ -13,10 +13,10 @@ export const setDisplay = display.setter;
 export function checkIsAddedToMyMiniProgram() {
   wx.checkIsAddedToMyMiniProgram({
     success(res: any) {
-      display.text(`是否已添加: ${res.added ? '是' : '否'}`);
+      wx.showToast({ title: `是否已添加: ${res.added ? '是' : '否'}`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`查询失败: ${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `查询失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   } as any);
 }

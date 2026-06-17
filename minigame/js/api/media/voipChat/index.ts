@@ -2,8 +2,6 @@
  * 实时语音通话
  * wx.joinVoIPChat / wx.exitVoIPChat / wx.updateVoIPChatMuteConfig /
  * wx.onVoIPChatInterrupted / wx.offVoIPChatInterrupted /
- * wx.onVoIPChatStateChanged / wx.offVoIPChatStateChanged /
- * wx.onVoIPChatSpeakersChanged / wx.offVoIPChatSpeakersChanged /
  * wx.onVoIPChatMembersChanged / wx.offVoIPChatMembersChanged
  * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/media/voip/wx.joinVoIPChat.html
  */
@@ -14,53 +12,108 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const listeners: Record<string, any> = {};
+let groupId = '';
+let scopeRecord = false;
 
-/** 加入语音通话（需要服务端预生成签名） */
-export function joinChat() {
-  const tip =
-    '⚠️ 此功能需要服务端生成 signature、nonceStr 等真实数据，\n' +
-    'Demo 中无法模拟，调用将失败。\n\n' +
-    '接入流程：\n' +
-    '1. 后端调用微信 API 预创建房间获取签名\n' +
-    '2. 前端携带签名调用 wx.joinVoIPChat\n\n' +
-    '文档：developers.weixin.qq.com/minigame/dev/api/media/voip/wx.joinVoIPChat.html';
-
-  display.text(tip);
-
-  // 2s 后发起真实调用，展示失败结果
-  setTimeout(() => {
-    wx.joinVoIPChat({
-      signature: 'placeholder',
-      nonceStr: 'placeholder',
-      timeStamp: Math.floor(Date.now() / 1000),
-      groupId: 'demo_group',
-      muteConfig: { muteMicrophone: false, muteEarphone: false },
+/** 授权录音权限 */
+function authorizeRecord(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (scopeRecord) return resolve();
+    wx.getSetting({
       success(res: any) {
-        display.text(
-          formatObj({
-            状态: '已加入',
-            openIds: (res.openIdList || []).length + ' 人',
-          })
-        );
+        scopeRecord = res.authSetting['scope.record'];
+        if (scopeRecord) return resolve();
+        wx.authorize({
+          scope: 'scope.record',
+          success() {
+            scopeRecord = true;
+            resolve();
+          },
+          fail() {
+            scopeRecord = false;
+            reject(new Error('未授权录音权限'));
+          },
+        });
       },
-      fail(err: any) {
-        display.text(`调用失败：${err?.errMsg || '未知错误'}`);
-      },
+      fail: reject,
     });
-  }, 2000);
+  });
 }
 
-/** 退出 */
+/** 通过云函数获取签名 */
+function getSignature(gId: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'getSignature',
+      data: { groupId: gId },
+      success(res: any) {
+        resolve(res.result);
+      },
+      fail(res: any) {
+        reject(res);
+      },
+    });
+  });
+}
+
+/** 加入（创建）实时语音通话 */
+export function joinChat() {
+  authorizeRecord()
+    .then(() => {
+      if (!groupId) {
+        groupId = `语音房间${Math.random().toString(36).substring(2)}`;
+      }
+      wx.showLoading({ title: '正在加入房间' });
+      getSignature(groupId)
+        .then((signData: any) => {
+          wx.joinVoIPChat({
+            ...signData,
+            muteConfig: { muteMicrophone: false, muteEarphone: false },
+            complete(res: any) {
+              wx.hideLoading();
+              if (res.errCode) {
+                wx.showToast({ title: `加入失败: ${res.errMsg || res.errCode}`, icon: 'none' });
+              } else {
+                display.text(
+                  formatObj({
+                    状态: '已加入房间',
+                    房间: groupId,
+                    成员数: (res.openIdList || []).length,
+                  })
+                );
+                // 注册成员变化和中断监听
+                wx.onVoIPChatMembersChanged((ev: any) => {
+                  wx.showToast({ title: `成员变化: ${ev.openIdList.length} 人`, icon: 'none' });
+                });
+                wx.onVoIPChatInterrupted(() => {
+                  wx.showToast({ title: '语音通话被中断', icon: 'none' });
+                  wx.offVoIPChatInterrupted();
+                });
+              }
+            },
+          });
+        })
+        .catch((err: any) => {
+          wx.hideLoading();
+          wx.showToast({ title: `获取签名失败: ${err?.errCode || '未知错误'}`, icon: 'none' });
+        });
+    })
+    .catch(() => {
+      wx.showToast({ title: '没有授权录音，无法加入语音通话', icon: 'none' });
+    });
+}
+
+/** 退出语音通话 */
 export function exitChat() {
   wx.exitVoIPChat({
     success() {
-      display.text('已退出');
+      wx.showToast({ title: '已退出房间', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`退出失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `退出失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
+  groupId = '';
 }
 
 /** 麦克风静音 */
@@ -68,63 +121,21 @@ export function muteMic() {
   wx.updateVoIPChatMuteConfig({
     muteConfig: { muteMicrophone: true, muteEarphone: false },
     success() {
-      display.text('已静音麦克风');
+      wx.showToast({ title: '已静音麦克风', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`静音失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `静音失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
 
-/** 监听 VoIP 状态变化、成员变化、说话变化 */
-export function listenVoIPEvents() {
-  listeners.state = (res: any) =>
-    display.text(
-      formatObj({
-        事件: 'stateChanged',
-        code: res.code,
-        errMsg: res?.errMsg,
-      })
-    );
-  listeners.speak = (res: any) =>
-    display.text(
-      formatObj({
-        事件: 'speakersChanged',
-        openIds: (res.openIdList || []).join(','),
-      })
-    );
-  listeners.member = (res: any) =>
-    display.text(
-      formatObj({
-        事件: 'membersChanged',
-        openIds: (res.openIdList || []).join(','),
-      })
-    );
-  listeners.interrupt = (res: any) =>
-    display.text(formatObj({ 事件: 'interrupted', errMsg: res?.errMsg }));
-
-  wx.onVoIPChatStateChanged(listeners.state);
-  wx.onVoIPChatSpeakersChanged(listeners.speak);
-  wx.onVoIPChatMembersChanged(listeners.member);
-  wx.onVoIPChatInterrupted(listeners.interrupt);
-  display.text('已注册 VoIP 4 事件监听');
-}
-
-/** 停止 VoIP 事件监听 */
-export function stopListen() {
-  if (listeners.state) wx.offVoIPChatStateChanged(listeners.state);
-  if (listeners.speak) wx.offVoIPChatSpeakersChanged(listeners.speak);
-  if (listeners.member) wx.offVoIPChatMembersChanged(listeners.member);
-  if (listeners.interrupt) wx.offVoIPChatInterrupted(listeners.interrupt);
-  Object.keys(listeners).forEach((k) => delete listeners[k]);
-  display.text('已停止 VoIP 监听');
-}
-
 export function onUnload() {
-  stopListen();
+  try {
+    wx.offVoIPChatMembersChanged();
+    wx.offVoIPChatInterrupted();
+  } catch { /* ignore */ }
   try {
     wx.exitVoIPChat({});
-  } catch {
-    console.log('exitVoIPChat error');
-  }
+  } catch { /* ignore */ }
+  groupId = '';
 }

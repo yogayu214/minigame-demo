@@ -17,7 +17,7 @@ export function encodeUtf8() {
   const buf: ArrayBuffer = wx.encode({ data: text, format: 'utf8' });
   lastEncoded = buf;
   display.text(
-    `原文: ${text}\n编码: utf8\n字节长度: ${buf.byteLength}\n十六进制: ${bufToHex(new Uint8Array(buf)).slice(0, 60)}...`
+    `原文: ${text}\n编码: utf8\n字节长度: ${buf.byteLength}\n十六进制: ${bufToHex(new Uint8Array(buf))}`
   );
 }
 

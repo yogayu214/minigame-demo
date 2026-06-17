@@ -12,10 +12,10 @@ export const setDisplay = display.setter;
 export function getNetworkType() {
   wx.getNetworkType({
     success(res: any) {
-      display.text(`当前网络类型：${res.networkType}`);
+      wx.showToast({ title: `当前网络类型：${res.networkType}`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `获取失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

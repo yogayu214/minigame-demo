@@ -17,50 +17,54 @@ export const setDisplay = display.setter;
 const TIP = '参数皆为虚拟，用户可下载demo后自行填入可用参数查看效果';
 const TIP_DURATION = 1500;
 
-/** 检查是否支持米大师支付 */
-export function checkIsSupportMidasPayment() {
-  display.text(TIP);
-  setTimeout(() => {
+/** 检测是否支持米大师支付，不支持则 toast 提示并返回 false */
+function checkMidasSupport(): Promise<boolean> {
+  return new Promise((resolve) => {
     (wx as any).checkIsSupportMidasPayment({
       success(res: any) {
-        display.text(
-          formatObj({
-            状态: '查询成功',
-            support: String(res.support),
-          })
-        );
+        if (res?.data?.allow_pay) {
+          resolve(true);
+        } else {
+          wx.showToast({ title: '当前不支持米大师支付', icon: 'none', duration: 1000 });
+          resolve(false);
+        }
       },
       fail(err: any) {
-        display.text(
-          formatObj({
-            状态: '查询失败',
-            原因: err?.errMsg || '未知错误',
-          })
-        );
+        wx.showToast({ title: `检测支付能力失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
+        resolve(false);
       },
     });
-  }, TIP_DURATION);
+  });
+}
+
+/** 检查是否支持米大师支付 */
+export function checkIsSupportMidasPayment() {
+    (wx as any).checkIsSupportMidasPayment({
+      success(res: any) {
+        wx.showToast({ title: `查询成功，support: ${res.data.allow_pay}`, icon: 'none', duration: 1000 });
+      },
+      fail(err: any) {
+        wx.showToast({ title: `查询失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
+      },
+    });
 }
 
 /** 发起米大师支付（按金额买货币） */
-export function requestMidasPayment() {
-  display.text(TIP);
+export async function requestMidasPayment() {
+  const supported = await checkMidasSupport();
+  if (!supported) return;
+  wx.showToast({ title: TIP, icon: 'none', duration: TIP_DURATION });
   setTimeout(() => {
     wx.requestMidasPayment({
       mode: 'game',
-      env: 0,
+      env: 1,
       offerId: '1450000000',
       currencyType: 'CNY',
       platform: 'android',
       buyQuantity: 10,
       outTradeNo: 'demo_' + Date.now(),
       success(res: any) {
-        display.text(
-          formatObj({
-            状态: '支付成功',
-            详情: JSON.stringify(res),
-          })
-        );
+        wx.showToast({ title: '支付成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
         display.text(
@@ -75,8 +79,10 @@ export function requestMidasPayment() {
 }
 
 /** 发起米大师道具直购 */
-export function requestMidasPaymentGameItem() {
-  display.text(TIP);
+export async function requestMidasPaymentGameItem() {
+  const supported = await checkMidasSupport();
+  if (!supported) return;
+  wx.showToast({ title: TIP, icon: 'none', duration: TIP_DURATION });
   setTimeout(() => {
     (wx as any).requestMidasPaymentGameItem({
       mode: 'short_series_game',
@@ -86,12 +92,7 @@ export function requestMidasPaymentGameItem() {
       paySig: 'placeholder',
       signature: 'placeholder',
       success(res: any) {
-        display.text(
-          formatObj({
-            状态: '道具购买成功',
-            详情: JSON.stringify(res),
-          })
-        );
+        wx.showToast({ title: '道具购买成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
         display.text(
@@ -106,8 +107,10 @@ export function requestMidasPaymentGameItem() {
 }
 
 /** 好友代付 */
-export function requestMidasFriendPayment() {
-  display.text(TIP);
+export async function requestMidasFriendPayment() {
+  const supported = await checkMidasSupport();
+  if (!supported) return;
+  wx.showToast({ title: TIP, icon: 'none', duration: TIP_DURATION });
   setTimeout(() => {
     (wx as any).requestMidasFriendPayment({
       mode: 'game',
@@ -118,12 +121,7 @@ export function requestMidasFriendPayment() {
       buyQuantity: 10,
       outTradeNo: 'demo_friend_' + Date.now(),
       success(res: any) {
-        display.text(
-          formatObj({
-            状态: '好友代付成功',
-            详情: JSON.stringify(res),
-          })
-        );
+        wx.showToast({ title: '好友代付成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
         display.text(

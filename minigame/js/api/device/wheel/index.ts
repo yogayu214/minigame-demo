@@ -14,8 +14,15 @@ let count = 0;
 
 /** 监听滚轮事件 */
 export function onWheel() {
+  // 判断是否 PC 环境
+  const systemInfo = wx.getSystemInfoSync();
+  const platform = (systemInfo.platform || '').toLowerCase();
+  if (platform !== 'windows' && platform !== 'mac' && platform !== 'devtools') {
+    wx.showToast({ title: '请在 PC 环境下使用滚轮事件', icon: 'none' });
+    return;
+  }
   if (wheelListener) {
-    display.text('已在监听');
+    wx.showToast({ title: '已在监听', icon: 'none' });
     return;
   }
   count = 0;
@@ -26,7 +33,7 @@ export function onWheel() {
     );
   };
   wx.onWheel(wheelListener);
-  display.text('已注册滚轮监听（PC 端）');
+  wx.showToast({ title: '已注册滚轮监听', icon: 'none' });
 }
 
 /** 停止监听 */
@@ -34,7 +41,7 @@ export function offWheel() {
   if (wheelListener) {
     wx.offWheel(wheelListener);
     wheelListener = null;
-    display.text('已停止滚轮监听');
+    wx.showToast({ title: '已停止滚轮监听', icon: 'none' });
   }
 }
 

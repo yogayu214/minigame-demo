@@ -7,12 +7,15 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
 let lastImagePath = '';
+
+function toast(title: string) {
+  wx.showToast({ title, icon: 'none' });
+}
 
 /** 授权相机/相册 */
 function authorize(scope: string): Promise<void> {
@@ -48,20 +51,15 @@ export function chooseImage() {
         sourceType: ['album', 'camera'],
         success(res: any) {
           lastImagePath = res.tempFilePaths?.[0] || '';
-          display.text(
-            formatObj({
-              数量: res.tempFiles?.length || 0,
-              路径: lastImagePath.slice(-30),
-            })
-          );
+          toast('选择成功');
         },
         fail(err: any) {
-          display.text(`选择失败：${err?.errMsg || '未知错误'}`);
+          toast(`选择失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })
     .catch(() => {
-      display.text('需要授权相机/相册权限才能选择图片');
+      toast('需要授权相机/相册权限才能选择图片');
     });
 }
 
@@ -76,21 +74,15 @@ export function chooseMedia() {
         success(res: any) {
           const f = res.tempFiles?.[0];
           lastImagePath = f?.tempFilePath || '';
-          display.text(
-            formatObj({
-              type: res.type,
-              size: f ? `${f.size} B` : '-',
-              路径: lastImagePath.slice(-30),
-            })
-          );
+          toast('选择成功');
         },
         fail(err: any) {
-          display.text(`选择失败：${err?.errMsg || '未知错误'}`);
+          toast(`选择失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })
     .catch(() => {
-      display.text('需要授权相机/相册权限才能选择媒体');
+      toast('需要授权相机/相册权限才能选择媒体');
     });
 }
 
@@ -102,16 +94,10 @@ export function chooseMessageFile() {
     success(res: any) {
       const f = res.tempFiles?.[0];
       lastImagePath = f?.path || '';
-      display.text(
-        formatObj({
-          name: f?.name || '-',
-          size: f ? `${f.size} B` : '-',
-          路径: lastImagePath.slice(-30),
-        })
-      );
+      toast('选择成功');
     },
     fail(err: any) {
-      display.text(`选择失败：${err?.errMsg || '未知错误'}`);
+      toast(`选择失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -119,17 +105,17 @@ export function chooseMessageFile() {
 /** 预览上一张图 */
 export function previewImage() {
   if (!lastImagePath) {
-    display.text('请先选择一张图');
+    toast('请先选择一张图');
     return;
   }
   wx.previewImage({
     urls: [lastImagePath],
     current: lastImagePath,
     success() {
-      display.text('预览中');
+      toast('预览成功');
     },
     fail(err: any) {
-      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
+      toast(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -137,16 +123,16 @@ export function previewImage() {
 /** 预览图片/视频媒体 */
 export function previewMedia() {
   if (!lastImagePath) {
-    display.text('请先选择一张图/视频');
+    toast('请先选择一张图/视频');
     return;
   }
   wx.previewMedia({
     sources: [{ url: lastImagePath, type: 'image' }],
     success() {
-      display.text('预览中');
+      toast('预览成功');
     },
     fail(err: any) {
-      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
+      toast(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -154,19 +140,17 @@ export function previewMedia() {
 /** 压缩上一张图 */
 export function compressImage() {
   if (!lastImagePath) {
-    display.text('请先选择一张图');
+    toast('请先选择一张图');
     return;
   }
   wx.compressImage({
     src: lastImagePath,
     quality: 50,
-    success(res: any) {
-      display.text(
-        formatObj({ 状态: '已压缩', 新路径: res.tempFilePath.slice(-30) })
-      );
+    success() {
+      toast('压缩成功');
     },
     fail(err: any) {
-      display.text(`压缩失败：${err?.errMsg || '未知错误'}`);
+      toast(`压缩失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -174,7 +158,7 @@ export function compressImage() {
 /** 保存到相册 */
 export function saveImageToPhotosAlbum() {
   if (!lastImagePath) {
-    display.text('请先选择一张图');
+    toast('请先选择一张图');
     return;
   }
   authorize('scope.writePhotosAlbum')
@@ -182,14 +166,14 @@ export function saveImageToPhotosAlbum() {
       wx.saveImageToPhotosAlbum({
         filePath: lastImagePath,
         success() {
-          display.text('已保存到相册');
+          toast('保存成功');
         },
         fail(err: any) {
-          display.text(`保存失败：${err?.errMsg || '未知错误'}`);
+          toast(`保存失败：${err?.errMsg || '未知错误'}`);
         },
       });
     })
     .catch(() => {
-      display.text('需要授权相册权限才能保存图片');
+      toast('需要授权相册权限才能保存图片');
     });
 }

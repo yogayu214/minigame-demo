@@ -58,7 +58,6 @@ export function getSetting() {
 export function openSetting() {
   wx.openSetting({
     success(res: any) {
-      renderSettings(res?.authSetting || {});
     },
     fail(err: any) {
       display.text(`打开失败: ${err?.errMsg || '未知错误'}`);
@@ -71,16 +70,19 @@ let settingButton: any = null;
 /** 创建设置按钮 (OpenSettingButton) */
 export function createOpenSettingButton() {
   if (settingButton) {
-    display.text('已存在设置按钮');
+    wx.showToast({ title: '按钮已创建，请点击下方按钮', icon: 'none' });
     return;
   }
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
   settingButton = wx.createOpenSettingButton({
     type: 'text',
     text: '打开设置',
     style: {
-      left: 30,
-      top: 260,
-      width: 100,
+      left: windowWidth / 2 - 100,
+      top: 350,
+      width: 200,
       height: 40,
       backgroundColor: '#ffffff',
       color: '#07c160',
@@ -89,11 +91,7 @@ export function createOpenSettingButton() {
       lineHeight: 40,
     },
   });
-  settingButton.onTap?.(() => {
-    display.text('设置按钮被点击（将自动跳转设置）');
-  });
   settingButton.show?.();
-  display.text('设置按钮已创建');
 }
 
 export function onUnload() {

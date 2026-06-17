@@ -15,10 +15,10 @@ export function enableDebug() {
   wx.setEnableDebug({
     enableDebug: true,
     success() {
-      display.text('已开启调试，重启后右下角出现调试按钮');
+      wx.showToast({ title: '已开启调试，重启后右下角出现调试按钮', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
-      display.text(`开启失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `开启失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
 }
@@ -28,10 +28,10 @@ export function disableDebug() {
   wx.setEnableDebug({
     enableDebug: false,
     success() {
-      display.text('已关闭调试');
+      wx.showToast({ title: '已关闭调试', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
-      display.text(`关闭失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `关闭失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
 }

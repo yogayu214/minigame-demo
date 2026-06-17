@@ -1,6 +1,6 @@
 /**
- * 客服消息 / 意见反馈
- * wx.openCustomerServiceConversation / wx.createFeedbackButton
+ * 意见反馈
+ * wx.createFeedbackButton
  * FeedbackButton.destroy / FeedbackButton.hide / FeedbackButton.offTap /
  * FeedbackButton.onTap / FeedbackButton.show
  * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/open-api/customer-message/wx.openCustomerServiceConversation.html
@@ -13,32 +13,22 @@ export const setDisplay = display.setter;
 
 let feedbackButton: any = null;
 
-/** 打开客服会话 */
-export function openCustomerServiceConversation() {
-  wx.openCustomerServiceConversation({
-    sessionFrom: 'demo',
-    success() {
-      display.text('已打开客服会话');
-    },
-    fail(err: any) {
-      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
-    },
-  });
-}
-
 /** 创建意见反馈按钮 (FeedbackButton) */
 export function createFeedbackButton() {
   if (feedbackButton) {
-    display.text('已存在反馈按钮，请先销毁');
+    wx.showToast({ title: '已存在反馈按钮，请先销毁', icon: 'none' });
     return;
   }
+  const sysInfo = wx.getSystemInfoSync();
+  const windowWidth = sysInfo?.windowWidth || 375;
+  const windowHeight = sysInfo?.windowHeight || 667;
   feedbackButton = wx.createFeedbackButton({
     type: 'text',
     text: '意见反馈',
     style: {
-      left: 30,
-      top: 200,
-      width: 100,
+      left: windowWidth / 2 - 100,
+      top: 550,
+      width: 200,
       height: 40,
       backgroundColor: '#ffffff',
       color: '#07c160',
@@ -49,57 +39,57 @@ export function createFeedbackButton() {
   });
 
   if (!feedbackButton) {
-    display.text('创建反馈按钮失败');
+    wx.showToast({ title: '创建反馈按钮失败', icon: 'none' });
     return;
   }
 
   feedbackButton.onTap?.(() => {
-    display.text('onTap 回调触发');
+    wx.showToast({ title: 'onTap 回调触发', icon: 'none' });
   });
   feedbackButton.show?.();
-  display.text('反馈按钮已创建并显示');
+  wx.showToast({ title: '反馈按钮已创建并显示', icon: 'none' });
 }
 
 /** FeedbackButton.show - 显示按钮 */
 export function show() {
   if (!feedbackButton) {
-    display.text('请先创建反馈按钮');
+    wx.showToast({ title: '请先创建反馈按钮', icon: 'none' });
     return;
   }
   feedbackButton.show?.();
-  display.text('反馈按钮已显示');
+  wx.showToast({ title: '反馈按钮已显示', icon: 'none' });
 }
 
 /** FeedbackButton.hide - 隐藏按钮 */
 export function hide() {
   if (!feedbackButton) {
-    display.text('请先创建反馈按钮');
+    wx.showToast({ title: '请先创建反馈按钮', icon: 'none' });
     return;
   }
   feedbackButton.hide?.();
-  display.text('反馈按钮已隐藏');
+  wx.showToast({ title: '反馈按钮已隐藏', icon: 'none' });
 }
 
 /** FeedbackButton.onTap - 监听点击事件 */
 export function onTap() {
   if (!feedbackButton) {
-    display.text('请先创建反馈按钮');
+    wx.showToast({ title: '请先创建反馈按钮', icon: 'none' });
     return;
   }
   feedbackButton.onTap?.(() => {
-    display.text('已注册 onTap 监听');
+    wx.showToast({ title: '已注册 onTap 监听', icon: 'none' });
   });
-  display.text('onTap 监听已绑定');
+  wx.showToast({ title: 'onTap 监听已绑定', icon: 'none' });
 }
 
 /** FeedbackButton.offTap - 取消监听点击事件 */
 export function offTap() {
   if (!feedbackButton) {
-    display.text('请先创建反馈按钮');
+    wx.showToast({ title: '请先创建反馈按钮', icon: 'none' });
     return;
   }
   feedbackButton.offTap?.();
-  display.text('offTap 已取消监听');
+  wx.showToast({ title: 'offTap 已取消监听', icon: 'none' });
 }
 
 /** FeedbackButton.destroy - 销毁按钮 */
@@ -107,9 +97,9 @@ export function destroy() {
   if (feedbackButton) {
     feedbackButton.destroy?.();
     feedbackButton = null;
-    display.text('反馈按钮已销毁');
+    wx.showToast({ title: '反馈按钮已销毁', icon: 'none' });
   } else {
-    display.text('无反馈按钮可销毁');
+    wx.showToast({ title: '无反馈按钮可销毁', icon: 'none' });
   }
 }
 

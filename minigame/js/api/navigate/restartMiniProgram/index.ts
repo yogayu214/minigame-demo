@@ -14,7 +14,7 @@ export const setDisplay = display.setter;
 
 /** 直接重启（不带启动参数） */
 export function restartMiniProgram() {
-  display.text('调用 wx.restartMiniProgram …');
+  wx.showToast({ title: '调用 wx.restartMiniProgram …', icon: 'none' });
   wx.restartMiniProgram({
     success(res: any) {
       console.log('[restartMiniProgram] success', res);
@@ -27,6 +27,7 @@ export function restartMiniProgram() {
 
 /** 重启并附带启动参数 query */
 export function restartWithQuery() {
+  wx.showToast({ title: '调用 wx.restartMiniProgram（带 path）…', icon: 'none' });
   display.text('调用 wx.restartMiniProgram（带 path）…');
   wx.restartMiniProgram({
     path: '?from=demo&ts=' + Date.now(),

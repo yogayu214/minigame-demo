@@ -26,10 +26,9 @@ export function showKeyboard() {
     confirmType: 'done',
     keyboardType: 'default',
     success() {
-      display.text('软键盘已弹出');
     },
     fail(err: any) {
-      display.text(`弹出键盘失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `弹出键盘失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   } as any);
 }
@@ -38,10 +37,10 @@ export function showKeyboard() {
 export function hideKeyboard() {
   wx.hideKeyboard({
     success() {
-      display.text('软键盘已隐藏');
+      wx.showToast({ title: '软键盘已隐藏', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`隐藏键盘失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `隐藏键盘失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -51,29 +50,29 @@ export function updateKeyboard() {
   wx.updateKeyboard({
     value: '更新-' + Date.now(),
     success() {
-      display.text('已更新软键盘内容');
+      wx.showToast({ title: '已更新软键盘内容', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`更新键盘失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `更新键盘失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
 
 /** 监听键盘输入 + 确认 + 完成 + 高度变化 */
 export function listenSoftKeyboard() {
-  listeners.input = (res: any) => display.text(`事件: input\n值: ${res.value}`);
+  listeners.input = (res: any) => wx.showToast({ title: `input: ${res.value}`, icon: 'none' });
   listeners.confirm = (res: any) =>
-    display.text(`事件: confirm\n值: ${res.value}`);
+    wx.showToast({ title: `confirm: ${res.value}`, icon: 'none' });
   listeners.complete = (res: any) =>
-    display.text(`事件: complete\n值: ${res.value}`);
+    wx.showToast({ title: `complete: ${res.value}`, icon: 'none' });
   listeners.height = (res: any) =>
-    display.text(`事件: heightChange\n高度: ${res.height}`);
+    wx.showToast({ title: `heightChange: ${res.height}`, icon: 'none' });
 
   wx.onKeyboardInput(listeners.input);
   wx.onKeyboardConfirm(listeners.confirm);
   wx.onKeyboardComplete(listeners.complete);
   wx.onKeyboardHeightChange(listeners.height);
-  display.text('已注册软键盘 4 个事件');
+  wx.showToast({ title: '已注册软键盘 4 个事件', icon: 'none' });
 }
 
 /** 停止软键盘监听 */
@@ -85,18 +84,25 @@ export function stopSoftKeyboard() {
   ['input', 'confirm', 'complete', 'height'].forEach(
     (k) => delete listeners[k]
   );
-  display.text('已停止软键盘监听');
+  wx.showToast({ title: '已停止软键盘监听', icon: 'none' });
 }
 
 /** 监听物理键盘按键（PC 端） */
 export function listenHardKeyboard() {
+  // 判断是否 PC 环境
+  const systemInfo = wx.getSystemInfoSync();
+  const platform = (systemInfo.platform || '').toLowerCase();
+  if (platform !== 'windows' && platform !== 'mac' && platform !== 'devtools') {
+    wx.showToast({ title: '请在 PC 环境下使用物理键盘事件', icon: 'none' });
+    return;
+  }
   listeners.keydown = (res: any) =>
-    display.text(`事件: keydown\n按键: ${res.key}\n编码: ${res.code}`);
+    wx.showToast({ title: `keydown: ${res.key} (${res.code})`, icon: 'none' });
   listeners.keyup = (res: any) =>
-    display.text(`事件: keyup\n按键: ${res.key}\n编码: ${res.code}`);
+    wx.showToast({ title: `keyup: ${res.key} (${res.code})`, icon: 'none' });
   wx.onKeyDown(listeners.keydown);
   wx.onKeyUp(listeners.keyup);
-  display.text('已注册物理键盘监听（PC 端有效）');
+  wx.showToast({ title: '已注册物理键盘监听', icon: 'none' });
 }
 
 /** 停止物理键盘监听 */
@@ -105,7 +111,7 @@ export function stopHardKeyboard() {
   if (listeners.keyup) wx.offKeyUp(listeners.keyup);
   delete listeners.keydown;
   delete listeners.keyup;
-  display.text('已停止物理键盘监听');
+  wx.showToast({ title: '已停止物理键盘监听', icon: 'none' });
 }
 
 export function onUnload() {

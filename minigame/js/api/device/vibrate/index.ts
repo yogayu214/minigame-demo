@@ -12,10 +12,10 @@ export const setDisplay = display.setter;
 export function vibrateLong() {
   wx.vibrateLong({
     success() {
-      display.text('长振动已触发');
+      wx.showToast({ title: '长振动已触发', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`长振动失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `长振动失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -25,10 +25,10 @@ export function vibrateShort() {
   wx.vibrateShort({
     type: 'heavy',
     success() {
-      display.text('短振动已触发 (heavy)');
+      wx.showToast({ title: '短振动已触发 (heavy)', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`短振动失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `短振动失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

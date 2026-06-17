@@ -132,7 +132,6 @@ export const SCENE_MAP: Record<string, string> = {
   '111': 'midasPay',
   '112': 'overseasPay',
   '113': 'merchantTransfer',
-  '114': 'storeGift',
   // ===== 游戏对局回放 =====
   '115': 'getGameRecorder',
   // ===== 游戏服务 =====

@@ -38,10 +38,10 @@ export function setMenuDark() {
   wx.setMenuStyle({
     style: 'dark',
     success() {
-      display.text('菜单已设为深色');
+      wx.showToast({ title: '菜单已设为深色', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
-      display.text(`失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
 }
@@ -51,7 +51,7 @@ export function setMenuLight() {
   wx.setMenuStyle({
     style: 'light',
     success() {
-      display.text('菜单已设为浅色');
+      wx.showToast({ title: '菜单已设为浅色', icon: 'none', duration: 1000 });
     },
   });
 }
@@ -77,7 +77,7 @@ export function onOfficialChange() {
     );
   };
   wx.onOfficialComponentsInfoChange?.(officialListener);
-  display.text('已注册官方组件变化监听');
+  wx.showToast({ title: '已注册官方组件变化监听', icon: 'none', duration: 1000 });
 }
 
 /** 取消监听官方组件变化 */
@@ -85,9 +85,9 @@ export function offOfficialChange() {
   if (officialListener) {
     wx.offOfficialComponentsInfoChange?.(officialListener);
     officialListener = null;
-    display.text('已取消官方组件变化监听');
+    wx.showToast({ title: '已取消官方组件变化监听', icon: 'none', duration: 1000 });
   } else {
-    display.text('当前无监听，无需取消');
+    wx.showToast({ title: '当前无监听，无需取消', icon: 'none', duration: 1000 });
   }
 }
 

@@ -4,7 +4,6 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -27,90 +26,90 @@ export function onLoad() {
 /** 开始录制 */
 export function startGameRecord() {
   if (!gr) {
-    display.text('录制器未就绪，当前环境可能不支持 wx.getGameRecorder');
+    wx.showToast({ title: '录制器未就绪，当前环境可能不支持', icon: 'none', duration: 1000 });
     return;
   }
   writeTime = 0;
-  display.text('正在启动录制...');
+  wx.showToast({ title: '正在启动录制...', icon: 'none', duration: 1000 });
   gr.start()
     .then((res: any) => {
       if (res.error?.code) {
-        display.text(`录屏错误: ${res.error.code} ${res.error.message}`);
+        wx.showToast({ title: `录屏错误: ${res.error.code} ${res.error.message}`, icon: 'none', duration: 1000 });
         return;
       }
       gr.on('timeUpdate', (r: any) => {
         writeTime = Math.min(r.currentTime, 60000);
       });
-      display.text('录制已开始');
+      wx.showToast({ title: '录制已开始', icon: 'none', duration: 1000 });
     })
     .catch((err: any) => {
-      display.text(`启动失败: ${err?.errMsg || err?.message || err}`);
+      wx.showToast({ title: `启动失败: ${err?.errMsg || err?.message || err}`, icon: 'none', duration: 1000 });
     });
 }
 
 /** 暂停录制 */
 export function pause() {
   if (!gr) {
-    display.text('录制器未就绪');
+    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
     return;
   }
   gr.pause()
     .then((res: any) => {
       if (res.error?.code) {
-        display.text(`暂停错误: ${res.error.message}`);
+        wx.showToast({ title: `暂停错误: ${res.error.message}`, icon: 'none', duration: 1000 });
         return;
       }
-      display.text('已暂停录制');
+      wx.showToast({ title: '已暂停录制', icon: 'none', duration: 1000 });
     })
     .catch((err: any) => {
-      display.text(`暂停失败: ${err?.errMsg || err}`);
+      wx.showToast({ title: `暂停失败: ${err?.errMsg || err}`, icon: 'none', duration: 1000 });
     });
 }
 
 /** 继续录制 */
 export function resume() {
   if (!gr) {
-    display.text('录制器未就绪');
+    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
     return;
   }
   gr.resume()
     .then((res: any) => {
       if (res.error?.code) {
-        display.text(`恢复错误: ${res.error.message}`);
+        wx.showToast({ title: `恢复错误: ${res.error.message}`, icon: 'none', duration: 1000 });
         return;
       }
-      display.text('已继续录制');
+      wx.showToast({ title: '已继续录制', icon: 'none', duration: 1000 });
     })
     .catch((err: any) => {
-      display.text(`恢复失败: ${err?.errMsg || err}`);
+      wx.showToast({ title: `恢复失败: ${err?.errMsg || err}`, icon: 'none', duration: 1000 });
     });
 }
 
 /** 停止录制 */
 export function stopGameRecord() {
   if (!gr) {
-    display.text('录制器未就绪');
+    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
     return;
   }
   if (writeTime < 2000) {
-    display.text('录屏时间需大于2秒才能停止');
+    wx.showToast({ title: '录屏时间需大于2秒才能停止', icon: 'none', duration: 1000 });
     return;
   }
   gr.stop()
     .then((res: any) => {
       if (res.error?.code) {
-        display.text(`停止错误: ${res.error.message}`);
+        wx.showToast({ title: `停止错误: ${res.error.message}`, icon: 'none', duration: 1000 });
         return;
       }
       gr.off('timeUpdate');
-      display.text(formatObj({ 录制时长: `${writeTime}ms`, 状态: '录制完成' }));
+      wx.showToast({ title: `录制完成，时长${writeTime}ms`, icon: 'none', duration: 1000 });
 
       // 创建分享录制视频按钮
       if (!shareButton) {
         shareButton = wx.createGameRecorderShareButton({
           style: {
             left: 100,
-            top: 400,
+            top: 650,
             height: 40,
             backgroundColor: '#ffffff',
             color: '#576b95',
@@ -126,47 +125,47 @@ export function stopGameRecord() {
       }
       shareButton.show();
       shareButton.onTap((r: any) => {
-        display.text(
-          formatObj({
-            分享结果: r.error ? `错误: ${r.error.message}` : '分享完成',
-          })
-        );
+        wx.showToast({
+          title: r.error ? `分享错误: ${r.error.message}` : '分享完成',
+          icon: 'none',
+          duration: 1000,
+        });
       });
     })
     .catch((err: any) => {
-      display.text(`停止失败: ${err?.errMsg || err}`);
+      wx.showToast({ title: `停止失败: ${err?.errMsg || err}`, icon: 'none', duration: 1000 });
     });
 }
 
 /** 放弃录制 */
 export function abort() {
   if (!gr) {
-    display.text('录制器未就绪');
+    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
     return;
   }
   gr.abort()
     .then((res: any) => {
       if (res.error?.code) {
-        display.text(`放弃错误: ${res.error.message}`);
+        wx.showToast({ title: `放弃错误: ${res.error.message}`, icon: 'none', duration: 1000 });
         return;
       }
       gr.off('timeUpdate');
       writeTime = 0;
-      display.text('已放弃录制');
+      wx.showToast({ title: '已放弃录制', icon: 'none', duration: 1000 });
     })
     .catch((err: any) => {
-      display.text(`放弃失败: ${err?.errMsg || err}`);
+      wx.showToast({ title: `放弃失败: ${err?.errMsg || err}`, icon: 'none', duration: 1000 });
     });
 }
 
 /** 通过 API 分享对局回放（支持分享到游戏圈/会话） */
 export function operateGameRecorderVideo() {
   if (typeof (wx as any).operateGameRecorderVideo !== 'function') {
-    display.text('当前环境不支持 wx.operateGameRecorderVideo');
+    wx.showToast({ title: '当前环境不支持该功能', icon: 'none', duration: 1000 });
     return;
   }
   if (writeTime < 2000) {
-    display.text('请先录制至少2秒的对局回放');
+    wx.showToast({ title: '请先录制至少2秒的对局回放', icon: 'none', duration: 1000 });
     return;
   }
   (wx as any).operateGameRecorderVideo({
@@ -179,10 +178,10 @@ export function operateGameRecorderVideo() {
     atempo: 1,
     audioMix: true,
     success() {
-      display.text('分享对局回放成功');
+      wx.showToast({ title: '分享对局回放成功', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
-      display.text(`分享失败: ${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `分享失败: ${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
 }

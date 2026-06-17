@@ -6,14 +6,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-/** 获取当前小游戏的账号信息（appId / envVersion） */
+/** 获取当前小游戏的账号信息 */
 export function getAccountInfoSync() {
   const info: any = wx.getAccountInfoSync();
-  display.text(
-    `appId: ${info.miniProgram?.appId || '-'}\nenvVersion: ${info.miniProgram?.envVersion || '-'}\nversion: ${info.miniProgram?.version || '-'}`
-  );
+  display.text(`账号信息\n${formatObj(info)}`);
 }

@@ -13,12 +13,10 @@ export const setDisplay = display.setter;
 export function scanCode() {
   wx.scanCode({
     success(res: any) {
-      display.text(
-        `result: ${res.result}\nscanType: ${res.scanType}\ncharSet: ${res.charSet || '-'}`
-      );
+      wx.showToast({ title: `扫码结果: ${res.result}`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`扫码失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `扫码失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -29,10 +27,10 @@ export function scanCodeCameraOnly() {
     onlyFromCamera: true,
     scanType: ['qrCode', 'barCode'],
     success(res: any) {
-      display.text(`result: ${res.result}\nscanType: ${res.scanType}`);
+      wx.showToast({ title: `扫码结果: ${res.result}`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`扫码失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `扫码失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

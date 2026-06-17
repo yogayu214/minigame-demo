@@ -16,9 +16,9 @@ let tempPath = '';
 function ensure() {
   if (recorder) return recorder;
   recorder = wx.getRecorderManager();
-  recorder.onStart(() => display.text('开始录音'));
-  recorder.onPause(() => display.text('录音暂停'));
-  recorder.onResume(() => display.text('录音恢复'));
+  recorder.onStart(() => wx.showToast({ title: '开始录音', icon: 'none' }));
+  recorder.onPause(() => wx.showToast({ title: '录音暂停', icon: 'none' }));
+  recorder.onResume(() => wx.showToast({ title: '录音恢复', icon: 'none' }));
   recorder.onStop((res: any) => {
     tempPath = res?.tempFilePath || '';
     display.text(
@@ -30,7 +30,7 @@ function ensure() {
       })
     );
   });
-  recorder.onError((err: any) => display.text(`录音错误: ${err?.errMsg || '未知错误'}`));
+  recorder.onError((err: any) => wx.showToast({ title: `录音错误: ${err?.errMsg || '未知错误'}`, icon: 'none' }));
   return recorder;
 }
 
@@ -62,7 +62,7 @@ export function stop() {
 /** 播放上一次录音 */
 export function playLast() {
   if (!tempPath) {
-    display.text('请先录一段音频');
+    wx.showToast({ title: '请先录一段音频', icon: 'none' });
     return;
   }
   const audio = wx.createInnerAudioContext();
@@ -70,7 +70,7 @@ export function playLast() {
   audio.onEnded(() => audio.destroy());
   audio.onError(() => audio.destroy());
   audio.play();
-  display.text('播放录音');
+  wx.showToast({ title: '播放录音', icon: 'none' });
 }
 
 export function onUnload() {

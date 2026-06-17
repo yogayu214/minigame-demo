@@ -5,6 +5,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -13,12 +14,10 @@ export const setDisplay = display.setter;
 export function getGroupEnterInfo() {
   wx.getGroupEnterInfo({
     success(res: any) {
-      display.text(
-        `encryptedData: ${String(res.encryptedData || '').slice(0, 40)}...\niv: ${res.iv || '-'}`
-      );
+      display.text(`群聊入参\n${formatObj(res)}`);
     },
     fail(err: any) {
-      display.text(`查询失败：${err?.errMsg || '未知错误'}（请从群聊场景进入）`);
+      wx.showToast({ title: `查询失败: ${'请从群聊场景进入'}`, icon: 'none' });
     },
   });
 }

@@ -1,11 +1,11 @@
 /**
  * 隐私授权
- * wx.requirePrivacyAuthorize / wx.openPrivacyContract /
- * wx.onNeedPrivacyAuthorization / wx.getPrivacySetting
+ * wx.requirePrivacyAuthorize / wx.openPrivacyContract / wx.getPrivacySetting
  * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/open-api/privacy/wx.requirePrivacyAuthorize.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -14,10 +14,10 @@ export const setDisplay = display.setter;
 export function requirePrivacyAuthorize() {
   wx.requirePrivacyAuthorize({
     success() {
-      display.text('用户已同意隐私协议');
+      wx.showToast({ title: '用户已同意隐私协议', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`授权失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `授权失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -26,10 +26,10 @@ export function requirePrivacyAuthorize() {
 export function openPrivacyContract() {
   wx.openPrivacyContract({
     success() {
-      display.text('已打开隐私协议');
+      wx.showToast({ title: '已打开隐私协议', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `打开失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -38,35 +38,10 @@ export function openPrivacyContract() {
 export function getPrivacySetting() {
   wx.getPrivacySetting({
     success(res: any) {
-      display.text(
-        `needAuthorization: ${res.needAuthorization}\nprivacyContractName: ${res.privacyContractName || '-'}`
-      );
+      display.text(`隐私授权设置\n${formatObj(res)}`);
     },
     fail(err: any) {
-      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `查询失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
-}
-
-let privacyCallback: any = null;
-
-/** 监听用户操作隐私协议事件 */
-export function onNeedPrivacyAuthorization() {
-  if (privacyCallback) {
-    display.text('已在监听中');
-    return;
-  }
-  privacyCallback = (resolve: any) => {
-    display.text('收到 onNeedPrivacyAuthorization 回调，自动同意');
-    resolve({ event: 'agree', buttonId: 'agree-btn' });
-  };
-  wx.onNeedPrivacyAuthorization?.(privacyCallback);
-  display.text('已注册 onNeedPrivacyAuthorization 监听');
-}
-
-export function onUnload() {
-  if (privacyCallback) {
-    wx.offNeedPrivacyAuthorization?.(privacyCallback);
-    privacyCallback = null;
-  }
 }

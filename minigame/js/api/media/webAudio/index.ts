@@ -143,7 +143,7 @@ export function closeContext() {
   if (ctx) {
     ctx.close?.();
     ctx = null;
-    display.text('已关闭 WebAudioContext');
+    wx.showToast({ title: '已关闭 WebAudioContext', icon: 'none' });
   }
 }
 

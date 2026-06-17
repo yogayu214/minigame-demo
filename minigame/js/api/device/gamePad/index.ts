@@ -16,7 +16,7 @@ let disconnectListener: any = null;
 /** 监听手柄连接/断开 */
 export function listenGamepad() {
   if (connectListener) {
-    display.text('已在监听');
+    wx.showToast({ title: '已在监听', icon: 'none' });
     return;
   }
   connectListener = (res: any) => {
@@ -27,7 +27,7 @@ export function listenGamepad() {
   };
   wx.onGamepadConnected(connectListener);
   wx.onGamepadDisconnected(disconnectListener);
-  display.text('已注册手柄监听，请插拔手柄');
+  wx.showToast({ title: '已注册手柄监听，请插拔手柄', icon: 'none' });
 }
 
 /** 停止监听 */
@@ -36,7 +36,7 @@ export function stopListen() {
   if (disconnectListener)
     (wx as any).offGamepadDisconnected(disconnectListener);
   connectListener = disconnectListener = null;
-  display.text('已停止手柄监听');
+  wx.showToast({ title: '已停止手柄监听', icon: 'none' });
 }
 
 export function onUnload() {

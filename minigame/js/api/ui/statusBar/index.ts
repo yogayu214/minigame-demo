@@ -16,7 +16,7 @@ export function setStatusBarDark() {
   wx.setStatusBarStyle({
     style: 'black',
     success() {
-      display.text('状态栏已设为深色（白字）');
+      wx.showToast({ title: '状态栏已设为深色（白字）', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
       display.text(
@@ -34,7 +34,7 @@ export function setStatusBarLight() {
   wx.setStatusBarStyle({
     style: 'white',
     success() {
-      display.text('状态栏已设为浅色（黑字）');
+      wx.showToast({ title: '状态栏已设为浅色（黑字）', icon: 'none', duration: 1000 });
     },
     fail(err: any) {
       display.text(

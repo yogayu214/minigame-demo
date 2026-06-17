@@ -17,14 +17,14 @@ let hideListener: (() => void) | null = null;
 /** 监听小游戏回到前台 */
 export function listenOnShow() {
   if (showListener) {
-    display.text('已在监听 onShow，请先停止');
+    wx.showToast({ title: '已在监听 onShow，请先停止', icon: 'none' });
     return;
   }
   showListener = (res: any) => {
     display.text(formatObj(res));
   };
   wx.onShow(showListener);
-  display.text('已注册 onShow，切到后台再回来观察');
+  wx.showToast({ title: '已注册 onShow，切到后台再回来观察', icon: 'none' });
 }
 
 /** 停止监听 onShow */
@@ -32,21 +32,21 @@ export function stopOnShow() {
   if (showListener) {
     wx.offShow(showListener);
     showListener = null;
-    display.text('已停止 onShow 监听');
+    wx.showToast({ title: '已停止 onShow 监听', icon: 'none' });
   }
 }
 
 /** 监听小游戏进入后台 */
 export function listenOnHide() {
   if (hideListener) {
-    display.text('已在监听 onHide，请先停止');
+    wx.showToast({ title: '已在监听 onHide，请先停止', icon: 'none' });
     return;
   }
   hideListener = () => {
     display.text('onHide已触发');
   };
   wx.onHide(hideListener);
-  display.text('已注册 onHide，请切到后台观察 console');
+    wx.showToast({ title: '已注册 onHide，切到后台再回来观察', icon: 'none' });
 }
 
 /** 停止监听 onHide */
@@ -54,7 +54,7 @@ export function stopOnHide() {
   if (hideListener) {
     wx.offHide(hideListener);
     hideListener = null;
-    display.text('已停止 onHide 监听');
+    wx.showToast({ title: '已停止 onHide 监听', icon: 'none' });
   }
 }
 

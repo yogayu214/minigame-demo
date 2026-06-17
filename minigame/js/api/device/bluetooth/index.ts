@@ -17,11 +17,12 @@ let stateListener: ((res: any) => void) | null = null;
 /** 打开蓝牙适配器 */
 export function openBluetoothAdapter() {
   wx.openBluetoothAdapter({
+    mode: 'central',
     success() {
-      display.text('蓝牙适配器已打开');
+      wx.showToast({ title: '蓝牙适配器已打开', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `打开失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -30,10 +31,10 @@ export function openBluetoothAdapter() {
 export function closeBluetoothAdapter() {
   (wx as any).closeBluetoothAdapter({
     success() {
-      display.text('蓝牙适配器已关闭');
+      wx.showToast({ title: '蓝牙适配器已关闭', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`关闭失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `关闭失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -42,12 +43,10 @@ export function closeBluetoothAdapter() {
 export function getBluetoothAdapterState() {
   wx.getBluetoothAdapterState({
     success(res: any) {
-      display.text(
-        `discovering: ${res.discovering}\navailable: ${res.available}`
-      );
+      wx.showToast({ title: `discovering: ${res.discovering}  available: ${res.available}`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`查询失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `查询失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -55,12 +54,10 @@ export function getBluetoothAdapterState() {
 /** 监听蓝牙状态变化 */
 export function onAdapterStateChange() {
   stateListener = (res: any) => {
-    display.text(
-      `事件: onBluetoothAdapterStateChange\navailable: ${res?.available}\ndiscovering: ${res?.discovering}`
-    );
+    wx.showToast({ title: `available: ${res?.available} discovering: ${res?.discovering}`, icon: 'none' });
   };
   wx.onBluetoothAdapterStateChange(stateListener);
-  display.text('已注册蓝牙状态监听');
+  wx.showToast({ title: '已注册蓝牙状态监听', icon: 'none' });
 }
 
 /** 停止监听蓝牙状态 */
@@ -68,7 +65,7 @@ export function offAdapterStateChange() {
   if (stateListener) {
     (wx as any).offBluetoothAdapterStateChange(stateListener);
     stateListener = null;
-    display.text('已停止蓝牙状态监听');
+    wx.showToast({ title: '已停止蓝牙状态监听', icon: 'none' });
   }
 }
 
@@ -76,10 +73,10 @@ export function offAdapterStateChange() {
 export function startDevicesDiscovery() {
   wx.startBluetoothDevicesDiscovery({
     success() {
-      display.text('已开始搜索附近设备');
+      wx.showToast({ title: '已开始搜索附近设备', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`搜索失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `搜索失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -88,10 +85,10 @@ export function startDevicesDiscovery() {
 export function stopDevicesDiscovery() {
   wx.stopBluetoothDevicesDiscovery({
     success() {
-      display.text('已停止搜索');
+      wx.showToast({ title: '已停止搜索', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`停止搜索失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `停止搜索失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -101,14 +98,10 @@ export function getDevices() {
   wx.getBluetoothDevices({
     success(res: any) {
       const list = res.devices || [];
-      let info = `设备数: ${list.length}`;
-      list.slice(0, 5).forEach((d: any, i: number) => {
-        info += `\n设备${i + 1}: ${d.name || '-'} (${d.deviceId || '-'})`;
-      });
-      display.text(info);
+      wx.showToast({ title: `发现 ${list.length} 个设备`, icon: 'none' });
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `获取失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

@@ -13,10 +13,10 @@ export function enableKeepScreenOn() {
   wx.setKeepScreenOn({
     keepScreenOn: true,
     success() {
-      display.text('已开启屏幕常亮');
+      wx.showToast({ title: '已开启屏幕常亮', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`开启屏幕常亮失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `开启屏幕常亮失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }
@@ -26,10 +26,10 @@ export function disableKeepScreenOn() {
   wx.setKeepScreenOn({
     keepScreenOn: false,
     success() {
-      display.text('已关闭屏幕常亮');
+      wx.showToast({ title: '已关闭屏幕常亮', icon: 'none' });
     },
     fail(err: any) {
-      display.text(`关闭屏幕常亮失败：${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `关闭屏幕常亮失败：${err?.errMsg || '未知错误'}`, icon: 'none' });
     },
   });
 }

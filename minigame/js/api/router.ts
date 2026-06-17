@@ -297,11 +297,6 @@ const signIn = [
             path: 'media/video/index',
           },
           {
-            label: '录音',
-            name: 'voice',
-            path: 'media/voice/index',
-          },
-          {
             label: '相机',
             name: 'camera',
             path: 'media/camera/index',
@@ -360,11 +355,6 @@ const signIn = [
         label: '设备',
         name: 'device',
         children: [
-          {
-            label: '更新',
-            name: 'getUpdateManager',
-            path: 'device/getUpdateManager/index',
-          },
           {
             label: '振动',
             name: 'vibrate',
@@ -601,21 +591,6 @@ const signIn = [
             path: 'open-api/openLink/index',
           },
           {
-            label: '平台组件',
-            name: 'platformComponent',
-            path: 'open-api/platformComponent/index',
-          },
-          {
-            label: '微信小店',
-            name: 'storeGift',
-            path: 'open-api/storeGift/index',
-          },
-          {
-            label: '卡券',
-            name: 'card',
-            path: 'open-api/card/index',
-          },
-          {
             label: '我的小程序',
             name: 'myMiniProgram',
             path: 'open-api/myMiniProgram/index',
@@ -629,11 +604,6 @@ const signIn = [
             label: '账号信息',
             name: 'accountInfo',
             path: 'open-api/accountInfo/index',
-          },
-          {
-            label: '视频号',
-            name: 'channels',
-            path: 'open-api/channels/index',
           },
           {
             label: '微信群',
@@ -802,6 +772,9 @@ const richPages: Record<string, string> = {
   gyroscopeChange: '../libs/rich-configs/gyroscopeChange',
   deviceMotionChange: '../libs/rich-configs/deviceMotionChange',
   screenBrightness: '../libs/rich-configs/screenBrightness',
+  camera: '../libs/rich-configs/camera',
+  videoDecoder: '../libs/rich-configs/videoDecoder',
+  mediaAudioPlayer: '../libs/rich-configs/mediaAudioPlayer',
 };
 
 // 走通用 display 工厂的页面：key 是路由 name，value 是业务模块路径
@@ -851,10 +824,8 @@ const displayPages: Record<string, string> = {
   // media 新增
   innerAudio: 'media/innerAudio/index',
   webAudio: 'media/webAudio/index',
-  mediaAudioPlayer: 'media/mediaAudioPlayer/index',
   recorder: 'media/recorder/index',
   voipChat: 'media/voipChat/index',
-  videoDecoder: 'media/videoDecoder/index',
   mediaImage: 'media/image/index',
   // network 新增
   WebSocket: 'network/webSocket/index',
@@ -864,12 +835,8 @@ const displayPages: Record<string, string> = {
   accountInfo: 'open-api/accountInfo/index',
   facial: 'open-api/facial/index',
   myMiniProgram: 'open-api/myMiniProgram/index',
-  card: 'open-api/card/index',
   openLink: 'open-api/openLink/index',
-  platformComponent: 'open-api/platformComponent/index',
-  storeGift: 'open-api/storeGift/index',
   authorize: 'open-api/authorize/index',
-  channels: 'open-api/channels/index',
   customerMessage: 'open-api/customerMessage/index',
   groupInfo: 'open-api/group/index',
   privacy: 'open-api/privacy/index',
@@ -906,7 +873,6 @@ const displayPages: Record<string, string> = {
   clipboardData: 'device/clipboardData/index',
   onNetworkStatusChange: 'device/onNetworkStatusChange/index',
   deviceOrientationChange: 'device/deviceOrientationChange/index',
-  getUpdateManager: 'device/getUpdateManager/index',
   vibrate: 'device/vibrate/index',
   setKeepScreenOn: 'device/setKeepScreenOn/index',
   getLocation: 'location/getLocation/index',
@@ -917,10 +883,9 @@ const displayPages: Record<string, string> = {
   getUserInfo: 'open-api/getUserInfo/index',
   setting: 'open-api/setting/index',
   requestSubscribeMessage: 'open-api/requestSubscribeMessage/index',
+  createGameClubButton: 'open-api/createGameClubButton/index',
   storageOp: 'storage/storage/index',
   // ui
-  voice: 'media/voice/index',
-  camera: 'media/camera/index',
   readdir: 'file/readdir/index',
   saveFile: 'file/saveFile/index',
   access: 'file/access/index',

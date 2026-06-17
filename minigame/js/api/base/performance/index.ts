@@ -13,14 +13,14 @@ export const setDisplay = display.setter;
 /** 主动触发 JavaScriptCore 垃圾回收 */
 export function triggerGC() {
   wx.triggerGC();
-  display.text(' triggerGC 已调用（GC 时机由引擎控制）');
+  wx.showToast({ title: ' triggerGC 已调用（GC 时机由引擎控制）', icon: 'none' });
 }
 
 /** 上报自定义性能指标 */
 export function reportPerformance() {
   const perf: any = wx.getPerformance();
   wx.reportPerformance(10001, perf.now());
-  display.text('reportPerformance 已调用，entryId=10001');
+  wx.showToast({ title: 'reportPerformance 已调用，entryId=10001', icon: 'none' });
 }
 
 /** 获取 Performance 对象并打印 now() */

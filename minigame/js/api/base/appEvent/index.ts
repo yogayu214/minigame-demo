@@ -22,7 +22,7 @@ let rejectionCount = 0;
 /** 监听全局错误事件 */
 export function listenOnError() {
   if (errorListener) {
-    display.text('已在监听 onError');
+    wx.showToast({ title: '已在监听 onError', icon: 'none' });
     return;
   }
   errorCount = 0;
@@ -35,7 +35,7 @@ export function listenOnError() {
     display.text(formatObj(data));
   };
   wx.onError(errorListener);
-  display.text('已注册 onError，点击"触发错误"测试');
+  wx.showToast({ title: '已注册 onError，点击"触发错误"测试', icon: 'none' });
 }
 
 /** 故意抛出一个错误 */
@@ -50,14 +50,14 @@ export function stopOnError() {
   if (errorListener) {
     wx.offError(errorListener);
     errorListener = null;
-    display.text('已停止 onError 监听');
+    wx.showToast({ title: '已停止 onError 监听', icon: 'none' });
   }
 }
 
 /** 监听未处理的 Promise 异常 */
 export function listenOnUnhandledRejection() {
   if (rejectionListener) {
-    display.text('已在监听 onUnhandledRejection');
+    wx.showToast({ title: '已在监听 onUnhandledRejection', icon: 'none' });
     return;
   }
   rejectionCount = 0;
@@ -70,7 +70,7 @@ export function listenOnUnhandledRejection() {
     display.text(formatObj(data));
   };
   wx.onUnhandledRejection(rejectionListener);
-  display.text('已注册 onUnhandledRejection');
+  wx.showToast({ title: '已注册 onUnhandledRejection', icon: 'none' });
 }
 
 /** 故意触发一个未处理的 Promise reject */
@@ -85,7 +85,7 @@ export function stopOnUnhandledRejection() {
   if (rejectionListener) {
     wx.offUnhandledRejection(rejectionListener);
     rejectionListener = null;
-    display.text('已停止 onUnhandledRejection 监听');
+    wx.showToast({ title: '已停止 onUnhandledRejection 监听', icon: 'none' });
   }
 }
 
@@ -99,7 +99,7 @@ export function listenAudioInterruption() {
   };
   wx.onAudioInterruptionBegin(audioBeginListener);
   wx.onAudioInterruptionEnd(audioEndListener);
-  display.text('已注册音频中断监听');
+  wx.showToast({ title: '已注册音频中断监听', icon: 'none' });
 }
 
 /** 停止监听音频中断 */
@@ -112,7 +112,7 @@ export function stopAudioInterruption() {
     wx.offAudioInterruptionEnd(audioEndListener);
     audioEndListener = null;
   }
-  display.text('已停止音频中断监听');
+  wx.showToast({ title: '已停止音频中断监听', icon: 'none' });
 }
 
 export function onUnload() {

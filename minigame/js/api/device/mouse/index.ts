@@ -17,8 +17,15 @@ let lastMoveAt = 0;
 
 /** 监听所有鼠标事件 */
 export function listenAll() {
+  // 判断是否 PC 环境
+  const systemInfo = wx.getSystemInfoSync();
+  const platform = (systemInfo.platform || '').toLowerCase();
+  if (platform !== 'windows' && platform !== 'mac' && platform !== 'devtools') {
+    wx.showToast({ title: '请在 PC 环境下使用鼠标事件', icon: 'none' });
+    return;
+  }
   if (downListener) {
-    display.text('已在监听');
+    wx.showToast({ title: '已在监听', icon: 'none' });
     return;
   }
   downListener = (res: any) =>
@@ -38,7 +45,7 @@ export function listenAll() {
   wx.onMouseDown(downListener);
   wx.onMouseUp(upListener);
   wx.onMouseMove(moveListener);
-  display.text('已注册鼠标监听，请在 PC 端移动 / 点击');
+  wx.showToast({ title: '已注册鼠标监听，请移动/点击鼠标', icon: 'none' });
 }
 
 /** 停止所有鼠标监听 */
@@ -47,7 +54,7 @@ export function stopAll() {
   if (upListener) wx.offMouseUp(upListener);
   if (moveListener) wx.offMouseMove(moveListener);
   downListener = upListener = moveListener = null;
-  display.text('已停止所有鼠标监听');
+  wx.showToast({ title: '已停止所有鼠标监听', icon: 'none' });
 }
 
 export function onUnload() {

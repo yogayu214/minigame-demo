@@ -105,9 +105,14 @@ export const config: RichConfig = {
     });
 
     circle.onTouchMoveFn((e: any) => {
-      if (e.data.global.x >= transparentLine.x && transparentLine.x + transparentLine.width >= e.data.global.x) {
-        circle.setPositionFn({ x: e.data.global.x });
-        whiteLine.width = e.data.global.x - whiteLine.x;
+      const touchX = e.data.global.x;
+      const touchY = e.data.global.y;
+      // 限制 y 坐标在滑块附近（±80px），避免远处触摸影响滑块
+      const sliderY = transparentLine.y;
+      if (touchX >= transparentLine.x && touchX <= transparentLine.x + transparentLine.width
+        && Math.abs(touchY - sliderY) < 80 * PIXI.ratio) {
+        circle.setPositionFn({ x: touchX });
+        whiteLine.width = touchX - whiteLine.x;
         const idx = 1 + Math.round(41 * (whiteLine.width / transparentLine.width));
         logic.setFabonacciIndex(idx);
         fabonacciText.turnText(`计算斐波拉契数列第${idx}个数的值`);

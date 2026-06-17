@@ -4,6 +4,7 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -14,14 +15,12 @@ export function getExtConfigSync() {
     const res = wx.getExtConfigSync();
     const keys = Object.keys(res || {});
     if (keys.length === 0) {
-      display.text('getExtConfigSync\n返回数据为空\n当前非第三方平台小程序');
+      wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
     } else {
-      display.text(
-        `getExtConfigSync\n字段数: ${keys.length}\n${keys.map((k) => `${k}: ${res[k]}`).join('\n')}`
-      );
+      display.text(`getExtConfigSync\n${formatObj(res)}`);
     }
   } catch (e: any) {
-    display.text(`getExtConfigSync 失败\n${e?.message || e}`);
+    wx.showToast({ title: `获取失败：${e?.message || '未知错误'}`, icon: 'none', duration: 1000 });
   }
 }
 
@@ -31,15 +30,13 @@ export function getExtConfig() {
     success(res: any) {
       const keys = Object.keys(res || {});
       if (keys.length === 0) {
-        display.text('getExtConfig\n返回数据为空\n当前非第三方平台小程序');
+        wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
       } else {
-        display.text(
-          `getExtConfig\n字段数: ${keys.length}\n${keys.map((k) => `${k}: ${res[k]}`).join('\n')}`
-        );
+        display.text(`getExtConfig\n${formatObj(res)}`);
       }
     },
     fail(err: any) {
-      display.text(`getExtConfig 失败\n${err?.errMsg || '未知错误'}`);
+      wx.showToast({ title: `获取失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
 }

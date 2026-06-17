@@ -17,7 +17,6 @@ export const setDisplay = display.setter;
 export function navigateBackMiniProgram() {
   wx.navigateBackMiniProgram({
     success(res: any) {
-      display.text('已返回上一个小程序');
       console.log('[navigateBackMiniProgram] success', res);
     },
     fail(err: any) {
@@ -37,7 +36,6 @@ export function navigateBackWithExtra() {
   wx.navigateBackMiniProgram({
     extraData: { from: 'minigame-demo', ts: Date.now() },
     success(res: any) {
-      display.text('已返回上一个小程序（带 extraData）');
       console.log('[navigateBackMiniProgram] success', res);
     },
     fail(err: any) {

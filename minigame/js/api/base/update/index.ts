@@ -9,15 +9,6 @@ import { createDisplay } from '../../../libs/display-slot';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-let updateManager: any = null;
-
-function ensureManager() {
-  if (!updateManager) {
-    updateManager = wx.getUpdateManager();
-  }
-  return updateManager;
-}
-
 /** 跳转到更新微信页面（当前微信版本过低时） */
 export function updateWeChatApp() {
   wx.updateWeChatApp({
@@ -27,40 +18,31 @@ export function updateWeChatApp() {
   });
 }
 
-/** 检查小游戏是否有新版本 */
-export function checkForUpdate() {
-  const mgr = ensureManager();
-  mgr.onCheckForUpdate((res: any) => {
-    display.text(res.hasUpdate ? '✓ 检测到新版本' : '当前已是最新版本');
-  });
-}
+/** 检查更新（组合用法：注册所有回调并自动应用更新） */
+export function checkUpdate() {
+  const updateManager = wx.getUpdateManager();
 
-/** 监听新版本下载完成 */
-export function onUpdateReady() {
-  const mgr = ensureManager();
-  mgr.onUpdateReady(() => {
-    display.text('新版本已准备好，点击 applyUpdate 即可重启应用');
+  updateManager.onCheckForUpdate((res: any) => {
+    wx.showToast({ title: res.hasUpdate ? '检测到小游戏新版本，正在下载...' : '当前小游戏已是最新版本', icon: 'none', duration: 1000 });
   });
-  display.text('已注册 onUpdateReady 监听');
-}
 
-/** 应用新版本并重启小游戏 */
-export function applyUpdate() {
-  const mgr = ensureManager();
-  mgr.applyUpdate();
-  display.text('已调用 applyUpdate');
-}
-
-/** 监听新版本下载失败 */
-export function onUpdateFailed() {
-  const mgr = ensureManager();
-  mgr.onUpdateFailed(() => {
-    display.text('✗ 新版本下载失败');
+  updateManager.onUpdateReady(() => {
+    wx.showModal({
+      title: '更新提示',
+      content: '新版本已经准备好，是否重启应用？',
+      success(res: any) {
+        if (res.confirm) {
+          updateManager.applyUpdate();
+        }
+      },
+    });
   });
-  display.text('已注册 onUpdateFailed 监听');
+
+  updateManager.onUpdateFailed(() => {
+    wx.showToast({ title: '新版本下载失败', icon: 'none', duration: 1000 });
+  });
 }
 
 export function onUnload() {
   // UpdateManager 的监听无法注销，下次进入时复用同一个实例即可
-  updateManager = null;
 }

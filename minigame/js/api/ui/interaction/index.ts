@@ -53,9 +53,6 @@ export function showNoneToast() {
 /** 隐藏 Toast */
 export function hideToast() {
   wx.hideToast({
-    success() {
-      display.text('Toast 已隐藏');
-    },
   });
 }
 
@@ -73,9 +70,6 @@ export function showLoading() {
 /** 隐藏 Loading */
 export function hideLoading() {
   wx.hideLoading({
-    success() {
-      display.text('Loading 已隐藏');
-    },
   });
 }
 
@@ -85,7 +79,6 @@ export function showConfirmModal() {
     title: '提示',
     content: '这是一个确认弹窗',
     success(res: any) {
-      display.text(res?.confirm ? '用户点击确认' : '用户点击取消');
     },
     fail(err: any) {
       display.text(`showModal 失败：${err?.errMsg || '未知错误'}`);
@@ -112,10 +105,9 @@ export function showActionSheet() {
   wx.showActionSheet({
     itemList: items,
     success(res: any) {
-      display.text(`选中：第 ${res.tapIndex + 1} 项 "${items[res.tapIndex]}"`);
+      wx.showToast({ title: `选中：第 ${res.tapIndex + 1} 项 "${items[res.tapIndex]}"`, icon: 'none' });
     },
     fail() {
-      display.text('已取消');
     },
   });
 }

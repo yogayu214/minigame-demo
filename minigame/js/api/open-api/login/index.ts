@@ -14,7 +14,7 @@ export function login() {
     success(res: any) {
       if (res.code) {
         display.text(
-          `登录成功\ncode: ${res.code}\n说明: 需将 code 发送到后端换取 openid`
+          `登录成功\ncode: ${res.code}\n`
         );
       } else {
         display.text(`登录失败: ${res?.errMsg || '未知错误'}`);
@@ -30,7 +30,7 @@ export function login() {
 export function checkSession() {
   wx.checkSession({
     success() {
-      display.text('checkSession: 登录态未过期');
+      wx.showToast({ title: 'checkSession: 登录态未过期', icon: 'none' });
     },
     fail(err: any) {
       display.text(
