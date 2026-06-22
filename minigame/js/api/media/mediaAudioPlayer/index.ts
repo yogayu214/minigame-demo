@@ -168,10 +168,15 @@ export function destroyAll(silent = false) {
     if (decoder) {
       player.removeAudioSource?.(decoder).catch(() => {});
     }
+    player.stop?.().catch(() => {});
     player.destroy?.().catch(() => {});
     player = null;
   }
   if (decoder) {
+    decoder.stop?.();
+    decoder.off?.('stop');
+    decoder.off?.('ended');
+    decoder.off?.('error');
     decoder.remove?.();
     decoder = null;
   }

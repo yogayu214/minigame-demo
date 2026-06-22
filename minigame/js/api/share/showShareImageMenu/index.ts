@@ -11,7 +11,7 @@ export const setDisplay = display.setter;
 
 /** 截取当前画布作为分享图片，调起图片分享菜单 */
 export function showShareImageMenu() {
-  display.text('截取画布中...');
+  wx.showToast({ title: '截取画布中...', icon: 'none' });
   try {
     const tempFilePath = canvas.toTempFilePathSync({
       x: 0,
@@ -22,13 +22,13 @@ export function showShareImageMenu() {
     wx.showShareImageMenu({
       path: tempFilePath,
       success() {
-        display.text('已弹出图片分享菜单');
+        wx.showToast({ title: '已弹出图片分享菜单', icon: 'none' });
       },
       fail(err: any) {
-        display.text(`弹出失败：${err?.errMsg || '未知错误'}`);
+        wx.showToast({ title: `${err?.errMsg || '未知错误'}`, icon: 'none' });
       },
     });
   } catch (e: any) {
-    display.text(`截图失败：${e.message || e}`);
+    wx.showToast({ title: `截图失败：${e.message || e}`, icon: 'none' });
   }
 }

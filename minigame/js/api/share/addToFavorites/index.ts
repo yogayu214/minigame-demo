@@ -34,7 +34,7 @@ export function onAddToFavorites() {
     };
   };
   (wx as any).onAddToFavorites(favoritesFn);
-  display.text('已监听收藏事件');
+  wx.showToast({ title: '点击右上角菜单收藏查看效果', icon: 'none' });
 }
 
 /** 取消监听收藏 */
@@ -42,9 +42,9 @@ export function offAddToFavorites() {
   if (favoritesFn) {
     (wx as any).offAddToFavorites(favoritesFn);
     favoritesFn = null;
-    display.text('已取消监听收藏');
+    wx.showToast({ title: '已取消监听', icon: 'none' });
   } else {
-    display.text('当前无监听，无需取消');
+    wx.showToast({ title: '当前无监听，无需取消', icon: 'none' });
   }
 }
 

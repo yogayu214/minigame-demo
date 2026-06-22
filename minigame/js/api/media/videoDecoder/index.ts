@@ -145,14 +145,20 @@ export function stop() {
 export function destroyAll() {
   stopRenderLoop();
   if (decoder) {
+    decoder.stop?.();
+    decoder.off?.('start');
+    decoder.off?.('seek');
+    decoder.off?.('stop');
+    decoder.off?.('ended');
+    decoder.off?.('error');
     decoder.remove?.();
     decoder = null;
+    frameCanvas = null;
+    frameCtx = null;
+    lastFrameInfo = '';
+    display.clear();
+    toast('已销毁解码器');
   }
-  frameCanvas = null;
-  frameCtx = null;
-  lastFrameInfo = '';
-  display.clear();
-  toast('已销毁解码器');
 }
 
 export function onUnload() {

@@ -66,6 +66,7 @@ export const SCENE_MAP: Record<string, string> = {
   '50': 'voipChat',
   '51': 'videoDecoder',
   '52': 'mediaImage',
+  '138': 'mediaAudioPlayer',
   // ===== 位置 =====
   '53': 'getLocation',
   // ===== 设备 =====
