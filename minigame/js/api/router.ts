@@ -803,9 +803,7 @@ const displayPages: Record<string, string> = {
   // game-server / ai / ad
   aiInference: 'ai/aiInference/index',
   vkSession: 'ai/vkSession/index',
-  'visionkit-basic': 'ai/visionkit-basic/index',
-  'visionkit-basic-v2': 'ai/visionkit-basic-v2/index',
-  'plane-ar': 'ai/plane-ar/index',
+  // AR 模块（visionkit-basic/v2, plane-ar, face-detect）走 arPages 专用渲染
   createCustomAd: 'ad/createCustomAd/index',
   // device 新增
   bluetooth: 'device/bluetooth/index',
@@ -898,8 +896,15 @@ const displayPages: Record<string, string> = {
   createBannerAd: 'ad/createBannerAd/index',
   createInterstitialAd: 'ad/createInterstitialAd/index',
   createRewardedVideoAd: 'ad/createRewardedVideoAd/index',
-  'face-detect': 'ai/face-detect/index',
   customerService: 'open-api/customerService/index',
+};
+
+// AR 可视化页面：走 aiAr rich-config（Three.js + YUV + VKSession 全链路渲染）
+const arPages: Record<string, string> = {
+  'visionkit-basic': 'ai/visionkit-basic/index',
+  'visionkit-basic-v2': 'ai/visionkit-basic-v2/index',
+  'plane-ar': 'ai/plane-ar/index',
+  'face-detect': 'ai/face-detect/index',
 };
 
 // 走 sub-minigame 分包的页面：key 是路由 name，value 是分包名
@@ -1019,6 +1024,43 @@ function loadPage(
     return richRenderer(PIXI, app, params, config);
   }
 
+  // AR 可视化渲染（Three.js + YUV + VKSession 全链路）
+  if (arPages[name]) {
+    try {
+      console.log('[router] 加载 AR 页面:', name, '路径:', arPages[name]);
+      const mod = require(arPages[name]);
+      console.log('[router] AR 模块加载成功:', !!mod);
+
+      const { createArConfig } = require('../libs/rich-configs/aiAr');
+      console.log('[router] aiAr 模块加载成功');
+
+      const config = createArConfig(mod, label);
+      console.log('[router] createArConfig 成功');
+
+      if (treePage && config.onUnload) {
+        treePage[name]._onUnload = () => config.onUnload(null);
+      }
+      return richRenderer(PIXI, app, params, config);
+    } catch (e: any) {
+      console.error('[router] AR 页面加载失败:', e?.stack || e);
+      // 不再向上抛，改为返回错误提示页面
+      const { p_text } = require('../libs/component/index');
+      const errContainer = new PIXI.Container();
+      const errBg = new PIXI.Graphics();
+      errBg.beginFill(0xffffff).drawRect(0, 0, params.width, params.height).endFill();
+      errContainer.addChild(errBg);
+      const errMsg = p_text(PIXI, {
+        content: 'AR 模块加载失败\n\n' + (e?.message || e?.errMsg || String(e)) + '\n\n请在 vConsole 中查看详细日志',
+        fontSize: 28 * PIXI.ratio,
+        fill: 0xff0000,
+        x: 40 * PIXI.ratio,
+        y: 200 * PIXI.ratio,
+      });
+      errContainer.addChild(errMsg);
+      return errContainer;
+    }
+  }
+
   // 走通用 display 工厂：业务模块用 setDisplay 接收展示 api，rich-config 自动生成
   if (displayPages[name]) {
     const mod = require(displayPages[name]);
@@ -1110,10 +1152,10 @@ function router(PIXI, app, parameter) {
         treePage[name].page.visible = false;
         treePage[newPage].page.visible = true;
       } catch (e) {
-        console.error('!!! 功能错误:', e);
+        console.error('!!! 功能错误:', e?.stack || e);
         this.treeView.pop();
         wx.showModal({
-          content: '你的微信版本过低，无法演示该功能！',
+          content: '功能加载失败：' + (e?.message || e?.errMsg || String(e)),
           showCancel: false,
           confirmColor: '#02BB00',
         });

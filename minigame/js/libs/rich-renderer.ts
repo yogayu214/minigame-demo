@@ -54,6 +54,9 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const topView = config.buildTopView(PIXI, app, obj, underline);
   if (topView) container.addChild(topView);
 
+  // debug: 检查 config.actions
+  console.log('[richRenderer] config:', JSON.stringify({ title: config.title, apiName: config.apiName, actionsType: typeof config.actions, actionsVal: config.actions, hasBuildTopView: typeof config.buildTopView }));
+
   // 按钮列表（在 topView 下方，支持滚动）
   // 注意：Container.height = localBounds.maxY - localBounds.minY，
   // 当子元素不从 y=0 开始时，topView.y + topView.height 不等于实际底部，
@@ -72,11 +75,11 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const btnW = 580 * PIXI.ratio;
   const btnH = 80 * PIXI.ratio;
   const btnGap = 20 * PIXI.ratio;
-  const totalBtnH = config.actions.length * (btnH + btnGap) - btnGap;
+  const totalBtnH = (config.actions ? config.actions.length : 0) * (btnH + btnGap) - btnGap;
 
   // 仅当有按钮时才创建滚动容器（否则 scrollWrapper 的 interactive/hitArea
   // 会拦截触摸事件，导致 topView 中的滑块等组件无法操作）
-  if (config.actions.length > 0) {
+  if (config.actions && config.actions.length > 0) {
     // 滚动容器
     const scrollWrapper = new PIXI.Container();
     scrollWrapper.x = 0;

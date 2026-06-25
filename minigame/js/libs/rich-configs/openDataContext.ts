@@ -51,46 +51,124 @@ export function createOpenDataContextConfig(
       rootRef = root;
 
       // ============== sharedCanvas 渲染 ==============
+      // 对齐旧版 minigame-demo ShareCanvas.js 的已验证策略：
+      //   1. sharedCanvas 尺寸 = 子域 designSize（960×1410），与 style.ts 设计稿 1:1
+      //   2. sprite 按屏幕比例缩放并居中（卡片式全屏覆盖感）
+      //   3. updateViewPort 传物理→逻辑映射值（旧版 updateSubViewPort 公式）
+      //   4. 右上角浮层关闭按钮
       let openDataContext: any = null;
       let sharedCanvas: any = null;
       let sharedTexture: any = null;
       let sharedSprite: any = null;
+      // 全屏不透明遮罩 + 浮层关闭按钮
+      let canvasOverlay: any = null;
+      let canvasCloseBtn: any = null;
+
+      // 子域设计稿尺寸（必须与 open-data-context/render/style.ts container 一致）
+      const DESIGN_W = 960;
+      const DESIGN_H = 1410;
+
+      // 隐藏 sharedCanvas 相关元素
+      const hideSharedCanvasView = () => {
+        sharedCanvasShowed = false;
+        if (sharedSprite) sharedSprite.visible = false;
+        if (canvasOverlay) canvasOverlay.visible = false;
+        if (canvasCloseBtn) canvasCloseBtn.visible = false;
+      };
 
       try {
         openDataContext = wx.getOpenDataContext();
         sharedCanvas = openDataContext.canvas;
+        const info = wx.getSystemInfoSync();
+        const GAME_WIDTH = info.windowWidth * info.pixelRatio;
+        const GAME_HEIGHT = info.windowHeight * info.pixelRatio;
 
-        // 初始化 sharedCanvas 尺寸并同步视口
-        const systemInfo = wx.getSystemInfoSync();
-        const { pixelRatio } = systemInfo;
-        const ratio = PIXI.ratio;
-        const canvasW = Math.floor(obj.width * ratio);
-        const canvasH = Math.floor(obj.height * ratio);
-        sharedCanvas.width = canvasW;
-        sharedCanvas.height = canvasH;
+        // ---- 1. sharedCanvas 固定为设计稿尺寸（子域 Layout 按 960×1410 渲染）----
+        sharedCanvas.width = DESIGN_W;
+        sharedCanvas.height = DESIGN_H;
+
+        // ---- 2. 计算显示尺寸（对齐旧版 ShareCanvas.js 的适配公式）----
+        // 旧版用 times=0.85（即屏幕宽度的 85%），这里改为 0.92 更饱满
+        const coverRatio = 0.92;
+        const displayW = Math.floor(GAME_WIDTH * coverRatio);
+        const displayH = Math.floor((DESIGN_H / DESIGN_W) * displayW);
+
+        // ---- 3. updateViewPort（旧版 updateSubViewPort 公式：物理→逻辑映射）----
+        // 旧版: realWidth = width / GAME_WIDTH * windowWidth
+        // 这会把物理像素的显示尺寸映射回逻辑像素传给子域 Layout
+        const viewPortW = displayW / GAME_WIDTH * info.windowWidth;
+        const viewPortH = displayH / GAME_HEIGHT * info.windowHeight;
+        const viewPortX = (info.windowWidth - viewPortW) / 2;
+        const viewPortY = (info.windowHeight - viewPortH) / 2;
 
         openDataContext.postMessage({
           event: 'updateViewPort',
           box: {
-            width: canvasW,
-            height: canvasH,
-            x: 0,
-            y: 0,
+            width: viewPortW,
+            height: viewPortH,
+            x: viewPortX,
+            y: viewPortY,
           },
         });
 
-        // 创建 sharedCanvas texture + sprite
+        // ---- 4. 全屏遮罩（白色底，盖住底层按钮列表）----
+        canvasOverlay = new PIXI.Graphics();
+        canvasOverlay
+          .beginFill(0xffffff)
+          .drawRect(0, 0, obj.width, obj.height)
+          .endFill();
+        canvasOverlay.name = 'canvasOverlay';
+        canvasOverlay.visible = false;
+        root.addChild(canvasOverlay);
+
+        // ---- 5. sharedCanvas texture + sprite（居中卡片式）----
         sharedTexture = PIXI.Texture.fromCanvas(sharedCanvas);
         sharedSprite = new PIXI.Sprite(sharedTexture);
         sharedSprite.name = 'sharedCanvasSprite';
-        sharedSprite.width = obj.width;
-        sharedSprite.height = obj.height;
-        sharedSprite.x = 0;
-        sharedSprite.y = 120 * PIXI.ratio; // 下移避开标题栏遮挡（FPS/drawcall等）
+        sharedSprite.width = displayW;
+        sharedSprite.height = displayH;
+        // 居中放置（对齐旧版 renderFriendRank 的居中公式）
+        sharedSprite.x = (obj.width - displayW) / 2;
+        sharedSprite.y = (obj.height - displayH) / 2;
         sharedSprite.visible = false;
         root.addChild(sharedSprite);
 
-        // 每帧更新 sharedCanvas 到 PIXI 舞台
+        // ---- 6. 浮层关闭按钮（sprite 右上角外侧）----
+        const floatCloseSize = 72 * PIXI.ratio;
+        canvasCloseBtn = new PIXI.Container();
+        // 按钮位置：相对于 sprite 右上角，偏移一定间距
+        canvasCloseBtn.x = sharedSprite.x + displayW - floatCloseSize * 0.3;
+        canvasCloseBtn.y = sharedSprite.y - floatCloseSize * 0.3;
+        const fcbBg = new PIXI.Graphics();
+        fcbBg
+          .beginFill(0x000000, 0.5)
+          .drawCircle(floatCloseSize / 2, floatCloseSize / 2, floatCloseSize / 2)
+          .endFill();
+        const fcbIcon = p_text(PIXI, {
+          content: '✕',
+          fontSize: 34 * PIXI.ratio,
+          fill: 0xffffff,
+          relative_middle: {
+            containerWidth: floatCloseSize,
+            containerHeight: floatCloseSize,
+          },
+        });
+        canvasCloseBtn.addChild(fcbBg, fcbIcon);
+        canvasCloseBtn.name = 'canvasCloseBtn';
+        canvasCloseBtn.visible = false;
+        canvasCloseBtn.interactive = true;
+        root.addChild(canvasCloseBtn);
+        (canvasCloseBtn as any).touchend = (e: any) => {
+          e.stopPropagation();
+          hideSharedCanvasView();
+          try {
+            wx.getOpenDataContext().postMessage({ event: 'close' });
+          } catch (_e) {
+            /* noop */
+          }
+        };
+
+        // ---- 7. 每帧刷新纹理 ----
         tickerFn = () => {
           if (!sharedCanvasShowed) return;
           try {
@@ -104,13 +182,9 @@ export function createOpenDataContextConfig(
         // 开发工具可能不支持，静默处理
       }
 
-      // 监听子域消息，当子域开始渲染时显示 sharedCanvas
+      // 业务模块的 onLoad 透传（进入页面不自动显示 sharedCanvas）
       const origOnLoad = mod.onLoad;
       mod.onLoad = () => {
-        // 劫持 mod 中所有 postMessage 函数，发送后自动开启 sharedCanvas 显示
-        sharedCanvasShowed = true;
-        if (sharedSprite) sharedSprite.visible = true;
-
         if (origOnLoad) {
           try {
             origOnLoad();
@@ -331,8 +405,7 @@ export function createOpenDataContextConfig(
           layoutScroll();
 
           // 文本弹窗显示时隐藏 sharedCanvas，避免遮挡
-          if (sharedSprite) sharedSprite.visible = false;
-          sharedCanvasShowed = false;
+          hideSharedCanvasView();
         },
         data(kv: Record<string, any>) {
           clearAll();
@@ -402,8 +475,7 @@ export function createOpenDataContextConfig(
           showModal();
           layoutScroll();
 
-          if (sharedSprite) sharedSprite.visible = false;
-          sharedCanvasShowed = false;
+          hideSharedCanvasView();
         },
         image(src: string) {
           clearAll();
@@ -425,19 +497,30 @@ export function createOpenDataContextConfig(
           setTitle('调用结果');
           showModal();
           layoutScroll();
+          hideSharedCanvasView();
         },
         clear() {
           clearAll();
           hideModal();
         },
-        /** 显示 sharedCanvas，供 UI 渲染类函数调用 */
+        /** 全屏展示 sharedCanvas（盖住按钮列表，提供浮层关闭按钮） */
         showCanvas() {
           // 先关闭文字弹窗（如果有）
           hideModal();
           clearAll();
-          // 显示 sharedCanvas
-          sharedCanvasShowed = true;
+          // 全屏展示 sharedCanvas + 遮罩 + 关闭按钮
+          if (canvasOverlay) canvasOverlay.visible = true;
           if (sharedSprite) sharedSprite.visible = true;
+          if (canvasCloseBtn) {
+            canvasCloseBtn.visible = true;
+            // 关闭按钮置顶，确保可点
+            try {
+              root.setChildIndex(canvasCloseBtn, root.children.length - 1);
+            } catch (_e) {
+              /* noop */
+            }
+          }
+          sharedCanvasShowed = true;
         },
       };
 
@@ -466,8 +549,21 @@ export function createOpenDataContextConfig(
     },
 
     onUnload(app: any) {
-      // 停止 sharedCanvas 渲染
+      // 停止 sharedCanvas 渲染并隐藏相关元素
+      // （navigateBack 不销毁页面，需手动隐藏避免再次进入时残留）
       sharedCanvasShowed = false;
+      if (rootRef) {
+        try {
+          const s = rootRef.getChildByName('sharedCanvasSprite');
+          if (s) s.visible = false;
+          const o = rootRef.getChildByName('canvasOverlay');
+          if (o) o.visible = false;
+          const c = rootRef.getChildByName('canvasCloseBtn');
+          if (c) c.visible = false;
+        } catch (_e) {
+          /* noop */
+        }
+      }
       if (tickerFn && app) {
         app.ticker.remove(tickerFn);
         tickerFn = null;

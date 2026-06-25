@@ -30,10 +30,31 @@ const Layout = requirePlugin('Layout').default;
 GameGlobal.Layout = Layout;
 
 const systemInfo = wx.getSystemInfoSync();
-const { screenWidth, pixelRatio } = systemInfo;
+const { screenWidth, screenHeight, pixelRatio } = systemInfo;
 
 const sharedCanvas = wx.getSharedCanvas();
 const sharedContext = sharedCanvas.getContext('2d');
+
+// 设置默认视口。
+// 对齐旧版 minigame-demo ShareCanvas.js 的 updateSubViewPort 公式：
+//   realWidth = displayW / GAME_WIDTH * windowWidth
+// 主域消息到达后会覆盖为精确的居中版本。
+const DESIGN_W = 960;
+const DESIGN_H = 1410;
+const coverRatio = 0.92;
+const windowW = screenWidth; // 逻辑像素
+const windowH = screenHeight;
+const gameW = windowW * pixelRatio;
+const gameH = windowH * pixelRatio;
+const displayW = gameW * coverRatio;
+const displayH = (DESIGN_H / DESIGN_W) * displayW;
+
+Layout.updateViewPort({
+  width: displayW / gameW * windowW,
+  height: displayH / gameH * windowH,
+  x: (windowW - displayW / gameW * windowW) / 2,
+  y: (windowH - displayH / gameH * windowH) / 2,
+});
 
 function draw(title: any, data: any = [], type?: string) {
   Layout.clearAll();

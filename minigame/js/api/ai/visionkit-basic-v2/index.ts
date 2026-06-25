@@ -1,63 +1,26 @@
 /**
- * VisionKit 基础 v2
- * VisionKit v2 - 平面追踪
+ * VisionKit 基础 v2（AR 可视化版本）
+ *
+ * 对齐旧版 minigame-demo/AR/visionkit-basic-v2：
+ *   使用 VKSession v2 的 plane 追踪模式，
+ *   触碰屏幕任意位置进行 hitTest，命中平面则放置跳舞的 3D 机器人。
+ *
+ * 微信 API: wx.createVKSession
+ * 文档: developers.weixin.qq.com/minigame/dev/api/ai/visionkit/wx.createVKSession.html
+ * 注意: 仅真机可用，需相机权限
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+import type { ARModuleConfig } from '../../../libs/rich-configs/aiAr';
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-let session: any = null;
-
-/** 创建 VisionKit v2 会话 */
-export function createVKSession() {
-  const tip =
-    '⚠️ 此功能需要在真机上运行，且需要相机权限，\n' +
-    '模拟器不支持\n\n' +
-    '接入流程：\n' +
-    '1. 在 game.json 中配置 requiredBackgroundModes: ["camera"]\n' +
-    '2. 在真机上调用 wx.createVKSession 并指定 version: "v2"\n\n' +
-    '文档：developers.weixin.qq.com/minigame/dev/api/ai/visionkit/wx.createVKSession.html';
-
-  display.text(tip);
-
-  // 2s 后发起真实调用，展示失败结果
-  setTimeout(() => {
-    if (typeof wx.createVKSession !== 'function') {
-      display.text('当前环境不支持 createVKSession');
-      return;
-    }
-    session = wx.createVKSession({
-      track: { plane: { mode: 3 } },
-      version: 'v2',
-    });
-
-    if (!session) {
-      display.text('创建 VKSession 失败');
-      return;
-    }
-
-    session.start((err: any) => {
-      if (err) {
-        display.text(`调用失败：${err}`);
-        return;
-      }
-      display.text('VisionKit v2 已启动');
-    });
-  }, 2000);
-}
-
-/** 销毁会话 */
-export function destroySession() {
-  if (session) {
-    if (typeof session.stop === 'function') session.stop();
-    if (typeof session.destroy === 'function') session.destroy();
-    session = null;
-    display.text('VisionKit v2 已销毁');
-  }
-}
-
-export function onUnload() {
-  destroySession();
-}
+export const arConfig: ARModuleConfig = {
+  title: 'VisionKit基础-v2',
+  tip: '提示：v2版本识别平面, 触碰屏幕任意点,\n在平面位置会生成示例的机器小人',
+  buttonName: null,
+  mode: 'default',
+  vkConfig: {
+    track: {
+      plane: { mode: 3 },
+    },
+    version: 'v2',
+  },
+};
