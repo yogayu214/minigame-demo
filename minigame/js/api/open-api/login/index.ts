@@ -14,7 +14,7 @@ export function login() {
     success(res: any) {
       if (res.code) {
         display.text(
-          `登录成功\ncode: ${res.code}\n`
+          `已登录\ncode: ${res.code}\n`
         );
       } else {
         display.text(`登录失败: ${res?.errMsg || '未知错误'}`);

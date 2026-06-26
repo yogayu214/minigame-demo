@@ -50,6 +50,9 @@ const app = new PIXI.Application({
   forceCanvas: true,
 });
 
+// 暴露给横竖屏切换等模块使用
+(globalThis as any).__pixiApp = app;
+
 // 因为在微信小游戏里canvas肯定是全屏的，所以映射起来就很简单暴力
 PIXI.interaction.InteractionManager.prototype.mapPositionToPoint = (
   point,

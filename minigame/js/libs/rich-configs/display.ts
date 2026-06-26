@@ -38,6 +38,8 @@ export interface DisplayApi {
   clear(): void;
   /** 显示 sharedCanvas（开放数据域专用，其他页面空实现） */
   showCanvas?(): void;
+  /** 注册弹窗关闭回调（如恢复被遮挡的原生按钮） */
+  onClose?(cb: () => void): void;
 }
 
 export interface DisplayModule {
@@ -216,6 +218,7 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       };
 
       // ============== 弹窗显示 / 关闭 ==============
+      let closeCallback: (() => void) | null = null;
       const showModal = () => {
         modal.visible = true;
         // 重置滚动位置
@@ -223,6 +226,10 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       };
       const hideModal = () => {
         modal.visible = false;
+        // 触发关闭回调（如恢复被遮挡的原生按钮）
+        if (closeCallback) {
+          try { closeCallback(); } catch (e) { /* ignore */ }
+        }
       };
       (overlay as any).touchstart = (e: any) => {
         e.stopPropagation();
@@ -388,6 +395,9 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
         clear() {
           clearAll();
           hideModal();
+        },
+        onClose(cb: () => void) {
+          closeCallback = cb;
         },
       };
 

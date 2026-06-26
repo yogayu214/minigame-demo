@@ -3,14 +3,17 @@
  * wx.getGameRecorder / wx.createGameRecorderShareButton / wx.operateGameRecorderVideo
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
-
 let gr: any = null;
 let shareButton: any = null;
 let writeTime = 0;
+
+// 原生分享按钮的样式（由 rich-config 计算后注入）
+let shareButtonStyle: { left: number; top: number; width: number; height: number } | null = null;
+
+/** 注入原生分享按钮的位置和尺寸（供 rich-config 调用） */
+export function setShareButtonStyle(style: { left: number; top: number; width: number; height: number }) {
+  shareButtonStyle = style;
+}
 
 export function onLoad() {
   try {
@@ -104,15 +107,20 @@ export function stopGameRecord() {
       gr.off('timeUpdate');
       wx.showToast({ title: `录制完成，时长${writeTime}ms`, icon: 'none', duration: 1000 });
 
-      // 创建分享录制视频按钮
+      // 创建分享录制视频按钮（样式对齐绿色函数按钮）
       if (!shareButton) {
+        const s = shareButtonStyle || { left: 100, top: 650, width: 290, height: 40 };
         shareButton = wx.createGameRecorderShareButton({
           style: {
-            left: 100,
-            top: 650,
-            height: 40,
-            backgroundColor: '#ffffff',
-            color: '#576b95',
+            left: s.left,
+            top: s.top,
+            width: s.width,
+            height: s.height,
+            backgroundColor: '#05c25f',
+            color: '#ffffff',
+            fontSize: 15,
+            borderRadius: 10,
+            textAlign: 'center',
           } as any,
           text: '分享录制视频',
           share: {
@@ -184,16 +192,6 @@ export function operateGameRecorderVideo() {
       wx.showToast({ title: `分享失败: ${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
     },
   });
-}
-
-/** 隐藏分享按钮 */
-export function hideShareButton() {
-  if (shareButton) shareButton.hide();
-}
-
-/** 显示分享按钮 */
-export function showShareButton() {
-  if (shareButton) shareButton.show();
 }
 
 export function onUnload() {

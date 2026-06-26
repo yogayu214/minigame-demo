@@ -13,8 +13,8 @@
 
 // gltf-clone 和 gltf-loader 是 TypeScript 模块，通过 import 引入（确保被 TS 编译器包含在分包中）
 // threejs-miniprogram 是 vendor 目录下的 CommonJS JS 文件，在 initTHREE() 中延迟 require
-import cloneGltf from '../loaders/gltf-clone';
-import { registerGLTFLoader } from '../loaders/gltf-loader';
+import cloneGltf from './gltf-clone';
+import { registerGLTFLoader } from './gltf-loader';
 
 // ============== 着色器源码 ==============
 
@@ -126,6 +126,10 @@ export interface ARRendererOptions {
   screenTop?: number;
   screenBottom?: number;
   onTouchEnd?: (x: number, y: number) => void;
+  /** VKSession 启动成功后的回调（异步） */
+  onReady?: () => void;
+  /** VKSession 创建或启动失败的回调（同步+异步均可触发） */
+  onError?: (err: string) => void;
 }
 
 // ============== ARRenderer 类 ==============
@@ -187,6 +191,8 @@ export class ARRenderer {
 
   // 回调
   onTouchEndCallback: ((x: number, y: number) => void) | null = null;
+  onReadyCallback: (() => void) | null = null;
+  errorCallback: ((err: string) => void) | null = null;
 
   // 渲染循环标志
   private disposed = false;
@@ -203,6 +209,8 @@ export class ARRenderer {
     this.data.screenTop = options.screenTop ?? -1;
     this.data.screenBottom = options.screenBottom ?? 1;
     this.onTouchEndCallback = options.onTouchEnd ?? null;
+    this.onReadyCallback = options.onReady ?? null;
+    this.errorCallback = options.onError ?? null;
   }
 
   setData(args: Record<string, any>) {
@@ -271,7 +279,7 @@ export class ARRenderer {
   private initTHREE() {
     // 延迟加载 Three.js 和 GLTF Loader（避免模块加载时即失败）
     // threejs-miniprogram 是 vendor 目录下的 CommonJS JS 文件，在主包中，运行时 require
-    const { createScopedThreejs } = require('../../../vendor/threejs-miniprogram/index');
+    const { createScopedThreejs } = require('../../vendor/threejs-miniprogram/index');
     // registerGLTFLoader 已在文件顶部通过 import 引入
 
     const THREE = (this.THREE = createScopedThreejs(this.canvas));
@@ -313,17 +321,35 @@ export class ARRenderer {
   private initVK(config: ARConfig) {
     // 检查 VKSession API 是否存在
     if (typeof (wx as any).createVKSession !== 'function') {
-      console.warn('当前环境不支持 wx.createVKSession');
-      this.vkError = '当前环境不支持 createVKSession\n请在真机上运行';
+      const msg = '当前环境不支持 createVKSession，请在真机上运行';
+      console.warn('[AR] ' + msg);
+      this.vkError = msg;
+      if (this.errorCallback) this.errorCallback(msg);
       return;
     }
 
     config.gl = this.gl;
-    const session = (this.session = (wx as any).createVKSession(config));
+    let session: any;
+    try {
+      session = this.session = (wx as any).createVKSession(config);
+    } catch (e: any) {
+      const msg = '创建 VKSession 失败: ' + (e?.errMsg || e?.message || String(e));
+      console.error('[AR] ' + msg);
+      this.vkError = msg;
+      if (this.errorCallback) this.errorCallback(msg);
+      return;
+    }
 
     session.start((err: any) => {
-      if (err) return console.error('VK error: ', err);
-      console.log('VKSession.version', session.version);
+      if (err) {
+        const msg = 'VKSession 启动失败（可能设备不支持此版本）: ' + err;
+        console.error('[AR] ' + msg);
+        this.vkError = msg;
+        if (this.errorCallback) this.errorCallback(msg);
+        return;
+      }
+      console.log('[AR] VKSession.version', session.version);
+      if (this.onReadyCallback) this.onReadyCallback();
 
       // 加载机器人模型
       const loader = new this.THREE.GLTFLoader();

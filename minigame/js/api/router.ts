@@ -740,16 +740,6 @@ const signIn = [
             name: 'face-detect',
             path: 'ai/face-detect/index',
           },
-          {
-            label: 'AI 推理',
-            name: 'aiInference',
-            path: 'ai/aiInference/index',
-          },
-          {
-            label: 'VK Session',
-            name: 'vkSession',
-            path: 'ai/vkSession/index',
-          },
         ],
       },
 
@@ -775,6 +765,7 @@ const richPages: Record<string, string> = {
   camera: '../libs/rich-configs/camera',
   videoDecoder: '../libs/rich-configs/videoDecoder',
   mediaAudioPlayer: '../libs/rich-configs/mediaAudioPlayer',
+  getGameRecorder: '../libs/rich-configs/getGameRecorder',
 };
 
 // 走通用 display 工厂的页面：key 是路由 name，value 是业务模块路径
@@ -801,8 +792,6 @@ const displayPages: Record<string, string> = {
   dataAnalysisLogManager: 'data-analysis/logManager/index',
   midasPay: 'pay/midas/index',
   // game-server / ai / ad
-  aiInference: 'ai/aiInference/index',
-  vkSession: 'ai/vkSession/index',
   // AR 模块（visionkit-basic/v2, plane-ar, face-detect）走 arPages 专用渲染
   createCustomAd: 'ad/createCustomAd/index',
   // device 新增

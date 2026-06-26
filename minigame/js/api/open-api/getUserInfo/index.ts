@@ -5,6 +5,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { formatObj } from '../../../libs/format';
+import { calcNativeButtonPos, GREEN_BUTTON_STYLE } from '../../../libs/native-button-pos';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -28,42 +29,41 @@ export function getUserInfo() {
   });
 }
 
-/** 创建获取用户信息按钮（点击后会请求授权） */
+/** 创建获取用户信息按钮（点击后会请求授权，位置在 destroyButton 下方） */
 export function createUserInfoButton() {
   if (userInfoBtn) {
-    wx.showToast({ title: '按钮已创建，请点击下方按钮', icon: 'none' });
+    wx.showToast({ title: '按钮已创建，请点击按钮', icon: 'none' });
     return;
   }
-  const sysInfo = wx.getSystemInfoSync();
-  const windowWidth = sysInfo?.windowWidth || 375;
-  const windowHeight = sysInfo?.windowHeight || 667;
+
+  // 第4个按钮位置 (index=3): getUserInfo[0] / createUserInfoButton[1] / destroyButton[2] / ★原生按钮[3]
+  const pos = calcNativeButtonPos(3);
+
   userInfoBtn = wx.createUserInfoButton({
     type: 'text',
     text: '点这里获取用户信息',
     style: {
-      left: windowWidth / 2 - 100,
-      top: 125,
-      width: 200,
-      height: 40,
-      backgroundColor: '#07c160',
-      color: '#ffffff',
-      fontSize: 16,
-      textAlign: 'center',
-      lineHeight: 40,
-      borderRadius: 4,
-    },
+      ...pos,
+      ...GREEN_BUTTON_STYLE,
+      lineHeight: Math.round(pos.height),
+    } as any,
   });
+
   userInfoBtn.onTap?.((res: any) => {
+    // 隐藏原生按钮，避免遮挡 display-slot 弹窗
+    userInfoBtn?.hide();
     if (res.userInfo) {
+      // 注册弹窗关闭回调：用户关闭弹窗后自动恢复按钮
+      display.onClose?.(() => { userInfoBtn?.show(); });
       setTimeout(() => {
-        const u = res.userInfo;
-        display.text(`用户信息\n${formatObj(u)}`);
+        display.text(`用户信息\n${formatObj(res.userInfo)}`);
       }, 300);
-      } else {
+    } else {
       wx.showToast({ title: '用户拒绝授权', icon: 'none' });
+      userInfoBtn?.show(); // 未授权则恢复按钮，允许重试
     }
   });
-  wx.showToast({ title: '请点击屏幕下方的按钮获取用户信息', icon: 'none' });
+  wx.showToast({ title: '已创建授权按钮，请在下方点击', icon: 'none' });
 }
 
 /** 销毁按钮 */

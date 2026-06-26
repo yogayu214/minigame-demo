@@ -1,5 +1,5 @@
 import type { RichConfig } from '../rich-renderer';
-import { ARRenderer, ARMode, ARConfig } from '../../api/ai/common/arRenderer';
+import { ARRenderer, ARMode, ARConfig } from '../ar/arRenderer';
 
 export interface ARModuleConfig {
   title: string;
@@ -20,6 +20,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
   let tickerFn: ((dt: number) => void) | null = null;
   let switchBtn: any = null;
   let switchBtnText: any = null;
+  let screenBg: any = null; // 需要在外层声明，供 onError 回调访问
 
   // 2D 中转 canvas（用于将 WebGL 离屏 canvas 的内容 drawImage 过来，再生成 PIXI 纹理）
   // 对齐旧版 behavior.js：canvas2dContext.drawImage(offScreenCanvas, ...) 模式
@@ -29,22 +30,31 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
   return {
     title: cfg.title || pageLabel || '',
     apiName: '',
+    actions: [],
 
     buildTopView(PIXI: any, app: any, obj: any, underline: any) {
       const root = new PIXI.Container();
       rootRef = root;
 
-      // 计算 AR 画面区域的尺寸和位置
-      const underlineBottom = underline
-        ? (underline.y || 0) + (underline.height || 0)
-        : 0;
-      const screenTop = underlineBottom + 20 * PIXI.ratio;
+      // 计算 AR 画面区域的尺寸和位置（对齐旧版 view.js）
+      // 旧版 view.js: screen.y = title.height + title.y + 78 * PIXI.ratio（紧贴 api_name 下方）
+      // fixedTemplate 布局关系：
+      //   api_name.y = title.h + title.y + 78
+      //   underline.y = api_name.y + api_name.h + 23
+      // 所以: screenTop = underline.y - api_name.h - 23 ≈ underline.y - 67 * ratio
+      const API_NAME_H = 44 * PIXI.ratio; // fontSize=32 的文字高度约 44
+      const screenTop = underline
+        ? underline.y - API_NAME_H - 23 * PIXI.ratio - (underline.height || 0)
+        : 120 * PIXI.ratio;
+
+      // AR 画面高度：对齐旧版 behavior.js 的 canvas.height * 0.7
+      // 同时确保不超过屏幕底部 logo 区域
       const logoH = 100 * PIXI.ratio;
-      const screenBottom = obj.height - logoH - 20 * PIXI.ratio;
-      const screenH = screenBottom - screenTop;
+      const maxScreenH = obj.height - screenTop - logoH;
+      const screenH = Math.min(obj.height * 0.7, maxScreenH);
 
       // AR 画面区域（PIXI Graphics 背景 + Canvas Texture 叠加）
-      const screenBg = new PIXI.Graphics();
+      screenBg = new PIXI.Graphics();
       screenBg
         .beginFill(0x000000)
         .drawRect(0, screenTop, obj.width, screenH)
@@ -57,7 +67,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         content: cfg.tip,
         fontSize: 26 * PIXI.ratio,
         fill: 0x576b95,
-        y: screenBottom + 10 * PIXI.ratio,
+        y: screenTop + screenH + 10 * PIXI.ratio,
         relative_middle: {
           containerWidth: obj.width,
         },
@@ -86,11 +96,12 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         switchBtn.interactive = true;
         switchBtn.onClickFn(() => {
           if (renderer) {
+            // 先读取当前 cameraPosition 确定切换后的按钮文字（cfg 是静态配置，switchCamera 不会修改它）
+            const current = cfg.vkConfig.cameraPosition || 0;
             renderer.switchCamera();
             if (switchBtnText && switchBtnText.turnText) {
-              const current = cfg.vkConfig.cameraPosition || 0;
               switchBtnText.turnText(
-                current === 0 ? '切换为前置摄像头' : '切换为后置摄像头'
+                current === 0 ? '切换为后置摄像头' : '切换为前置摄像头'
               );
             }
           }
@@ -102,17 +113,15 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
       const arCanvasWidth = obj.width;
       const arCanvasHeight = screenH;
 
-      // 计算 YUV 渲染的屏幕裁剪参数（将物理像素映射到 -1~1 范围）
-      const yuvScreenTop = -1 + (screenTop / obj.height) * 2;
-      const yuvScreenBottom = -1 + (screenBottom / obj.height) * 2;
-
+      // 对齐旧版 behavior.js：YUV 渲染整个离屏 canvas，不做裁剪
+      // 旧版的 YUV shader 没有 screenTop/screenBottom 参数，全屏渲染后通过 drawImage 定位
       renderer = new ARRenderer({
         mode: cfg.mode,
         config: { ...cfg.vkConfig },
         width: arCanvasWidth,
         height: arCanvasHeight,
-        screenTop: yuvScreenTop,
-        screenBottom: yuvScreenBottom,
+        // 不传 screenTop/screenBottom，让 ARRenderer 使用默认值 -1~1（全屏渲染）
+        // 画面的位置控制完全由外层的 PIXI Sprite.y = screenTop 来决定
         onTouchEnd: (x: number, y: number) => {
           // 将触摸坐标从 PIXI 坐标转换为 AR Canvas 坐标
           const arX = x;
@@ -120,6 +129,14 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
           if (renderer) {
             renderer.onTouchEnd(arX, arY);
           }
+        },
+        onError: (err: string) => {
+          // 异步错误：VKSession 启动失败（如设备不支持 v2）
+          // 隐藏相机画面 + toast 提示即可
+          console.error('[aiAr] 异步错误:', err);
+          wx.showToast({ title: err, icon: 'none', duration: 3000 });
+          if (arSprite) arSprite.visible = false;
+          if (screenBg) screenBg.visible = false;
         },
       });
 
@@ -134,17 +151,20 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
       } catch (e: any) {
         initError = e?.errMsg || e?.message || String(e);
         console.error('[aiAr] AR 初始化失败:', e, '错误信息:', initError);
+        wx.showToast({ title: initError, icon: 'none', duration: 3000 });
       }
 
-      // 检查 VKSession 是否可用
+      // 检查同步阶段的 VKSession 是否可用
+      // （注意：session.start 是异步的，v2 不支持等错误会在回调中通过 onError 处理）
       const vkError = renderer?.vkError;
-      const hasError = initError || vkError;
-      console.log('[aiAr] hasError:', !!hasError, 'initError:', initError, 'vkError:', vkError);
+      const hasSyncError = initError || vkError;
+      console.log('[aiAr] hasSyncError:', !!hasSyncError, 'initError:', initError, 'vkError': vkError);
 
       // 获取 WebGL 离屏 canvas
       const webglCanvas = renderer?.getCanvas();
 
-      if (webglCanvas && !hasError) {
+      // 即使没有同步错误也创建相机画面（异步错误通过 onError 回调隐藏）
+      if (webglCanvas && !hasSyncError) {
         // ========== 对齐旧版 behavior.js 的 drawImage 方案 ==========
         // 创建 2D 中转 canvas，用于每帧将 WebGL 内容绘制过来
         transfer2dCanvas = (wx as any).createCanvas();
@@ -161,6 +181,11 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         arSprite.width = obj.width;
         arSprite.height = screenH;
         root.addChild(arSprite);
+
+        // 将摄像头切换按钮提升到 AR 画面上方（防止被 arSprite 遮挡）
+        if (switchBtn) {
+          root.setChildIndex(switchBtn, root.children.length - 1);
+        }
 
         // 每帧刷新：WebGL → drawImage 到 2D canvas → 更新 PIXI Texture
         tickerFn = () => {
@@ -182,22 +207,9 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         };
         app.ticker.add(tickerFn);
       } else {
-        // 环境不支持时，在 AR 区域显示提示
+        // 同步阶段就出错（如 API 不存在），只 toast 即可
         const errorDetail = initError || vkError || '未知错误';
-        const errorText = p_text(PIXI, {
-          content:
-            '⚠️ AR 渲染初始化失败\n\n' +
-            '原因: ' + errorDetail + '\n\n' +
-            '建议：\n' +
-            '1. 在真机上运行（模拟器不支持）\n' +
-            '2. game.json 配置 requiredBackgroundModes: ["camera"]\n' +
-            '3. 确保微信版本支持 VKSession',
-          fontSize: 26 * PIXI.ratio,
-          fill: 0xff6600,
-          x: 40 * PIXI.ratio,
-          y: screenTop + 60 * PIXI.ratio,
-        });
-        root.addChild(errorText);
+        wx.showToast({ title: 'AR 初始化失败: ' + errorDetail, icon: 'none', duration: 3000 });
       }
 
       // 触摸事件转发到 ARRenderer
@@ -254,6 +266,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
       switchBtnText = null;
       transfer2dCanvas = null;
       transfer2dCtx = null;
+      screenBg = null;
       rootRef = null;
     },
   };

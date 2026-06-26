@@ -54,9 +54,6 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const topView = config.buildTopView(PIXI, app, obj, underline);
   if (topView) container.addChild(topView);
 
-  // debug: 检查 config.actions
-  console.log('[richRenderer] config:', JSON.stringify({ title: config.title, apiName: config.apiName, actionsType: typeof config.actions, actionsVal: config.actions, hasBuildTopView: typeof config.buildTopView }));
-
   // 按钮列表（在 topView 下方，支持滚动）
   // 注意：Container.height = localBounds.maxY - localBounds.minY，
   // 当子元素不从 y=0 开始时，topView.y + topView.height 不等于实际底部，
