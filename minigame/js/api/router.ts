@@ -185,16 +185,6 @@ const signIn = [
             name: 'WebSocket',
             path: 'network/webSocket/index',
           },
-          {
-            label: 'TCP Socket',
-            name: 'tcpSocket',
-            path: 'network/tcp/index',
-          },
-          {
-            label: 'UDP Socket',
-            name: 'udpSocket',
-            path: 'network/udp/index',
-          },
         ],
       },
       {
@@ -757,6 +747,8 @@ const richPages: Record<string, string> = {
   worker: '../libs/rich-configs/worker',
   setPreferredFramesPerSecond:
     '../libs/rich-configs/setPreferredFramesPerSecond',
+  createImage: '../libs/rich-configs/render-createImage',
+  loadFont: '../libs/rich-configs/render-loadFont',
   accelerometerChange: '../libs/rich-configs/accelerometerChange',
   compassChange: '../libs/rich-configs/compassChange',
   gyroscopeChange: '../libs/rich-configs/gyroscopeChange',
@@ -766,6 +758,21 @@ const richPages: Record<string, string> = {
   videoDecoder: '../libs/rich-configs/videoDecoder',
   mediaAudioPlayer: '../libs/rich-configs/mediaAudioPlayer',
   getGameRecorder: '../libs/rich-configs/getGameRecorder',
+  request: '../libs/rich-configs/network-request',
+  downloadFile: '../libs/rich-configs/network-downloadFile',
+  uploadFile: '../libs/rich-configs/network-uploadFile',
+  WebSocket: '../libs/rich-configs/network-webSocket',
+  voipChat: '../libs/rich-configs/voipChat',
+  // file
+  access: '../libs/rich-configs/file-access',
+  dir: '../libs/rich-configs/file-dir',
+  getFileInfo: '../libs/rich-configs/file-getFileInfo',
+  readdir: '../libs/rich-configs/file-readdir',
+  rename: '../libs/rich-configs/file-rename',
+  saveFile: '../libs/rich-configs/file-saveFile',
+  savedFile: '../libs/rich-configs/file-savedFile',
+  stat: '../libs/rich-configs/file-stat',
+  unzip: '../libs/rich-configs/file-unzip',
 };
 
 // 走通用 display 工厂的页面：key 是路由 name，value 是业务模块路径
@@ -806,18 +813,11 @@ const displayPages: Record<string, string> = {
   // file 新增
   fileSystemManager: 'file/fileSystemManager/index',
   saveFileToDisk: 'file/saveFileToDisk/index',
-  rename: 'file/rename/index',
-  savedFile: 'file/savedFile/index',
   // media 新增
   innerAudio: 'media/innerAudio/index',
   webAudio: 'media/webAudio/index',
   recorder: 'media/recorder/index',
-  voipChat: 'media/voipChat/index',
   mediaImage: 'media/image/index',
-  // network 新增
-  WebSocket: 'network/webSocket/index',
-  tcpSocket: 'network/tcp/index',
-  udpSocket: 'network/udp/index',
   // open-api 新增
   accountInfo: 'open-api/accountInfo/index',
   facial: 'open-api/facial/index',
@@ -834,9 +834,7 @@ const displayPages: Record<string, string> = {
   cursor: 'render/cursor/index',
   createPath2D: 'render/createPath2D/index',
   animationFrame: 'render/animationFrame/index',
-  loadFont: 'render/loadFont/index',
   getTextLineHeight: 'render/getTextLineHeight/index',
-  createImage: 'render/createImage/index',
   createImageData: 'render/createImageData/index',
   // share 新增
   shareMenu: 'share/shareMenu/index',
@@ -863,9 +861,6 @@ const displayPages: Record<string, string> = {
   vibrate: 'device/vibrate/index',
   setKeepScreenOn: 'device/setKeepScreenOn/index',
   getLocation: 'location/getLocation/index',
-  request: 'network/request/index',
-  downloadFile: 'network/downloadFile/index',
-  uploadFile: 'network/uploadFile/index',
   login: 'open-api/login/index',
   getUserInfo: 'open-api/getUserInfo/index',
   setting: 'open-api/setting/index',
@@ -873,13 +868,6 @@ const displayPages: Record<string, string> = {
   createGameClubButton: 'open-api/createGameClubButton/index',
   storageOp: 'storage/storage/index',
   // ui
-  readdir: 'file/readdir/index',
-  saveFile: 'file/saveFile/index',
-  access: 'file/access/index',
-  stat: 'file/stat/index',
-  getFileInfo: 'file/getFileInfo/index',
-  dir: 'file/dir/index',
-  unzip: 'file/unzip/index',
   getGameRecorder: 'game-recorder/getGameRecorder/index',
   getExtConfig: 'extConfig/getExtConfig/index',
   createBannerAd: 'ad/createBannerAd/index',

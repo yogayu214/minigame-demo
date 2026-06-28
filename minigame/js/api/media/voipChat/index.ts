@@ -2,27 +2,30 @@
  * 实时语音通话（VoIP Chat）
  * wx.joinVoIPChat / wx.exitVoIPChat / wx.updateVoIPChatMuteConfig /
  * wx.onVoIPChatMembersChanged / wx.onVoIPChatInterrupted
- * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/media/voip/wx.joinVoIPChat.html
  *
- * 功能：
- *   1. 进入（创建）语音房间，显示房间人数
- *   2. 麦克风静音/取消静音切换
- *   3. 耳机静音/取消静音切换
- *   4. 监听成员变化，实时更新人数
- *   5. 邀请好友进入房间（分享）
- *   6. 退出房间
+ * 纯 API 逻辑 + 回调钩子，UI 由 rich-config 渲染
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+// ========== 回调钩子 ==========
+let onJoinCb: ((roomName: string, memberCount: number) => void) | null = null;
+let onMemberChangeCb: ((memberCount: number) => void) | null = null;
+let onExitCb: (() => void) | null = null;
 
-const display = createDisplay();
-export const setDisplay = display.setter;
+export function setOnJoin(cb: (roomName: string, memberCount: number) => void) {
+  onJoinCb = cb;
+}
+export function setOnMemberChange(cb: (memberCount: number) => void) {
+  onMemberChangeCb = cb;
+}
+export function setOnExit(cb: () => void) {
+  onExitCb = cb;
+}
 
 // ========== 状态 ==========
 let groupId = '';
 let scopeRecord = false;
-let micMuted = false;    // true = 静音（关闭），false = 开启
-let earMuted = false;    // true = 静音（关闭），false = 开启
+let micMuted = false; // false = 开启(on), true = 静音(off)
+let earMuted = false;
 let joined = false;
 
 // ========== 工具函数 ==========
@@ -31,7 +34,6 @@ function toast(title: string) {
   wx.showToast({ title, icon: 'none' });
 }
 
-/** 授权录音权限 */
 function authorizeRecord(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (scopeRecord) return resolve();
@@ -56,7 +58,6 @@ function authorizeRecord(): Promise<void> {
   });
 }
 
-/** 通过云函数获取签名 */
 function getSignature(gId: string): Promise<any> {
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
@@ -72,36 +73,35 @@ function getSignature(gId: string): Promise<any> {
   });
 }
 
-/** 更新 UI 显示 */
-function updateUI(memberCount?: number) {
-  display.data({
-    房间名: groupId || '-',
-    状态: joined ? '已加入' : '未加入',
-    麦克风: micMuted ? '已静音' : '开启',
-    耳机: earMuted ? '已静音' : '开启',
-    当前人数: `${memberCount ?? '?'} 人`,
-  });
-}
-
 // ========== 导出函数 ==========
 
-/**
- * 加入（创建）实时语音通话房间
- * 页面加载时自动调用，或用户手动点击"进入房间"
- */
+/** 是否已在房间中 */
+export function isJoined() {
+  return joined;
+}
+
+/** 获取当前房间名 */
+export function getRoomName() {
+  return groupId;
+}
+
+/** 加入（创建）实时语音通话房间 */
 export function joinChat() {
   if (joined) {
-    toast('已在房间中');
     return;
   }
   authorizeRecord()
     .then(() => {
+      // 从分享链接进入时，复用已有的 roomName
+      const query = (window as any).query;
+      if (!groupId && query?.roomName) {
+        groupId = query.roomName;
+      }
       if (!groupId) {
         groupId = `语音房间${Math.random().toString(36).substring(2)}`;
       }
-      const loadingText = window.query?.re_enter || '正在加入房间';
+      const loadingText = query?.re_enter || '正在加入房间';
       wx.showLoading({ title: loadingText, mask: true });
-
       return getSignature(groupId);
     })
     .then((signData: any) => {
@@ -118,32 +118,24 @@ export function joinChat() {
               joined = true;
               micMuted = false;
               earMuted = false;
-              updateUI(res.openIdList?.length);
+              onJoinCb?.(groupId, res.openIdList?.length || 1);
 
-              // 监听成员变化
               wx.onVoIPChatMembersChanged((ev: any) => {
-                updateUI(ev.openIdList?.length);
+                onMemberChangeCb?.(ev.openIdList?.length || 1);
               });
 
-              // 监听被中断（如切到后台）
               wx.onVoIPChatInterrupted(() => {
                 wx.offVoIPChatMembersChanged();
                 wx.offVoIPChatInterrupted();
                 joined = false;
                 toast('语音通话被中断');
-
-                // 尝试重新进入
-                if (window.query?.pathName && window.query?.roomName) {
-                  setTimeout(() => {
-                    groupId = window.query.roomName;
-                    joinChat();
-                  }, 500);
-                }
+                onExitCb?.();
+                // 被动断开后返回上一级
+                (window as any).router.delPage();
               });
 
-              // 设置分享参数，方便邀请好友
-              window.query = {
-                pathName: window.router.getNowPageName(),
+              (window as any).query = {
+                pathName: (window as any).router.getNowPageName(),
                 roomName: groupId,
                 re_enter: '返回当前房间',
               };
@@ -162,14 +154,12 @@ export function joinChat() {
       } else {
         toast(`获取签名失败: ${errMsg}`);
       }
+      onExitCb?.();
     });
 }
 
-/**
- * 切换麦克风静音状态
- * 点击时在 静音/开启 之间切换
- */
-export function toggleMicrophone() {
+/** 切换麦克风静音状态，成功后回调 */
+export function toggleMicrophone(onSuccess?: () => void) {
   if (!joined) {
     toast('请先加入房间');
     return;
@@ -178,22 +168,16 @@ export function toggleMicrophone() {
   wx.updateVoIPChatMuteConfig({
     muteConfig: { muteMicrophone: micMuted, muteEarphone: earMuted },
     success() {
-      updateUI();
-      toast(micMuted ? '麦克风已静音' : '麦克风已开启');
+      onSuccess?.();
     },
-    fail(err: any) {
-      // 切换回来
+    fail() {
       micMuted = !micMuted;
-      toast(`设置失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
-/**
- * 切换耳机静音状态
- * 点击时在 静音/开启 之间切换
- */
-export function toggleEarphone() {
+/** 切换耳机静音状态，成功后回调 */
+export function toggleEarphone(onSuccess?: () => void) {
   if (!joined) {
     toast('请先加入房间');
     return;
@@ -202,20 +186,15 @@ export function toggleEarphone() {
   wx.updateVoIPChatMuteConfig({
     muteConfig: { muteMicrophone: micMuted, muteEarphone: earMuted },
     success() {
-      updateUI();
-      toast(earMuted ? '耳机已静音' : '耳机已开启');
+      onSuccess?.();
     },
-    fail(err: any) {
-      // 切换回来
+    fail() {
       earMuted = !earMuted;
-      toast(`设置失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
 
-/**
- * 邀请好友进入房间（主动分享）
- */
+/** 邀请好友进入房间（主动分享） */
 export function inviteFriend() {
   if (!joined || !groupId) {
     toast('请先加入房间');
@@ -235,34 +214,29 @@ export function inviteFriend() {
   wx.shareAppMessage({
     title: '快来加入我的语音对话房间',
     imageUrl,
-    query: `pathName=${window.router.getNowPageName()}&roomName=${groupId}`,
+    query: `pathName=${(window as any).router.getNowPageName()}&roomName=${groupId}`,
   });
 }
 
-/**
- * 退出（销毁）实时语音通话
- */
+/** 退出（销毁）实时语音通话 */
 export function exitChat() {
   if (!joined) {
     toast('当前不在房间中');
     return;
   }
-
-  // 取消监听
   try {
     wx.offVoIPChatMembersChanged();
     wx.offVoIPChatInterrupted();
-  } catch { /* ignore */ }
-
+  } catch {
+    /* ignore */
+  }
   wx.exitVoIPChat({
     success() {
       joined = false;
-      window.query = null;
-      updateUI();
+      (window as any).query = null;
       toast('已退出房间');
-    },
-    fail(err: any) {
-      toast(`退出失败: ${err?.errMsg || '未知错误'}`);
+      onExitCb?.();
+      (window as any).router.delPage();
     },
   });
 }
@@ -271,10 +245,14 @@ export function onUnload() {
   try {
     wx.offVoIPChatMembersChanged();
     wx.offVoIPChatInterrupted();
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   try {
     wx.exitVoIPChat({});
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   joined = false;
   groupId = '';
 }

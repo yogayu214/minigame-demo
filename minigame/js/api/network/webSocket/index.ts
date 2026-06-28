@@ -1,133 +1,65 @@
-/**
- * WebSocket
- * wx.connectSocket / wx.sendSocketMessage / wx.closeSocket
- * wx.onSocketOpen / wx.onSocketClose / wx.onSocketError / wx.onSocketMessage
- * SocketTask
- * 官方文档：
- *   https://developers.weixin.qq.com/minigame/dev/api/network/websocket/wx.connectSocket.html
- */
+const show = require('../../../libs/show');
 
-import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
+let onStatusCallback: ((connected: boolean) => void) | null = null;
+let onMessageCallback: ((data: string) => void) | null = null;
 
-const display = createDisplay();
-export const setDisplay = display.setter;
+export function setOnStatus(cb: (connected: boolean) => void) {
+  onStatusCallback = cb;
+}
 
-let socketTask: any = null;
-let onOpen: any = null;
-let onClose: any = null;
-let onError: any = null;
-let onMessage: any = null;
+export function setOnMessage(cb: (data: string) => void) {
+  onMessageCallback = cb;
+}
 
-/** 连接 WebSocket（使用 SocketTask） */
+/** 连接 WebSocket */
 export function connectSocket() {
-  if (socketTask) {
-    display.text('请先断开当前连接');
-    return;
-  }
+  wx.showLoading({ title: '连接中...', mask: true });
 
-  const url = '';
-  if (!url) {
-    display.text('请下载 Demo 并填入对应参数即可查看效果');
-    return;
-  }
-
-  socketTask = wx.connectSocket({
-    url,
-    fail(err: any) {
-      display.text(formatObj({ 状态: '连接失败', 原因: err?.errMsg || '未知' }));
-      socketTask = null;
-    },
+  wx.onSocketOpen(() => {
+    wx.hideLoading();
+    show.Toast('Socket已连接', 'success', 1000);
+    onStatusCallback?.(true);
   });
 
-  if (!socketTask) {
-    display.text('创建 WebSocket 连接失败');
-    return;
-  }
+  wx.onSocketClose(() => {
+    onStatusCallback?.(false);
+  });
 
-  onOpen = () => {
-    display.text('WebSocket 已连接');
-  };
-  onClose = () => {
-    display.text('WebSocket 已关闭');
-    socketTask = null;
-  };
-  onError = (err: any) => {
-    display.text(
-      formatObj({
-        事件: 'onError',
-        原因: err?.errMsg || '未知',
-      })
-    );
-    socketTask = null;
-  };
-  onMessage = (res: any) => {
-    display.text(
-      formatObj({
-        事件: 'onMessage',
-        data: String(res?.data ?? '').slice(0, 100),
-      })
-    );
-  };
+  wx.onSocketError((error: any) => {
+    wx.hideLoading();
+    show.Modal(JSON.stringify(error), '发生错误');
+    console.error('socket error:', error);
+  });
 
-  socketTask.onOpen(onOpen);
-  socketTask.onClose(onClose);
-  socketTask.onError(onError);
-  socketTask.onMessage(onMessage);
+  wx.onSocketMessage((message: any) => {
+    show.Toast('收到服务器响应', 'success', 1000);
+    console.log('socket message:', message);
+    onMessageCallback?.(String(message.data ?? ''));
+  });
 
-  display.text('连接已发起...');
+  wx.connectSocket({
+    url: 'wss://echo.websocket.org',
+  });
 }
 
-/** 发送消息（优先使用 SocketTask） */
-export function sendMessage() {
-  const msg = 'Hello, MiniGame!';
-  if (socketTask) {
-    socketTask.send({
-      data: msg,
-      success() {
-        display.text(`已发送：${msg}`);
-      },
-      fail(err: any) {
-        display.text(
-          formatObj({
-            状态: '发送失败',
-            原因: err?.errMsg || '未知错误',
-          })
-        );
-      },
-    });
-  } else {
-    wx.sendSocketMessage({
-      data: msg,
-      success() {
-        display.text(`已发送：${msg}`);
-      },
-      fail(err: any) {
-        display.text(`发送失败：${err?.errMsg || '未知错误'}`);
-      },
-    });
-  }
-}
-
-/** 断开连接（优先使用 SocketTask） */
+/** 断开 WebSocket */
 export function closeSocket() {
-  if (socketTask) {
-    socketTask.close();
-    socketTask = null;
-  } else {
-    wx.closeSocket();
-  }
-  display.text('已断开');
+  wx.closeSocket({
+    success() {
+      show.Toast('Socket已断开', 'success', 1000);
+      onStatusCallback?.(false);
+    },
+  });
 }
 
+/** 发送消息 */
+export function sendMessage() {
+  wx.sendSocketMessage({
+    data: 'Hello, MiniGame!',
+  });
+}
+
+/** 页面卸载时关闭连接 */
 export function onUnload() {
-  try {
-    if (socketTask) {
-      socketTask.close();
-      socketTask = null;
-    }
-  } catch (e) {
-    console.error('close error:', e);
-  }
-  onOpen = onClose = onError = onMessage = null;
+  wx.closeSocket();
 }

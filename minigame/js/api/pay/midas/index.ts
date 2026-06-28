@@ -25,12 +25,20 @@ function checkMidasSupport(): Promise<boolean> {
         if (res?.data?.allow_pay) {
           resolve(true);
         } else {
-          wx.showToast({ title: '当前不支持米大师支付', icon: 'none', duration: 1000 });
+          wx.showToast({
+            title: '当前不支持米大师支付',
+            icon: 'none',
+            duration: 1000,
+          });
           resolve(false);
         }
       },
       fail(err: any) {
-        wx.showToast({ title: `检测支付能力失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
+        wx.showToast({
+          title: `检测支付能力失败：${err?.errMsg || '未知错误'}`,
+          icon: 'none',
+          duration: 1000,
+        });
         resolve(false);
       },
     });
@@ -39,14 +47,22 @@ function checkMidasSupport(): Promise<boolean> {
 
 /** 检查是否支持米大师支付 */
 export function checkIsSupportMidasPayment() {
-    (wx as any).checkIsSupportMidasPayment({
-      success(res: any) {
-        wx.showToast({ title: `查询成功，support: ${res.data.allow_pay}`, icon: 'none', duration: 1000 });
-      },
-      fail(err: any) {
-        wx.showToast({ title: `查询失败：${err?.errMsg || '未知错误'}`, icon: 'none', duration: 1000 });
-      },
-    });
+  (wx as any).checkIsSupportMidasPayment({
+    success(res: any) {
+      wx.showToast({
+        title: `查询成功，support: ${res.data.allow_pay}`,
+        icon: 'none',
+        duration: 1000,
+      });
+    },
+    fail(err: any) {
+      wx.showToast({
+        title: `查询失败：${err?.errMsg || '未知错误'}`,
+        icon: 'none',
+        duration: 1000,
+      });
+    },
+  });
 }
 
 /** 发起米大师支付（按金额买货币） */

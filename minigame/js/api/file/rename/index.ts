@@ -3,32 +3,42 @@
  * FileSystemManager.rename
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+const show = require('../../../libs/show');
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-/** 写入并重命名为 renamed.txt */
-export function renameFile() {
-  const fs = wx.getFileSystemManager();
-  fs.writeFile({
-    filePath: wx.env.USER_DATA_PATH + '/toRename.txt',
-    data: 'rename test',
-    encoding: 'utf8',
+/** 重命名文件/目录 */
+export function renameFile(
+  oldPath: string,
+  newPath: string,
+  onSuccess?: () => void,
+) {
+  wx.getFileSystemManager().rename({
+    oldPath,
+    newPath,
     success() {
-      fs.rename({
-        oldPath: wx.env.USER_DATA_PATH + '/toRename.txt',
-        newPath: wx.env.USER_DATA_PATH + '/renamed.txt',
-        success() {
-          display.text('重命名成功\ntoRename.txt -> renamed.txt');
-        },
-        fail(err: any) {
-          display.text(`重命名失败: ${err?.errMsg || '未知错误'}`);
-        },
-      });
+      show.Toast('重命名成功', 'success', 800);
+      onSuccess && onSuccess();
     },
-    fail(err: any) {
-      display.text(`写入失败: ${err?.errMsg || '未知错误'}`);
+    fail(res: any) {
+      if (!res.errMsg) return;
+      if (res.errMsg.includes('fail no such file or directory')) {
+        res.errMsg = `源文件，或目录 ${JSON.stringify(
+          `${wx.env.USER_DATA_PATH}/fileA`,
+        )} 不存在，请去创建`;
+        show.Modal(res.errMsg, '发生错误');
+      }
     },
   });
+}
+
+/** 清理 newTestFile 目录 */
+export function cleanup() {
+  wx.getFileSystemManager().rmdir({
+    dirPath: `${wx.env.USER_DATA_PATH}/newTestFile`,
+    recursive: true,
+  });
+}
+
+/** 页面卸载时清理 */
+export function onUnload() {
+  cleanup();
 }

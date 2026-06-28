@@ -3,27 +3,41 @@
  * FileSystemManager.readdir
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+const show = require('../../../libs/show');
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-/** 读取用户目录下的文件列表 */
-export function readdir() {
+/** 读取 fileA 目录下的文件列表 */
+export function readdir(onSuccess?: (dirPath: string) => void) {
+  const dirPath = `${wx.env.USER_DATA_PATH}/fileA`;
   wx.getFileSystemManager().readdir({
-    dirPath: wx.env.USER_DATA_PATH,
+    dirPath,
     success(res: any) {
-      if (res.files.length === 0) {
-        display.text('目录为空');
-        return;
-      }
-      const list = res.files
-        .map((f: string, i: number) => `[${i + 1}] ${f}`)
-        .join('\n');
-      display.text(`目录: ${wx.env.USER_DATA_PATH}\n${list}`);
+      if (!(res.files || []).length) return show.Modal('目录内容为空');
+      show.Toast('查看成功', 'success', 800);
+      onSuccess && onSuccess(dirPath);
     },
-    fail(err: any) {
-      display.text(`读取失败: ${err?.errMsg || '未知错误'}`);
+    fail(res: any) {
+      if (!res.errMsg) return;
+      if (
+        res.errMsg.includes('no such file or directory') ||
+        res.errMsg.includes('fail not a directory')
+      ) {
+        res.errMsg = `目录 ${JSON.stringify(dirPath)} 不存在，请去创建`;
+        show.Modal(res.errMsg, '发生错误');
+      }
     },
   });
 }
+
+/** 递归获取目录的文件信息 */
+export function statRecursive(path: string, onSuccess?: (stats: any[]) => void) {
+  wx.getFileSystemManager().stat({
+    path,
+    recursive: true,
+    success(res: any) {
+      onSuccess && onSuccess(res.stats);
+    },
+  });
+}
+
+/** 页面卸载时清理 */
+export function onUnload() {}

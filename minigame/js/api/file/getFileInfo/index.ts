@@ -3,21 +3,21 @@
  * FileSystemManager.getFileInfo
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
+const show = require('../../../libs/show');
 
 /** 获取文件信息 */
 export function getFileInfo() {
-  const path = wx.env.USER_DATA_PATH + '/opTest.txt';
   wx.getFileSystemManager().getFileInfo({
-    filePath: path,
+    filePath: 'images/weapp.jpg',
     success(res: any) {
-      display.text(`路径: ${path}\n文件大小: ${res.size} 字节`);
+      show.Modal(`这个文件的size：${res.size}B`, '获取成功');
     },
-    fail(err: any) {
-      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
+    fail(res: any) {
+      if (!res.errMsg) return;
+      show.Modal(res.errMsg, '发生错误');
     },
   });
 }
+
+/** 页面卸载时清理 */
+export function onUnload() {}

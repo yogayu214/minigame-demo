@@ -27,6 +27,7 @@ declare global {
 
 import './js/vendor/weapp-adapter';
 import * as PIXI from './js/vendor/pixi.min';
+import pmgressBar from './js/libs/pmgressBar';
 import share from './js/libs/share';
 import { resolvePathName } from './js/libs/sceneMap';
 
@@ -65,6 +66,12 @@ PIXI.interaction.InteractionManager.prototype.mapPositionToPoint = (
 
 PIXI.ratio = (windowWidth * pixelRatio) / 750;
 
+// 显示进度条（图片加载 + 分包加载期间可见）
+const loadingFn = pmgressBar(PIXI, app, {
+  width: windowWidth * pixelRatio,
+  height: windowHeight * pixelRatio,
+});
+
 PIXI.loader
   .add([
     'images/official.png',
@@ -73,6 +80,9 @@ PIXI.loader
     'images/right_arrow_black.png',
     'images/star.png',
     'images/customerService.png',
+    'images/off.png',
+    'images/on.png',
+    'images/pitch_on.png',
   ])
   .load(() => {
     wx.loadSubpackage({
@@ -128,6 +138,8 @@ PIXI.loader
 
           noNavigateToRequired && (window.query = null);
         });
+
+        loadingFn(100);
       },
       fail() {
         console.error('loadSubpackage fail');
@@ -135,5 +147,7 @@ PIXI.loader
       complete() {
         console.log('loadSubpackage complete');
       },
+    }).onProgressUpdate((res) => {
+      loadingFn(res.progress);
     });
   });

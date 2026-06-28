@@ -1,37 +1,48 @@
 /**
- * 目录操作
+ * 创建/删除目录
  * FileSystemManager.mkdir / FileSystemManager.rmdir
  */
 
-import { createDisplay } from '../../../libs/display-slot';
-
-const display = createDisplay();
-export const setDisplay = display.setter;
+const show = require('../../../libs/show');
 
 /** 创建目录 */
-export function mkdir() {
-  const path = wx.env.USER_DATA_PATH + '/testDir';
+export function mkdir(onSuccess?: () => void) {
   wx.getFileSystemManager().mkdir({
-    dirPath: path,
+    dirPath: `${wx.env.USER_DATA_PATH}/fileA`,
+    recursive: true,
     success() {
-      display.text(`路径: ${path}\n状态: 创建成功`);
-    },
-    fail(err: any) {
-      display.text(`创建失败: ${err?.errMsg || '未知错误'}`);
+      onSuccess && onSuccess();
+      show.Toast('创建成功', 'success', 800);
     },
   });
 }
 
 /** 删除目录 */
-export function rmdir() {
-  const path = wx.env.USER_DATA_PATH + '/testDir';
+export function rmdir(onSuccess?: () => void) {
   wx.getFileSystemManager().rmdir({
-    dirPath: path,
+    dirPath: `${wx.env.USER_DATA_PATH}/fileA`,
+    recursive: true,
     success() {
-      display.text(`路径: ${path}\n状态: 删除成功`);
-    },
-    fail(err: any) {
-      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
+      onSuccess && onSuccess();
+      show.Toast('删除成功', 'success', 800);
     },
   });
 }
+
+/** 检查 fileA 目录是否存在 */
+export function checkDirExists(): Promise<boolean> {
+  return new Promise((resolve) => {
+    wx.getFileSystemManager().access({
+      path: `${wx.env.USER_DATA_PATH}/fileA`,
+      success() {
+        resolve(true);
+      },
+      fail() {
+        resolve(false);
+      },
+    });
+  });
+}
+
+/** 页面卸载时清理 */
+export function onUnload() {}

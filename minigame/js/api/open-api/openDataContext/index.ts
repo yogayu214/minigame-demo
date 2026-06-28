@@ -2,31 +2,17 @@
  * 开放数据域（主域侧）
  *
  * 主域通过 wx.getOpenDataContext().postMessage() 向子域发送消息，
- * 子域（open-data-context/index.ts）通过 wx.onMessage 监听并渲染到 sharedCanvas。
+ * 子域通过 wx.onMessage 监听并渲染到 sharedCanvas。
  * 主域需要将 sharedCanvas 绘制到 PIXI 舞台上才能看到子域内容，
  * 该部分由 libs/rich-configs/openDataContext.ts 的 buildTopView 负责（每帧刷纹理）。
  *
- * 本模块每个 export function 会被 rich-config 自动收集为一个按钮；
- * 需要展示子域画布的函数调用 display.showCanvas()，需要展示文本结果的调用 display.text()。
- *
- * 支持的事件：
- *   setUserRecord        - 上报随机分数（主域直接 setUserCloudStorage）
- *   showFriendRank       - 显示好友排行榜（子域渲染到 sharedCanvas）
+ * 与 demo2 abilityOpen/openDataContext 对齐的 6 个功能：
+ *   setUserRecord          - 上报随机分数
+ *   showFriendRank         - 显示好友排行榜（子域渲染到 sharedCanvas）
  *   showFriendsOnlineStatus - 显示好友在线状态（子域渲染到 sharedCanvas）
- *   shareGroupRank       - 分享到群，群内点开后回流触发群排行榜
- *   showGroupRank        - 直接查看群排行榜（需 shareTicket，群场景有效）
- *   relationalChaininteractiveData - 关系链互动
- *   directedSharing      - 定向分享
- *   getUserCloudStorage  - 获取用户托管数据（仅限子域）
- *   getUserCloudStorageKeys - 获取用户托管数据 key 列表（仅限子域）
- *   modifyFriendInteractiveStorage - 修改好友互动数据（仅限子域）
- *   shareMessageToFriend - 分享消息给好友（仅限子域）
+ *   shareGroupRank         - 分享到群，群内点开后回流触发群排行榜
+ *   closeCanvas            - 关闭开放数据域画布
  *   subscribeSystemMessage - 订阅系统消息（好友互动 / 排行榜超越提醒）
- *   onMessage            - 监听子域发回的消息
- *   close                - 关闭开放数据域画布
- *
- * 官方文档：
- *   https://developers.weixin.qq.com/minigame/dev/api/open-api/data/wx.getOpenDataContext.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
@@ -34,23 +20,14 @@ import { createDisplay } from '../../../libs/display-slot';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+function toast(msg: string) {
+  wx.showToast({ title: msg, icon: 'none' });
+}
+
 /** 排行榜使用的托管数据 key，需与子域 data.ts 保持一致 */
 const RANK_KEY = 'rankid';
 
-let messageFn: any = null;
 let onShowFn: ((res: any) => void) | null = null;
-
-/** 获取开放数据域实例 */
-export function getOpenDataContext() {
-  try {
-    const ctx = wx.getOpenDataContext();
-    display.text(
-      `获取成功，postMessage: ${typeof ctx?.postMessage === 'function' ? '可用' : '不可用'}`
-    );
-  } catch (e: any) {
-    display.text(`获取失败: ${e.message}`);
-  }
-}
 
 /** 上报随机分数（主域直接调用 setUserCloudStorage，与子域使用同一个 key） */
 export function setUserRecord() {
@@ -68,15 +45,10 @@ export function setUserRecord() {
       },
     ],
     success() {
-      wx.showToast({
-        title: `分数上报成功: ${score}分`,
-        icon: 'none',
-        duration: 2000,
-      });
-      display.text(`分数上报成功: ${score}分`);
+      toast(`分数上报成功: ${score}分`);
     },
     fail(err: any) {
-      display.text(`上报失败: ${err?.errMsg || ''}`);
+      toast(`上报失败: ${err?.errMsg || ''}`);
     },
   });
 }
@@ -89,7 +61,7 @@ export function showFriendRank() {
       event: 'showFriendRank',
     });
   } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
+    toast(`发送失败: ${e.message}`);
   }
 }
 
@@ -101,7 +73,7 @@ export function showFriendsOnlineStatus() {
       event: 'showFriendsOnlineStatus',
     });
   } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
+    toast(`发送失败: ${e.message}`);
   }
 }
 
@@ -121,103 +93,21 @@ export function shareGroupRank() {
         height: (canvas.width * 4) / 5,
       }),
     });
-    display.text('若分享成功，请从群里点击会话查看群排行榜');
+    toast('若分享成功，请从群里点击会话查看群排行榜');
   } catch (e: any) {
-    display.text(`分享失败: ${e.message}`);
+    toast(`分享失败: ${e.message}`);
   }
 }
 
-/** 显示群排行榜（需 shareTicket，群场景有效） */
-export function showGroupRank() {
+/** 关闭开放数据域画布 */
+export function closeCanvas() {
   try {
-    display.showCanvas?.();
     wx.getOpenDataContext().postMessage({
-      event: 'showGroupRank',
-      shareTicket: '',
+      event: 'close',
     });
-    display.text('需要在群场景打开，可点击 shareGroupRank 分享到群后查看');
+    wx.triggerGC();
   } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 关系链互动（好友排行 + 互动按钮，子域会渲染 UI 到 sharedCanvas） */
-export function relationalChainInteractiveData() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'relationalChaininteractiveData',
-    });
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 定向分享（可能感兴趣的好友，子域会渲染 UI 到 sharedCanvas） */
-export function directedSharing() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'directedSharing',
-    });
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 获取用户托管数据（仅限子域，通过 postMessage 触发，结果渲染到 sharedCanvas） */
-export function getUserCloudStorage() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'getUserCloudStorage',
-      keyList: ['score'],
-    });
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 获取用户托管数据的 key 列表（仅限子域，通过 postMessage 触发，结果渲染到 sharedCanvas） */
-export function getUserCloudStorageKeys() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'getUserCloudStorageKeys',
-    });
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 修改好友互动数据（仅限子域，通过 postMessage 触发，结果渲染到 sharedCanvas） */
-export function modifyFriendInteractiveStorage() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'modifyFriendInteractiveStorage',
-      key: '1',
-      opNum: 1,
-      operation: 'add',
-      toUser: '', // 好友 openId，需替换
-    });
-    display.text('需在 demo 代码中填写目标好友 openId 后才可使用');
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 分享消息给好友（仅限子域，通过 postMessage 触发，结果渲染到 sharedCanvas） */
-export function shareMessageToFriend() {
-  try {
-    display.showCanvas?.();
-    wx.getOpenDataContext().postMessage({
-      event: 'shareMessageToFriend',
-      openId: '', // 好友 openId，需替换
-    });
-    display.text('需在 demo 代码中填写目标好友 openId 后才可使用');
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
+    /* ignore */
   }
 }
 
@@ -234,43 +124,12 @@ export function subscribeSystemMessage() {
         if (tips !== '成功订阅') tips += '和';
         tips += '排行榜好友超越提醒';
       }
-      display.text(tips);
+      toast(tips);
     },
     fail(res: any) {
-      display.text(`订阅失败: ${res?.errMsg || ''}`);
+      toast(`订阅失败: ${res?.errMsg || ''}`);
     },
   });
-}
-
-/** 关闭开放数据域画布 */
-export function closeCanvas() {
-  try {
-    wx.getOpenDataContext().postMessage({
-      event: 'close',
-    });
-    display.text('关闭画布');
-  } catch (e: any) {
-    display.text(`发送失败: ${e.message}`);
-  }
-}
-
-/** 监听开放数据域发回的消息 */
-export function onMessage() {
-  if (messageFn) {
-    display.text('已存在监听，无需重复绑定');
-    return;
-  }
-  messageFn = (res: any) => {
-    display.text(
-      `onMessage: ${
-        typeof res === 'object'
-          ? JSON.stringify(res).slice(0, 200)
-          : String(res)
-      }`
-    );
-  };
-  wx.onMessage(messageFn);
-  display.text('已监听开放数据域消息');
 }
 
 /**
@@ -289,7 +148,7 @@ export function onLoad() {
           shareTicket: res.shareTicket,
         });
       } catch (e: any) {
-        display.text(`群排行发送失败: ${e.message}`);
+        toast(`群排行发送失败: ${e.message}`);
       }
     }
   };
@@ -306,10 +165,6 @@ export function onLoad() {
 }
 
 export function onUnload() {
-  if (messageFn) {
-    (wx as any).offMessage?.(messageFn);
-    messageFn = null;
-  }
   if (onShowFn) {
     (wx as any).offShow?.(onShowFn);
     onShowFn = null;

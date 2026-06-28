@@ -3,50 +3,37 @@
  * FileSystemManager.getSavedFileList / removeSavedFile
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+const show = require('../../../libs/show');
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-/** 获取已保存文件列表 */
-export function getSavedFileList() {
+/** 获取本地缓存文件列表 */
+export function getSavedFileList(onSuccess?: (fileList: any[]) => void) {
   wx.getFileSystemManager().getSavedFileList({
     success(res: any) {
-      if (res.fileList.length === 0) {
-        display.text('暂无已保存文件');
-        return;
-      }
-      const list = res.fileList
-        .map((f: any, i: number) => `[${i + 1}] ${f.filePath} (${f.size}B)`)
-        .join('\n');
-      display.text(`已保存 ${res.fileList.length} 个文件:\n${list}`);
-    },
-    fail(err: any) {
-      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
+      if (!(res.fileList || []).length) return show.Modal('本地缓存文件列表为空');
+      show.Toast('获取成功', 'success', 800);
+      onSuccess && onSuccess(res.fileList);
     },
   });
 }
 
-/** 删除已保存文件 */
-export function removeSavedFile() {
-  wx.getFileSystemManager().getSavedFileList({
-    success(res: any) {
-      if (res.fileList.length > 0) {
+/** 清空所有本地缓存文件 */
+export function removeSavedFile(fileList: any[], onSuccess?: () => void) {
+  const promiseArr = fileList.map(
+    (item) =>
+      new Promise<void>((resolve) => {
         wx.getFileSystemManager().removeSavedFile({
-          filePath: res.fileList[0].filePath,
+          filePath: item.filePath,
           success() {
-            display.text('已删除第一个已保存文件');
-          },
-          fail(err: any) {
-            display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
+            resolve();
           },
         });
-      } else {
-        display.text('没有已保存文件');
-      }
-    },
-    fail(err: any) {
-      display.text(`获取列表失败: ${err?.errMsg || '未知错误'}`);
-    },
+      }),
+  );
+  Promise.all(promiseArr).then(() => {
+    show.Toast('已清空', 'success', 800);
+    onSuccess && onSuccess();
   });
 }
+
+/** 页面卸载时清理 */
+export function onUnload() {}

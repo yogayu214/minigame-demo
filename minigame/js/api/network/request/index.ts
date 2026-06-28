@@ -1,78 +1,23 @@
-/**
- * 发送请求
- * wx.request / RequestTask
- * 官方文档：
- *   https://developers.weixin.qq.com/minigame/dev/api/network/request/wx.request.html
- */
+let onDataCallback: ((dataSize: number, elapsed: number) => void) | null = null;
 
-import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
+export function setOnData(cb: (dataSize: number, elapsed: number) => void) {
+  onDataCallback = cb;
+}
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-let requestTask: any = null;
-
-/** 发起一个 HTTP GET 请求 */
+/** 发起一个 HTTP 请求 */
 export function sendRequest() {
-  const startTime = Date.now();
-  wx.showLoading({ title: '请求中...', mask: true });
-  requestTask = wx.request({
-    url: 'https://developers.weixin.qq.com/minigame/dev/api/',
+  const time = Date.now();
+  wx.request({
+    url: 'https://developers.weixin.qq.com/minigame/dev/api/base/system/system-info/wx.getSystemInfoSync.html',
     success(res: any) {
-      wx.hideLoading();
+      wx.showToast({ title: '请求成功', icon: 'success', duration: 1000 });
+      wx.reportPerformance && wx.reportPerformance(1001, Date.now() - time);
       const dataStr =
         typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
-      display.text(
-        formatObj({
-          数据包大小: `${dataStr.length} 字符`,
-          请求耗时: `${Date.now() - startTime} ms`,
-        })
-      );
+      onDataCallback?.(dataStr.length, Date.now() - time);
     },
-    fail(err: any) {
-      wx.hideLoading();
-      display.text(
-        formatObj({
-          状态: '请求失败',
-          原因: err?.errMsg || '未知错误',
-        })
-      );
+    fail() {
+      wx.showToast({ title: '请求失败', icon: 'none', duration: 1000 });
     },
   });
-}
-
-/** 中断请求（RequestTask.abort） */
-export function abortRequest() {
-  if (requestTask) {
-    requestTask.abort();
-    requestTask = null;
-    display.text('请求已中断');
-  } else {
-    display.text('当前无请求，无需中断');
-  }
-}
-
-/** 监听请求头响应（RequestTask.onHeadersReceived） */
-export function onHeadersReceived() {
-  if (!requestTask) {
-    display.text('请先发起请求');
-    return;
-  }
-  requestTask.onHeadersReceived((res: any) => {
-    display.text(
-      formatObj({
-        事件: 'onHeadersReceived',
-        header: JSON.stringify(res.header || {}).slice(0, 100),
-      })
-    );
-  });
-  display.text('已注册 headersReceived 监听');
-}
-
-export function onUnload() {
-  if (requestTask) {
-    requestTask.abort();
-    requestTask = null;
-  }
 }

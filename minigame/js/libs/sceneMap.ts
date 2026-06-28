@@ -37,8 +37,6 @@ export const SCENE_MAP: Record<string, string> = {
   '25': 'downloadFile',
   '26': 'uploadFile',
   '27': 'WebSocket',
-  '28': 'tcpSocket',
-  '29': 'udpSocket',
   // ===== 数据缓存 =====
   '30': 'storageOp',
   '31': 'backgroundFetch',

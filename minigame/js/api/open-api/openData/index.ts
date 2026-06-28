@@ -7,15 +7,16 @@
  *   wx.getUserInteractiveStorage - 获取用户互动数据（需真机，返回加密数据）
  *   wx.onInteractiveStorageModified - 监听互动数据修改（需真机）
  *   wx.offInteractiveStorageModified - 取消监听互动数据修改（需真机）
- * 官方文档：
- *   https://developers.weixin.qq.com/minigame/dev/guide/open-ability/open-data.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+function toast(msg: string) {
+  wx.showToast({ title: msg, icon: 'none' });
+}
 
 let interactiveFn: any = null;
 
@@ -37,10 +38,10 @@ export function setUserCloudStorage() {
       },
     ],
     success() {
-      display.text(`上报成功，分数: ${score}`);
+      toast(`上报成功，分数: ${score}`);
     },
     fail(err: any) {
-      display.text(`上报失败: ${err?.errMsg || '未知错误'}`);
+      toast(`上报失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -50,10 +51,10 @@ export function removeUserCloudStorage() {
   wx.removeUserCloudStorage({
     keyList: ['score'],
     success() {
-      display.text('已删除 score 托管数据');
+      toast('已删除 score 托管数据');
     },
     fail(err: any) {
-      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
+      toast(`删除失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -63,21 +64,16 @@ export function removeUserCloudStorage() {
 /** 获取用户互动数据（主域可调用，需真机） */
 export function getUserInteractiveStorage() {
   if (typeof (wx as any).getUserInteractiveStorage !== 'function') {
-    display.text('此 API 需在真机上测试');
+    toast('此 API 需在真机上测试');
     return;
   }
   (wx as any).getUserInteractiveStorage({
     keyList: ['1'],
     success(res: any) {
-      display.text(
-        formatObj({
-          iv: res.iv,
-          encryptedData: res.encryptedData,
-        })
-      );
+      toast(`iv: ${res.iv} | encryptedData: ${res.encryptedData}`);
     },
     fail(err: any) {
-      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
+      toast(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -85,33 +81,28 @@ export function getUserInteractiveStorage() {
 /** 监听互动数据修改（主域可调用，需真机） */
 export function onInteractiveStorageModified() {
   if (typeof (wx as any).onInteractiveStorageModified !== 'function') {
-    display.text('此 API 需在真机上测试');
+    toast('此 API 需在真机上测试');
     return;
   }
   interactiveFn = (res: any) => {
-    display.text(
-      formatObj({
-        事件: 'onInteractiveStorageModified',
-        openId: res.openId ?? '-',
-      })
-    );
+    toast(`onInteractiveStorageModified | openId: ${res.openId ?? '-'}`);
   };
   (wx as any).onInteractiveStorageModified(interactiveFn);
-  display.text('已监听互动数据修改事件');
+  toast('已监听互动数据修改事件');
 }
 
 /** 取消监听互动数据修改（主域可调用，需真机） */
 export function offInteractiveStorageModified() {
   if (typeof (wx as any).offInteractiveStorageModified !== 'function') {
-    display.text('此 API 需在真机上测试');
+    toast('此 API 需在真机上测试');
     return;
   }
   if (interactiveFn) {
     (wx as any).offInteractiveStorageModified(interactiveFn);
     interactiveFn = null;
-    display.text('已取消监听互动数据修改');
+    toast('已取消监听互动数据修改');
   } else {
-    display.text('当前无监听，无需取消');
+    toast('当前无监听，无需取消');
   }
 }
 

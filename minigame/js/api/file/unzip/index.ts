@@ -3,22 +3,18 @@
  * FileSystemManager.unzip
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+const show = require('../../../libs/show');
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-/** 解压 zip 文件到用户目录 */
+/** 解压 test.zip 到 fileA 目录 */
 export function unzipFile() {
-  const targetPath = wx.env.USER_DATA_PATH + '/unzipped';
   wx.getFileSystemManager().unzip({
     zipFilePath: 'js/api/file/unzip/assets/test.zip',
-    targetPath,
+    targetPath: `${wx.env.USER_DATA_PATH}/fileA`,
     success() {
-      display.text(`解压路径: ${targetPath}\n状态: 解压成功`);
-    },
-    fail(err: any) {
-      display.text(`解压失败: ${err?.errMsg || '未知错误'}`);
+      show.Toast('解压成功', 'success', 800);
     },
   });
 }
+
+/** 页面卸载时清理 */
+export function onUnload() {}

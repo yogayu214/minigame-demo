@@ -3,14 +3,16 @@
  * wx.reportEvent / wx.reportScene / wx.reportMonitor
  * wx.reportUserBehaviorBranchAnalytics
  * wx.getGameExptInfo / wx.getExptInfoSync
- * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/data-analysis/wx.reportEvent.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
-import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+function toast(msg: string) {
+  wx.showToast({ title: msg, icon: 'none' });
+}
 
 /** 自定义事件上报（需先在 mp 后台新建事件） */
 export function reportEvent() {
@@ -19,9 +21,9 @@ export function reportEvent() {
       action: 'click',
       ts: Date.now(),
     });
-    display.text('reportEvent 已调用（请在 mp 后台查看统计）');
+    toast('reportEvent 已调用（请在 mp 后台查看统计）');
   } catch (e: any) {
-    display.text(`调用失败：${e.message || e}`);
+    toast(`调用失败: ${e.message || e}`);
   }
 }
 
@@ -33,10 +35,10 @@ export function reportScene() {
     dimension: { custom: 'demo' },
     metric: { score: 100 },
     success() {
-      display.text('reportScene 已上报');
+      toast('reportScene 已上报');
     },
     fail(err: any) {
-      display.text(`上报失败：${err?.errMsg || '未知错误'}`);
+      toast(`上报失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -48,9 +50,9 @@ export function reportMonitor() {
       name: 'demo_monitor',
       value: 1,
     });
-    display.text('reportMonitor 已上报');
+    toast('reportMonitor 已上报');
   } catch (e: any) {
-    display.text(`调用失败：${e?.message || e}`);
+    toast(`调用失败: ${e?.message || e}`);
   }
 }
 
@@ -62,9 +64,9 @@ export function reportUserBehaviorBranchAnalytics() {
       branchDim: '1',
       eventType: 1,
     });
-    display.text('branchAnalytics 已上报');
+    toast('branchAnalytics 已上报');
   } catch (e: any) {
-    display.text(`调用失败：${e.message || e}`);
+    toast(`调用失败: ${e.message || e}`);
   }
 }
 
@@ -73,14 +75,10 @@ export function getGameExptInfo() {
   (wx as any).getGameExptInfo({
     keyList: ['demo_key'],
     success(res: any) {
-      display.text(
-        formatObj({
-          实验信息: JSON.stringify(res.data || {}),
-        })
-      );
+      toast(`实验信息: ${JSON.stringify(res.data || {}).slice(0, 30)}`);
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      toast(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -89,12 +87,8 @@ export function getGameExptInfo() {
 export function getExptInfoSync() {
   try {
     const res = (wx as any).getExptInfoSync(['demo_key']);
-    display.text(
-      formatObj({
-        实验信息: JSON.stringify(res || {}),
-      })
-    );
+    toast(`实验信息: ${JSON.stringify(res || {}).slice(0, 30)}`);
   } catch (e: any) {
-    display.text(`调用失败：${e.message || e}`);
+    toast(`调用失败: ${e.message || e}`);
   }
 }

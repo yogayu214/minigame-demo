@@ -1,16 +1,6 @@
 /**
  * 文件系统管理器（综合）
  * 演示 FileSystemManager 的常用操作：读、写、追加、复制、移动、删除、stat、压缩。
- *
- * 涉及 API：
- *   wx.getFileSystemManager → FileSystemManager.* 链式调用
- *     writeFile / writeFileSync / readFile / readFileSync
- *     appendFile / appendFileSync / copyFile / copyFileSync
- *     unlink / unlinkSync / truncate / truncateSync
- *     open / openSync / close / closeSync / read / readSync / write / writeSync
- *     fstat / fstatSync / ftruncate / ftruncateSync
- *     readCompressedFile / readCompressedFileSync / readZipEntry
- * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/file/FileSystemManager.html
  */
 
 import { createDisplay } from '../../../libs/display-slot';
@@ -23,6 +13,10 @@ const USER = wx.env.USER_DATA_PATH;
 const PATH = `${USER}/fs_demo.txt`;
 const COPY_PATH = `${USER}/fs_demo_copy.txt`;
 
+function toast(msg: string) {
+  wx.showToast({ title: msg, icon: 'none' });
+}
+
 /** 写入文本文件 */
 export function writeFile() {
   FS.writeFile({
@@ -30,10 +24,10 @@ export function writeFile() {
     data: 'Hello FileSystem!\nLine 2\nLine 3',
     encoding: 'utf8',
     success() {
-      display.text(`路径: ${PATH}\n状态: 写入成功`);
+      toast('写入成功');
     },
     fail(err: any) {
-      display.text(`写入失败: ${err?.errMsg || '未知错误'}`);
+      toast(`写入失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -42,9 +36,9 @@ export function writeFile() {
 export function writeFileSync() {
   try {
     FS.writeFileSync(PATH, 'sync write @ ' + Date.now(), 'utf8');
-    display.text('同步写入成功');
+    toast('同步写入成功');
   } catch (e: any) {
-    display.text(`同步写入失败: ${e.message}`);
+    toast(`同步写入失败: ${e.message}`);
   }
 }
 
@@ -54,11 +48,10 @@ export function readFile() {
     filePath: PATH,
     encoding: 'utf8',
     success(res: any) {
-      const content = String(res.data).slice(0, 60);
-      display.text(`内容: ${content}\n长度: ${String(res.data).length}`);
+      toast(`内容: ${String(res.data).slice(0, 30)}`);
     },
     fail(err: any) {
-      display.text(`读取失败: ${err?.errMsg || '未知错误'}（请先 writeFile）`);
+      toast(`读取失败（请先 writeFile）`);
     },
   });
 }
@@ -67,9 +60,9 @@ export function readFile() {
 export function readFileSync() {
   try {
     const data = FS.readFileSync(PATH, 'utf8');
-    display.text(`内容: ${String(data).slice(0, 60)}\n同步: 是`);
+    toast(`内容: ${String(data).slice(0, 30)}`);
   } catch (e: any) {
-    display.text(`同步读取失败: ${e.message}`);
+    toast(`同步读取失败: ${e.message}`);
   }
 }
 
@@ -80,10 +73,10 @@ export function appendFile() {
     data: `\nappended @ ${new Date().toLocaleTimeString()}`,
     encoding: 'utf8',
     success() {
-      display.text('追加成功');
+      toast('追加成功');
     },
     fail(err: any) {
-      display.text(`追加失败: ${err?.errMsg || '未知错误'}`);
+      toast(`追加失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -94,10 +87,10 @@ export function copyFile() {
     srcPath: PATH,
     destPath: COPY_PATH,
     success() {
-      display.text(`源: ${PATH}\n目标: ${COPY_PATH}\n状态: 复制成功`);
+      toast('复制成功');
     },
     fail(err: any) {
-      display.text(`复制失败: ${err?.errMsg || '未知错误'}`);
+      toast(`复制失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -107,10 +100,10 @@ export function unlink() {
   FS.unlink({
     filePath: COPY_PATH,
     success() {
-      display.text('副本已删除');
+      toast('副本已删除');
     },
     fail(err: any) {
-      display.text(`删除失败: ${err?.errMsg || '未知错误'}`);
+      toast(`删除失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -121,10 +114,10 @@ export function truncate() {
     filePath: PATH,
     length: 5,
     success() {
-      display.text('已截断到 5 字节');
+      toast('已截断到 5 字节');
     },
     fail(err: any) {
-      display.text(`截断失败: ${err?.errMsg || '未知错误'}`);
+      toast(`截断失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -141,19 +134,17 @@ export function fdReadWrite() {
         fd,
         arrayBuffer: buf,
         success(r: any) {
-          display.text(
-            `读取字节: ${r.bytesRead}\n内容: ${bufToText(buf, r.bytesRead)}`
-          );
+          toast(`读取字节: ${r.bytesRead}`);
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`read 失败: ${err?.errMsg || '未知错误'}`);
+          toast(`read 失败: ${err?.errMsg || '未知错误'}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败: ${err?.errMsg || '未知错误'}（请先 writeFile）`);
+      toast(`open 失败（请先 writeFile）`);
     },
   });
 }
@@ -168,21 +159,17 @@ export function fstat() {
       FS.fstat({
         fd,
         success(r: any) {
-          display.text(
-            `size: ${r.stats.size}\n` +
-              `isFile: ${r.stats.isFile()}\n` +
-              `mtime: ${new Date(r.stats.lastModifiedTime * 1000).toLocaleString()}`
-          );
+          toast(`size: ${r.stats.size}`);
           FS.close({ fd });
         },
         fail(err: any) {
-          display.text(`fstat 失败: ${err?.errMsg || '未知错误'}`);
+          toast(`fstat 失败: ${err?.errMsg || '未知错误'}`);
           FS.close({ fd });
         },
       });
     },
     fail(err: any) {
-      display.text(`open 失败: ${err?.errMsg || '未知错误'}`);
+      toast(`open 失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -190,17 +177,17 @@ export function fstat() {
 /** 读取压缩文件 */
 export function readCompressedFile() {
   if (typeof FS.readCompressedFile !== 'function') {
-    display.text('当前版本不支持 readCompressedFile');
+    toast('当前版本不支持 readCompressedFile');
     return;
   }
   FS.readCompressedFile({
     filePath: PATH,
     compressionAlgorithm: 'br',
     success(res: any) {
-      display.text('压缩文件读取成功，长度 ' + res.data.byteLength);
+      toast('压缩文件读取成功，长度 ' + res.data.byteLength);
     },
     fail(err: any) {
-      display.text(`读取失败: ${err?.errMsg || '未知错误'}`);
+      toast(`读取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -1,26 +1,34 @@
 /**
- * 判断路径是否是目录
+ * 判断文件路径是否是目录
  * FileSystemManager.stat
  */
 
-import { createDisplay } from '../../../libs/display-slot';
+const show = require('../../../libs/show');
 
-const display = createDisplay();
-export const setDisplay = display.setter;
-
-/** 获取路径 stat 信息 */
-export function statPath() {
+/** 获取路径 stat 信息并判断是目录还是文件 */
+export function statPath(index: number) {
   wx.getFileSystemManager().stat({
-    path: wx.env.USER_DATA_PATH,
+    path: [
+      `${wx.env.USER_DATA_PATH}`,
+      `${wx.env.USER_DATA_PATH}/fileA/hello.txt`,
+    ][index],
     success(res: any) {
-      display.text(
-        `路径: ${wx.env.USER_DATA_PATH}\n` +
-          `类型: ${res.stats.isDirectory() ? '目录' : '文件'}\n` +
-          `大小: ${res.stats.size} 字节`
-      );
+      const stats = res.stats;
+      show.Toast(`是一个${stats.isDirectory() ? '目录' : '文件'}`, 'success', 800);
     },
-    fail(err: any) {
-      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
+    fail(res: any) {
+      if (!res.errMsg) return;
+      if (res.errMsg.includes('no such file or directory')) {
+        show.Modal(
+          `源文件，或上级目录 ${JSON.stringify(
+            `${wx.env.USER_DATA_PATH}/fileA`,
+          )} 不存在，请去创建`,
+          '发生错误',
+        );
+      }
     },
   });
 }
+
+/** 页面卸载时清理 */
+export function onUnload() {}
