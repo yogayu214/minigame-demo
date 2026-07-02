@@ -35,9 +35,14 @@ export const config: RichConfig = {
       star.y = Math.sin(deg) * dist;
     }
 
+    // 使用 PIXI.Texture.from 替代 PIXI.loader.resources[].texture
+    // 原因：loader.resources 在页面二次进入时 texture.baseTexture 可能为 null
+    // （loader 只在启动时加载一次，退出后资源状态可能异常）
+    const starTexture = PIXI.Texture.from('images/star.png');
+
     for (let i = 0; i < starAmount; i++) {
       const star = {
-        sprite: new PIXI.Sprite(PIXI.loader.resources['images/star.png'].texture),
+        sprite: new PIXI.Sprite(starTexture),
         z: 0, x: 0, y: 0,
       };
       star.sprite.anchor.x = 0.5;

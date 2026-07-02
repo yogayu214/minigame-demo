@@ -14,16 +14,25 @@ let userInfoBtn: any = null;
 
 /** 获取用户信息（需先授权） */
 export function getUserInfo() {
+  // 若已创建原生按钮，先隐藏避免遮挡弹窗
+  if (userInfoBtn) userInfoBtn.hide();
+
   wx.getUserInfo({
     success(res: any) {
       const u = res?.userInfo;
       if (!u) {
+        userInfoBtn?.show();
         wx.showToast({ title: '用户信息为空', icon: 'none' });
         return;
       }
-      display.text(`getUserInfo 成功\n${formatObj(u)}`);
+      // 关闭弹窗后恢复原生按钮（与 createUserInfoButton 点击行为一致）
+      display.onClose?.(() => { userInfoBtn?.show(); });
+      setTimeout(() => {
+        display.text(`getUserInfo 成功\n${formatObj(u)}`);
+      }, 300);
     },
     fail(err: any) {
+      userInfoBtn?.show();
       wx.showToast({ title: `getUserInfo 失败: ${err?.errMsg || '请先在设置中授权'}`, icon: 'none' });
     },
   });
