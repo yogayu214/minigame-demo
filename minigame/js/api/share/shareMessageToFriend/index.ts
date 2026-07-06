@@ -14,23 +14,10 @@ function toast(msg: string) {
 
 let shareMsgFn: any = null;
 
-/** 在主动分享前设置 query，再调 shareAppMessage 即可带参 */
-export function setMessageToFriendQuery() {
-  const ok = wx.setMessageToFriendQuery({
-    shareMessageToFriendScene: 1,
-    query: 'from=demo&ts=' + Date.now(),
-  });
-  toast(`返回值: ${ok}（调用后再分享，对方点开会带上 query）`);
-}
-
 /** 设置 query 并立即触发分享 */
 export function setAndShare() {
-  wx.setMessageToFriendQuery({
-    shareMessageToFriendScene: 1,
-    query: 'from=demo&ts=' + Date.now(),
-  });
   wx.shareAppMessage({
-    title: '测试带 query 转发',
+    title: '测试转发',
     imageUrl: '',
   });
   toast('已 setQuery + shareAppMessage');

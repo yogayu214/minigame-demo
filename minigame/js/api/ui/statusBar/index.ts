@@ -1,6 +1,11 @@
 /**
  * 状态栏
  * wx.setStatusBarStyle
+ *
+ * 注意：此 API 只有在游戏主动配置了 showStatusBar 并且在 iOS 下才生效。
+ * 当在配置中设置 showStatusBar 时，屏幕顶部会显示状态栏。
+ * 此接口可以修改状态栏的样式（深色/浅色）。
+ *
  * 官方文档：
  *   https://developers.weixin.qq.com/minigame/dev/api/ui/status-bar/wx.setStatusBarStyle.html
  */
@@ -10,6 +15,11 @@ import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+/** 信息展示区：提示使用前提 */
+export const infoArea = {
+  initialText: '注意：此 API 仅在以下条件同时满足时生效：\n1. 游 game.json 配置中已设置 showStatusBar\n2. 运行环境为 iOS\n配置 showStatusBar 后屏幕顶部会显示状态栏，此接口可修改其样式。',
+};
 
 /** 设置状态栏为深色样式（白字） */
 export function setStatusBarDark() {

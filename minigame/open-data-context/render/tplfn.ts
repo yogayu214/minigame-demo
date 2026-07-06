@@ -28,7 +28,7 @@
         <view class="caption">
           <text class="captionLeftText" value="好友列表"></text>
           <view class="captionRight">
-            <image class="captionRightImg" src="sub/img/refresh.png"></image>
+            <image class="captionRightImg" src="open-data-context/img/refresh.png"></image>
             <text class="captionRightText" value="换一组"></text>
           </view>
         </view>
@@ -143,7 +143,7 @@ export default function tplFunc(it) {
     }
     out += ' ';
     if (it.data.potential) {
-      out += ' <view class="AD"> <text class="ADtext" value="活动图片"></text> <view class="ADmask"></view> </view> <view class="caption"> <text class="captionLeftText" value="好友列表"></text> <view class="captionRight"> <image class="captionRightImg" src="sub/img/refresh.png"></image> <text class="captionRightText" value="换一组"></text> </view> </view> ';
+      out += ' <view class="AD"> <text class="ADtext" value="活动图片"></text> <view class="ADmask"></view> </view> <view class="caption"> <text class="captionLeftText" value="好友列表"></text> <view class="captionRight"> <image class="captionRightImg" src="open-data-context/img/refresh.png"></image> <text class="captionRightText" value="换一组"></text> </view> </view> ';
     }
     out += ' ';
     if (it.isBillboard) {

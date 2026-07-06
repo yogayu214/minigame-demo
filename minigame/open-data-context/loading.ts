@@ -18,7 +18,7 @@ const style = {
 
 const tpl = `
 <view id="container">
-  <image src="sub/img/loading.png" id="loading"></image>
+  <image src="open-data-context/img/loading.png" id="loading"></image>
 </view>
 `;
 

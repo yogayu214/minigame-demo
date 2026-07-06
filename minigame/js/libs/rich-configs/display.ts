@@ -51,6 +51,30 @@ export interface DisplayModule {
   onLoad?: () => void;
   /** 业务层可选的 onUnload */
   onUnload?: () => void;
+
+  // ============== 信息展示区（按钮上方常驻文本区） ==============
+
+  /**
+   * 信息展示区配置。存在时会在按钮列表上方渲染一个带边框的文本容器。
+   * 业务层通过 onInfoTextReady 获取 setText 回调动态更新内容。
+   */
+  infoArea?: {
+    initialText?: string;
+    backgroundColor?: number;
+    borderColor?: number;
+    textColor?: number;
+    fontSize?: number;
+    lineHeight?: number;
+    paddingX?: number;
+    paddingY?: number;
+    borderRadius?: number;
+  };
+  /**
+   * infoArea 渲染完成后回调。
+   * 参数 setText 可用于动态更新信息区的文本内容。
+   */
+  onInfoTextReady?: (setText: (text: string) => void) => void;
+
   /** 其他的任意 export function 都会被当作按钮 */
   [key: string]: any;
 }
@@ -65,7 +89,7 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
   const { p_text, p_box } = require('../component/index');
 
   // 收集 export 的业务函数作为按钮（跳过约定字段）
-  const skipKeys = ['__esModule', 'default', 'title', 'apiName', 'onLoad', 'onUnload', 'setDisplay'];
+  const skipKeys = ['__esModule', 'default', 'title', 'apiName', 'onLoad', 'onUnload', 'setDisplay', 'infoArea', 'onInfoTextReady'];
   const actions: { label: string; handler: () => void }[] = [];
   for (const key of Object.keys(mod)) {
     if (skipKeys.includes(key)) continue;
@@ -84,6 +108,10 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
     title: mod.title || pageLabel || '',
     apiName: mod.apiName || '',
     actions,
+
+    // 透传信息展示区配置
+    infoArea: mod.infoArea,
+    onInfoTextReady: mod.onInfoTextReady,
 
     buildTopView(PIXI: any, _app: any, obj: any, _underline: any) {
       // 本容器同时承载：

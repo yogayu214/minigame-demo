@@ -77,8 +77,8 @@ export function hideShareMenu() {
   });
 }
 
-/** 分享活动（activityId 来自服务端预创建） */
-export function shareActivity() {
+/** 分享活动 */
+export function shareAppMessage() {
   wx.shareAppMessage({
     title: '一起来玩活动',
     imageUrl: '',

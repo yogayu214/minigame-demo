@@ -20,10 +20,9 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
   let tickerFn: ((dt: number) => void) | null = null;
   let switchBtn: any = null;
   let switchBtnText: any = null;
-  let screenBg: any = null; // 需要在外层声明，供 onError 回调访问
+  let screenBg: any = null;
+  let initTipText: any = null;
 
-  // 2D 中转 canvas（用于将 WebGL 离屏 canvas 的内容 drawImage 过来，再生成 PIXI 纹理）
-  // 对齐旧版 behavior.js：canvas2dContext.drawImage(offScreenCanvas, ...) 模式
   let transfer2dCanvas: any = null;
   let transfer2dCtx: any = null;
 
@@ -113,6 +112,21 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
       const arCanvasWidth = obj.width;
       const arCanvasHeight = screenH;
 
+      // v2 模式初始化提示文字（frame=null 期间显示）
+      const isV2 = cfg.vkConfig.version === 'v2';
+      if (isV2) {
+        initTipText = p_text(PIXI, {
+          content: '请左右移动手机进行初始化',
+          fontSize: 28 * PIXI.ratio,
+          fill: 0xffffff,
+          x: obj.width / 2,
+          y: screenTop + screenH / 2,
+        });
+        initTipText.anchor.set(0.5, 0.5);
+        initTipText.visible = false; // 默认隐藏，等 onInitStatusChange 触发
+        root.addChild(initTipText);
+      }
+
       // 对齐旧版 behavior.js：YUV 渲染整个离屏 canvas，不做裁剪
       // 旧版的 YUV shader 没有 screenTop/screenBottom 参数，全屏渲染后通过 drawImage 定位
       renderer = new ARRenderer({
@@ -120,10 +134,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         config: { ...cfg.vkConfig },
         width: arCanvasWidth,
         height: arCanvasHeight,
-        // 不传 screenTop/screenBottom，让 ARRenderer 使用默认值 -1~1（全屏渲染）
-        // 画面的位置控制完全由外层的 PIXI Sprite.y = screenTop 来决定
         onTouchEnd: (x: number, y: number) => {
-          // 将触摸坐标从 PIXI 坐标转换为 AR Canvas 坐标
           const arX = x;
           const arY = y - screenTop;
           if (renderer) {
@@ -131,34 +142,39 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
           }
         },
         onError: (err: string) => {
-          // 异步错误：VKSession 启动失败（如设备不支持 v2）
-          // 隐藏相机画面 + toast 提示即可
           console.error('[aiAr] 异步错误:', err);
-          wx.showToast({ title: err, icon: 'none', duration: 3000 });
+          wx.showToast({ title: '当前设备不支持', icon: 'none', duration: 3000 });
           if (arSprite) arSprite.visible = false;
           if (screenBg) screenBg.visible = false;
+        },
+        onInitStatusChange: (ready: boolean) => {
+          if (ready) {
+            // 初始化完成 → 隐藏提示
+            if (initTipText) {
+              initTipText.visible = false;
+            }
+          } else {
+            // 等待初始化 → 显示提示
+            if (initTipText) {
+              initTipText.visible = true;
+            } else {
+              wx.showToast({ title: '请左右移动手机进行初始化', icon: 'none', duration: 3000 });
+            }
+          }
         },
       });
 
       // 初始化 ARRenderer（用 try-catch 防止环境不支持时崩溃）
       let initError: string | null = null;
       try {
-        console.log('[aiAr] 开始 renderer.init()');
         renderer.init();
-        console.log('[aiAr] renderer.init() 成功完成');
-        console.log('[aiAr] vkError:', renderer?.vkError);
-        console.log('[aiAr] getCanvas():', !!renderer?.getCanvas());
       } catch (e: any) {
         initError = e?.errMsg || e?.message || String(e);
-        console.error('[aiAr] AR 初始化失败:', e, '错误信息:', initError);
-        wx.showToast({ title: initError, icon: 'none', duration: 3000 });
+        console.error('[aiAr] AR 初始化失败:', initError);
       }
 
-      // 检查同步阶段的 VKSession 是否可用
-      // （注意：session.start 是异步的，v2 不支持等错误会在回调中通过 onError 处理）
       const vkError = renderer?.vkError;
       const hasSyncError = initError || vkError;
-      console.log('[aiAr] hasSyncError:', !!hasSyncError, 'initError:', initError, 'vkError': vkError);
 
       // 获取 WebGL 离屏 canvas
       const webglCanvas = renderer?.getCanvas();
@@ -171,7 +187,6 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         transfer2dCanvas.width = arCanvasWidth;
         transfer2dCanvas.height = arCanvasHeight;
         transfer2dCtx = transfer2dCanvas.getContext('2d');
-        console.log('[aiAr] 2D中转canvas创建成功');
 
         // 用 2D 中转 canvas 创建 PIXI Texture
         arTexture = PIXI.Texture.fromCanvas(transfer2dCanvas);
@@ -187,12 +202,12 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
           root.setChildIndex(switchBtn, root.children.length - 1);
         }
 
-        // 每帧刷新：WebGL → drawImage 到 2D canvas → 更新 PIXI Texture
-        tickerFn = () => {
+        // drawImage 从 WebGL 离屏 canvas 拷贝到 2D 中转 canvas，再更新 PIXI 纹理
+        // iOS：在 VKSession RAF 内同步执行（WebGL 渲染后缓冲区会很快失效，需立即拷贝）
+        // Android：在 PIXI ticker 中执行（Android WebGL 缓冲区不会主动清除）
+        const drawFn = () => {
           if (!transfer2dCtx || !webglCanvas) return;
           try {
-            // 对齐旧版 behavior.js 第 147 行：
-            // canvas2dContext.drawImage(offScreenCanvas, 0, 0, w, h, 0, screenTop, w, h)
             transfer2dCtx.drawImage(
               webglCanvas,
               0, 0, arCanvasWidth, arCanvasHeight,
@@ -205,11 +220,17 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
             /* noop */
           }
         };
-        app.ticker.add(tickerFn);
+
+        const isIOS = (wx as any).getSystemInfoSync().platform === 'ios';
+        if (isIOS) {
+          renderer.onRenderCallback = drawFn;
+        } else {
+          tickerFn = drawFn;
+          app.ticker.add(tickerFn);
+        }
       } else {
-        // 同步阶段就出错（如 API 不存在），只 toast 即可
-        const errorDetail = initError || vkError || '未知错误';
-        wx.showToast({ title: 'AR 初始化失败: ' + errorDetail, icon: 'none', duration: 3000 });
+        console.error('[aiAr] AR 初始化失败:', initError || vkError);
+        wx.showToast({ title: '当前设备不支持', icon: 'none', duration: 3000 });
       }
 
       // 触摸事件转发到 ARRenderer
@@ -240,13 +261,13 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
     },
 
     onUnload(app: any) {
-      // 移除 ticker
+      // Android：移除 PIXI ticker
       if (tickerFn && app) {
         app.ticker.remove(tickerFn);
         tickerFn = null;
       }
 
-      // 销毁 AR 渲染器
+      // 销毁 AR 渲染器（onRenderCallback 随 renderer 一起释放）
       if (renderer) {
         renderer.dispose();
         renderer = null;
@@ -267,6 +288,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
       transfer2dCanvas = null;
       transfer2dCtx = null;
       screenBg = null;
+      initTipText = null;
       rootRef = null;
     },
   };

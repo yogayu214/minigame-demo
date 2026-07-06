@@ -107,6 +107,19 @@ const YUV_FS = `
   }
 `;
 
+// RGBA 相机背景片元着色器（iOS 不支持 YUV 纹理扩展，用 RGBA 模式）
+const RGBA_FS = `
+  precision highp float;
+  uniform sampler2D rgba_texture;
+  varying vec2 v_texCoord;
+  void main() {
+    gl_FragColor = texture2D(rgba_texture, v_texCoord);
+  }
+`;
+
+// 单位 3x3 矩阵（iOS RGBA 路径用）
+const IDENTITY_MAT3 = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+
 // ============== 类型定义 ==============
 
 export type ARMode = 'default' | 'planeAR' | 'faceDetect';
@@ -130,6 +143,10 @@ export interface ARRendererOptions {
   onReady?: () => void;
   /** VKSession 创建或启动失败的回调（同步+异步均可触发） */
   onError?: (err: string) => void;
+  /** 每帧 WebGL 渲染完成后的回调（用于同步 drawImage 到 2D canvas，避免 iOS 缓冲区失效） */
+  onRender?: () => void;
+  /** v2 模式初始化状态变化回调（frame 从 null → 有效 或 有效 → null） */
+  onInitStatusChange?: (ready: boolean) => void;
 }
 
 // ============== ARRenderer 类 ==============
@@ -182,6 +199,16 @@ export class ARRenderer {
   _ext: any = null;
   _dt: any = null;
 
+  // RGBA Shader 相关（iOS 用）
+  _rgbaProgram: any = null;
+  _rgbaVAO: any = null;
+  _rgbaTexLoc: any = null;
+  _rgbaDtLoc: any = null;
+  _rgbaTexture: any = null;
+
+  // 平台标识
+  private isIOS = false;
+
   // 人脸检测框 Shader 相关
   vertexProgram: any = null;
   rectEdgeProgram: any = null;
@@ -193,12 +220,20 @@ export class ARRenderer {
   onTouchEndCallback: ((x: number, y: number) => void) | null = null;
   onReadyCallback: (() => void) | null = null;
   errorCallback: ((err: string) => void) | null = null;
+  onRenderCallback: (() => void) | null = null;
+  onInitStatusCallback: ((ready: boolean) => void) | null = null;
 
   // 渲染循环标志
   private disposed = false;
 
+  // v2 初始化状态跟踪
+  private v2InitReady = false; // frame 是否曾经变为有效（初始化完成）
+
   // VKSession 错误信息（环境不支持时设置）
   vkError: string | null = null;
+
+  // default 模式：每帧 hitTest(0.5,0.5) 的最新命中结果（持续 hitTest 保持平面检测活跃）
+  private lastHitTransform: Float32Array | number[] | null = null;
 
   constructor(options: ARRendererOptions) {
     this.options = options;
@@ -211,6 +246,8 @@ export class ARRenderer {
     this.onTouchEndCallback = options.onTouchEnd ?? null;
     this.onReadyCallback = options.onReady ?? null;
     this.errorCallback = options.onError ?? null;
+    this.onRenderCallback = options.onRender ?? null;
+    this.onInitStatusCallback = options.onInitStatusChange ?? null;
   }
 
   setData(args: Record<string, any>) {
@@ -232,55 +269,48 @@ export class ARRenderer {
    *   - 主 canvas (app.view) 的 2D context: 用于 drawImage 合成（由外部 aiAr.ts 处理）
    */
   init() {
-    console.log('[AR] init 开始');
     try {
+      this.isIOS = (wx as any).getSystemInfoSync().platform === 'ios';
+
       // 创建独立的离屏 WebGL Canvas（与 PIXI 的 canvas 隔离）
       this.offScreenCanvas = (wx as any).createCanvas();
-      console.log('[AR] offScreenCanvas 创建成功:', !!this.offScreenCanvas);
       this.offScreenCanvas.width = this.data.width;
       this.offScreenCanvas.height = this.data.height;
 
-      // 关键：显式获取 WebGL context（对齐旧版 behavior.js 第 190 行）
-      const webglCtx = this.offScreenCanvas.getContext('webgl') || this.offScreenCanvas.getContext('experimental-webgl');
+      // iOS 上 drawImage 从 WebGL canvas 拷贝到 2D canvas 需 preserveDrawingBuffer，Android 不需要
+      const isIOS = (wx as any).getSystemInfoSync().platform === 'ios';
+      const ctxAttrs = isIOS ? { preserveDrawingBuffer: true } : undefined;
+      const webglCtx = this.offScreenCanvas.getContext('webgl', ctxAttrs)
+        || this.offScreenCanvas.getContext('experimental-webgl', ctxAttrs);
       if (!webglCtx) {
         throw new Error('无法获取 WebGL context，设备可能不支持 WebGL');
       }
-      console.log('[AR] WebGL context 获取成功');
       this.canvas = this.offScreenCanvas;
-      this.gl = webglCtx; // 预先保存 gl 引用
+      this.gl = webglCtx;
 
       // 初始化 Three.js
-      console.log('[AR] 开始 initTHREE');
       this.initTHREE();
-      console.log('[AR] initTHREE 完成');
 
       // 初始化 GLSL（YUV + 人脸检测框）
-      console.log('[AR] 开始 initGL');
       this.initGL();
-      console.log('[AR] initGL 完成');
 
       // 初始化 VKSession
-      console.log('[AR] 开始 initVK');
       this.initVK(this.config);
-      console.log('[AR] initVK 完成, vkError=', this.vkError);
 
       // 请求相机权限
       (wx as any).authorize({
         scope: 'scope.camera',
         success: (res: any) => console.log('相机授权成功:', res),
-        fail: (err: any) => console.log('相机授权失败:', err),
+        fail: (err: any) => console.error('相机授权失败:', err),
       });
     } catch (e) {
-      console.error('[AR] init 过程中抛出异常:', e);
-      throw e; // 向上抛出，由 aiAr.ts 的 catch 接收
+      console.error('[AR] init 异常:', e);
+      throw e;
     }
   }
 
   private initTHREE() {
-    // 延迟加载 Three.js 和 GLTF Loader（避免模块加载时即失败）
-    // threejs-miniprogram 是 vendor 目录下的 CommonJS JS 文件，在主包中，运行时 require
     const { createScopedThreejs } = require('../../vendor/threejs-miniprogram/index');
-    // registerGLTFLoader 已在文件顶部通过 import 引入
 
     const THREE = (this.THREE = createScopedThreejs(this.canvas));
     registerGLTFLoader(THREE);
@@ -300,16 +330,16 @@ export class ARRenderer {
     scene.add(light2);
 
     // 渲染层（使用离屏 Canvas，WebGL context 已在 init() 中获取）
+    const isIOS = (wx as any).getSystemInfoSync().platform === 'ios';
     const renderer = (this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       canvas: this.offScreenCanvas,
+      preserveDrawingBuffer: isIOS,
     }));
     renderer.gammaOutput = true;
     renderer.gammaFactor = 2.2;
 
-    // 使用已有的 gl 引用（init() 中通过 getContext("webgl") 获取）
-    // Three.js 的 getContext() 应该返回同一个 WebGL context
     if (!this.gl) {
       this.gl = renderer.getContext();
     }
@@ -400,9 +430,30 @@ export class ARRenderer {
       }
 
       // 逐帧渲染
+      let frameCount = 0;
+      const isV2 = this.config.version === 'v2';
       const onFrame = (_timestamp: number) => {
         if (this.disposed) return;
-        const frame = this.session.getVKFrame(this.data.width, this.data.height);
+        const fw = Math.round(this.data.width);
+        const fh = Math.round(this.data.height);
+        let frame: any = null;
+        try {
+          frame = this.session.getVKFrame(fw, fh);
+        } catch (_e) {
+          /* noop */
+        }
+        frameCount++;
+
+        // v2 初始化状态检测
+        if (isV2) {
+          if (frame && !this.v2InitReady) {
+            this.v2InitReady = true;
+            if (this.onInitStatusCallback) this.onInitStatusCallback(true);
+          } else if (!frame && !this.v2InitReady && frameCount === 15) {
+            if (this.onInitStatusCallback) this.onInitStatusCallback(false);
+          }
+        }
+
         if (frame) {
           this.renderFrame(frame);
         }
@@ -441,6 +492,30 @@ export class ARRenderer {
     gl.uniform1i(uniformUVTexture, 6);
 
     this._dt = gl.getUniformLocation(program, 'displayTransform');
+
+    // iOS：额外创建 RGBA shader
+    if (this.isIOS) {
+      const rgbaFrag = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(rgbaFrag, RGBA_FS);
+      gl.compileShader(rgbaFrag);
+
+      const rgbaVert = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(rgbaVert, YUV_VS); // 顶点着色器共用
+      gl.compileShader(rgbaVert);
+
+      const rgbaProgram = (this._rgbaProgram = gl.createProgram());
+      gl.attachShader(rgbaProgram, rgbaVert);
+      gl.attachShader(rgbaProgram, rgbaFrag);
+      gl.deleteShader(rgbaVert);
+      gl.deleteShader(rgbaFrag);
+      gl.linkProgram(rgbaProgram);
+      gl.useProgram(rgbaProgram);
+
+      this._rgbaTexLoc = gl.getUniformLocation(rgbaProgram, 'rgba_texture');
+      gl.uniform1i(this._rgbaTexLoc, 5);
+      this._rgbaDtLoc = gl.getUniformLocation(rgbaProgram, 'displayTransform');
+    }
+
     gl.useProgram(currentProgram);
   }
 
@@ -449,11 +524,22 @@ export class ARRenderer {
     const ext = gl.getExtension('OES_vertex_array_object');
     this._ext = ext;
 
+    // 创建 YUV VAO（Android 用）
+    this._vao = this.createVAOForProgram(ext, this._program);
+
+    // iOS：创建 RGBA VAO（翻转 V 分量修正上下颠倒）
+    if (this.isIOS && this._rgbaProgram) {
+      this._rgbaVAO = this.createVAOForProgram(ext, this._rgbaProgram, true);
+    }
+  }
+
+  private createVAOForProgram(ext: any, program: any, flipY = false) {
+    const gl = this.gl;
     const currentVAO = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
     const vao = ext.createVertexArrayOES();
     ext.bindVertexArrayOES(vao);
 
-    const posAttr = gl.getAttribLocation(this._program, 'a_position');
+    const posAttr = gl.getAttribLocation(program, 'a_position');
     const pos = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pos);
 
@@ -468,20 +554,20 @@ export class ARRenderer {
     gl.enableVertexAttribArray(posAttr);
     vao.posBuffer = pos;
 
-    const texcoordAttr = gl.getAttribLocation(this._program, 'a_texCoord');
+    const texcoordAttr = gl.getAttribLocation(program, 'a_texCoord');
     const texcoord = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texcoord);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]),
-      gl.STATIC_DRAW
-    );
+    // iOS: getCameraBuffer 返回的 buffer 上下方向与 WebGL 纹理坐标相反，需翻转 V 分量
+    const texCoords = flipY
+      ? new Float32Array([1, 0, 0, 0, 1, 1, 0, 1])
+      : new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]);
+    gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
     gl.vertexAttribPointer(texcoordAttr, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(texcoordAttr);
     vao.texcoordBuffer = texcoord;
 
     ext.bindVertexArrayOES(currentVAO);
-    this._vao = vao;
+    return vao;
   }
 
   private initGL() {
@@ -492,36 +578,119 @@ export class ARRenderer {
   private renderGL(frame: any) {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
-    const { yTexture, uvTexture } = frame.getCameraTexture(gl, 'yuv');
-    const displayTransform = frame.getDisplayTransform();
-    if (yTexture && uvTexture) {
-      const currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-      const currentActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-      const currentVAO = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
 
-      gl.useProgram(this._program);
-      this._ext.bindVertexArrayOES(this._vao);
+    if (this.isIOS) {
+      // iOS: 尝试 YUV 纹理路径（polyfill createYUVTexture 后）
+      // 如果 yTexture/uvTexture 有效，走 YUV 渲染；否则 fallback 到 getCameraBuffer
+      let yTexture: any = null;
+      let uvTexture: any = null;
+      let displayTransform: any = null;
+      try {
+        const camTex = frame.getCameraTexture(gl, 'yuv');
+        yTexture = camTex.yTexture;
+        uvTexture = camTex.uvTexture;
+        displayTransform = frame.getDisplayTransform();
+      } catch (_e) {
+        // iOS 不支持 createYUVTexture，fallback 到 getCameraBuffer
+      }
 
-      gl.uniformMatrix3fv(this._dt, false, displayTransform);
-      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      if (yTexture && uvTexture) {
+        // YUV 纹理路径（和 Android 一致）
+        const currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+        const currentActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        const currentVAO = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
 
-      gl.activeTexture(gl.TEXTURE0 + 5);
-      const bindingTexture5 = gl.getParameter(gl.TEXTURE_BINDING_2D);
-      gl.bindTexture(gl.TEXTURE_2D, yTexture);
+        gl.useProgram(this._program);
+        this._ext.bindVertexArrayOES(this._vao);
 
-      gl.activeTexture(gl.TEXTURE0 + 6);
-      const bindingTexture6 = gl.getParameter(gl.TEXTURE_BINDING_2D);
-      gl.bindTexture(gl.TEXTURE_2D, uvTexture);
+        gl.uniformMatrix3fv(this._dt, false, displayTransform);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.activeTexture(gl.TEXTURE0 + 5);
+        const bindingTexture5 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+        gl.bindTexture(gl.TEXTURE_2D, yTexture);
 
-      gl.bindTexture(gl.TEXTURE_2D, bindingTexture6);
-      gl.activeTexture(gl.TEXTURE0 + 5);
-      gl.bindTexture(gl.TEXTURE_2D, bindingTexture5);
+        gl.activeTexture(gl.TEXTURE0 + 6);
+        const bindingTexture6 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+        gl.bindTexture(gl.TEXTURE_2D, uvTexture);
 
-      gl.useProgram(currentProgram);
-      gl.activeTexture(currentActiveTexture);
-      this._ext.bindVertexArrayOES(currentVAO);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        gl.bindTexture(gl.TEXTURE_2D, bindingTexture6);
+        gl.activeTexture(gl.TEXTURE0 + 5);
+        gl.bindTexture(gl.TEXTURE_2D, bindingTexture5);
+
+        gl.useProgram(currentProgram);
+        gl.activeTexture(currentActiveTexture);
+        this._ext.bindVertexArrayOES(currentVAO);
+      } else {
+        // Fallback: getCameraBuffer RGBA 路径（v1 场景）
+        const bufW = Math.ceil(this.data.width / 16) * 16;
+        const bufH = Math.round(this.data.height);
+        const camBuffer = frame.getCameraBuffer(bufW, bufH);
+        if (camBuffer && camBuffer.byteLength > 0) {
+          const currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+          const currentActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+          const currentVAO = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
+
+          if (!this._rgbaTexture) {
+            this._rgbaTexture = gl.createTexture();
+          }
+          gl.activeTexture(gl.TEXTURE0 + 5);
+          const bindingTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
+          gl.bindTexture(gl.TEXTURE_2D, this._rgbaTexture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, bufW, bufH, 0, gl.RGBA, gl.UNSIGNED_BYTE, camBuffer);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+          gl.useProgram(this._rgbaProgram);
+          this._ext.bindVertexArrayOES(this._rgbaVAO);
+          gl.uniformMatrix3fv(this._rgbaDtLoc, false, IDENTITY_MAT3);
+          gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+          gl.bindTexture(gl.TEXTURE_2D, bindingTexture);
+          gl.useProgram(currentProgram);
+          gl.activeTexture(currentActiveTexture);
+          this._ext.bindVertexArrayOES(currentVAO);
+        }
+      }
+    } else {
+      // Android：YUV 模式
+      const { yTexture, uvTexture } = frame.getCameraTexture(gl, 'yuv');
+      const displayTransform = frame.getDisplayTransform();
+      if (yTexture && uvTexture) {
+        const currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+        const currentActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        const currentVAO = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
+
+        gl.useProgram(this._program);
+        this._ext.bindVertexArrayOES(this._vao);
+
+        gl.uniformMatrix3fv(this._dt, false, displayTransform);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+
+        gl.activeTexture(gl.TEXTURE0 + 5);
+        const bindingTexture5 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+        gl.bindTexture(gl.TEXTURE_2D, yTexture);
+
+        gl.activeTexture(gl.TEXTURE0 + 6);
+        const bindingTexture6 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+        gl.bindTexture(gl.TEXTURE_2D, uvTexture);
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        gl.bindTexture(gl.TEXTURE_2D, bindingTexture6);
+        gl.activeTexture(gl.TEXTURE0 + 5);
+        gl.bindTexture(gl.TEXTURE_2D, bindingTexture5);
+
+        gl.useProgram(currentProgram);
+        gl.activeTexture(currentActiveTexture);
+        this._ext.bindVertexArrayOES(currentVAO);
+      }
     }
   }
 
@@ -708,7 +877,7 @@ export class ARRenderer {
         model.rotation.copy(this.reticle.rotation);
         this.scene.add(model);
       }
-    } else {
+      } else {
       // default 模式：hitTest 点击位置放置机器人
       if (this.session && this.scene && this.model) {
         const hitTestRes = this.session.hitTest(
@@ -722,7 +891,17 @@ export class ARRenderer {
           model.matrixAutoUpdate = false;
           model.matrix.fromArray(hitTestRes[0].transform);
           this.scene.add(model);
+        } else if (this.lastHitTransform) {
+          // 点击位置未命中，fallback 到屏幕中心持续 hitTest 的结果
+          const model = this.getRobot();
+          model.matrixAutoUpdate = false;
+          model.matrix.fromArray(this.lastHitTransform);
+          this.scene.add(model);
+        } else {
+          wx.showToast({ title: '未检测到平面,请对准地面后重试', icon: 'none', duration: 1500 });
         }
+      } else if (!this.model) {
+        wx.showToast({ title: '模型加载中,请稍后重试', icon: 'none', duration: 1500 });
       }
     }
   }
@@ -735,12 +914,20 @@ export class ARRenderer {
     const NEAR = 0.001;
     const FAR = 1000;
 
-    // 1. 渲染 YUV 相机背景
+    // 1. 渲染相机背景
     this.renderGL(frame);
 
     // 2. planeAR 模式更新 reticle 光标
     if (this.mode === 'planeAR') {
       this.renderReticle();
+    }
+
+    // 2b. default 模式：持续 hitTest 屏幕中心，保持平面检测活跃（不显示 reticle 光标）
+    if (this.mode === 'default' && this.session) {
+      const hitTestRes = this.session.hitTest(0.5, 0.5);
+      if (hitTestRes.length) {
+        this.lastHitTransform = hitTestRes[0].transform;
+      }
     }
 
     // 3. 更新动画
@@ -759,7 +946,7 @@ export class ARRenderer {
       );
     }
 
-    // 5. Three.js 3D 渲染（不清除颜色缓冲，保留 YUV 背景）
+    // 5. Three.js 3D 渲染（不清除颜色缓冲，保留相机背景）
     this.renderer.autoClearColor = false;
     this.renderer.render(this.scene, this.camera);
     this.renderer.state.setCullFace(this.THREE.CullFaceNone);
@@ -804,9 +991,12 @@ export class ARRenderer {
         }
       }
     }
-  }
 
-  // ============== 切换摄像头 ==============
+    // 同步通知外部：WebGL 渲染已完成，可立即 drawImage（iOS 上缓冲区不会失效）
+    if (this.onRenderCallback) {
+      this.onRenderCallback();
+    }
+  }
 
   switchCamera() {
     if (this.config.cameraPosition === 0) {
@@ -859,6 +1049,10 @@ export class ARRenderer {
     this.clock = null;
     this.THREE = null;
     this.canvas = null;
+    if (this._rgbaTexture && this.gl) {
+      this.gl.deleteTexture(this._rgbaTexture);
+      this._rgbaTexture = null;
+    }
     this.gl = null;
     this.anchor2DList = [];
   }

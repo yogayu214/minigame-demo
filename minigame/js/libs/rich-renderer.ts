@@ -31,6 +31,39 @@ export interface RichConfig {
    * 页面关闭时执行，传入 app 方便移除 ticker。
    */
   onUnload?: (app: any) => void;
+
+  // ============== 信息展示区（按钮上方常驻文本区） ==============
+
+  /**
+   * 信息展示区配置。
+   * 存在时会在按钮列表上方渲染一个带边框的文本容器，
+   * 业务层通过 onInfoTextReady 获取 setText 回调动态更新内容。
+   */
+  infoArea?: {
+    /** 初始显示的文本 */
+    initialText?: string;
+    /** 背景色，默认 0xf5f0dc（浅黄） */
+    backgroundColor?: number;
+    /** 边框色，默认 0x333333 */
+    borderColor?: number;
+    /** 文字颜色，默认 0x333333 */
+    textColor?: number;
+    /** 字号，默认 28px（乘以 ratio） */
+    fontSize?: number;
+    /** 行高倍数，默认 1.4 */
+    lineHeight?: number;
+    /** 容器内水平内边距，默认 24px（乘以 ratio） */
+    paddingX?: number;
+    /** 容器内垂直内边距，默认 20px（乘以 ratio） */
+    paddingY?: number;
+    /** 圆角半径，默认 8px（乘以 ratio） */
+    borderRadius?: number;
+  };
+  /**
+   * infoArea 渲染完成后回调。
+   * 参数 setText 可用于动态更新信息区的文本内容。
+   */
+  onInfoTextReady?: (setText: (text: string) => void) => void;
 }
 
 module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: RichConfig) {
@@ -74,13 +107,89 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   const btnGap = 20 * PIXI.ratio;
   const totalBtnH = (config.actions ? config.actions.length : 0) * (btnH + btnGap) - btnGap;
 
+  // ============== 信息展示区（infoArea） ==============
+  let actualScrollY = scrollY;
+  let infoAreaContainer: any = null;
+  if (config.infoArea) {
+    const ia = config.infoArea;
+    const iaBgColor = ia.backgroundColor ?? 0xf5f0dc;
+    const iaBorderColor = ia.borderColor ?? 0x333333;
+    const iaTextColor = ia.textColor ?? 0x333333;
+    const iaFontSize = (ia.fontSize || 28) * PIXI.ratio;
+    const iaLineH = iaFontSize * (ia.lineHeight || 1.4);
+    const iaPadX = (ia.paddingX || 24) * PIXI.ratio;
+    const iaPadY = (ia.paddingY || 20) * PIXI.ratio;
+    const iaBorderRadius = (ia.borderRadius || 8) * PIXI.ratio;
+
+    // 容器宽度：左右留边距
+    const iaW = obj.width - 40 * PIXI.ratio;
+    const iaInnerW = iaW - iaPadX * 2;
+    const iaX = (obj.width - iaW) / 2;
+
+    infoAreaContainer = new PIXI.Container();
+    infoAreaContainer.x = iaX;
+    infoAreaContainer.y = scrollY;
+
+    // 背景底色
+    const iaBg = new PIXI.Graphics();
+    iaBg.beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, 10, iaBorderRadius).endFill();
+
+    // 边框（用 lineStyle 绘制圆角矩形描边）
+    const iaBorder = new PIXI.Graphics();
+    iaBorder.lineStyle(2 * PIXI.ratio, iaBorderColor)
+      .drawRoundedRect(0, 0, iaW, 10, iaBorderRadius);
+
+    // 文本
+    const iaText = new PIXI.Text(ia.initialText || '', {
+      fontSize: `${iaFontSize}px`,
+      fill: iaTextColor,
+      lineHeight: iaLineH,
+      wordWrap: true,
+      wordWrapWidth: iaInnerW,
+      breakWords: true,
+    });
+    iaText.x = iaPadX;
+    iaText.y = iaPadY;
+
+    infoAreaContainer.addChild(iaBg, iaBorder, iaText);
+    container.addChild(infoAreaContainer);
+
+    // 根据实际文本高度调整背景和边框尺寸
+    const iaContentH = iaText.height + iaPadY * 2;
+    const iaH = Math.max(iaContentH, 60 * PIXI.ratio);
+    iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, iaH, iaBorderRadius).endFill();
+    iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, iaH, iaBorderRadius);
+    infoAreaContainer.height; // 触发 bounds 更新
+
+    // 按钮区起始 y 下移（信息区高度 + 间距）
+    actualScrollY = scrollY + iaH + 30 * PIXI.ratio;
+
+    // 暴露 setText 回调给业务层
+    if (config.onInfoTextReady) {
+      try {
+        config.onInfoTextReady((text: string) => {
+          if (!iaText || !iaBg || !iaBorder || !infoAreaContainer) return;
+          iaText.text = text || '';
+          const newContentH = iaText.height + iaPadY * 2;
+          const newH = Math.max(newContentH, 60 * PIXI.ratio);
+          iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, newH, iaBorderRadius).endFill();
+          iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, newH, iaBorderRadius);
+          // 更新后重新计算按钮区位置
+          const newScrollY = scrollY + newH + 30 * PIXI.ratio;
+          if (scrollWrapper) scrollWrapper.y = newScrollY;
+        });
+      } catch (e) { /* ignore */ }
+    }
+  }
+
   // 仅当有按钮时才创建滚动容器（否则 scrollWrapper 的 interactive/hitArea
   // 会拦截触摸事件，导致 topView 中的滑块等组件无法操作）
+  let scrollWrapper: any = null;
   if (config.actions && config.actions.length > 0) {
     // 滚动容器
-    const scrollWrapper = new PIXI.Container();
+    scrollWrapper = new PIXI.Container();
     scrollWrapper.x = 0;
-    scrollWrapper.y = scrollY;
+    scrollWrapper.y = actualScrollY;
     scrollWrapper.interactive = true;
 
     // 内容层（存放按钮）

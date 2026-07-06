@@ -11,24 +11,38 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+// ============== 信息展示区 ==============
+
+/** infoArea 初始文案 */
+export const infoArea = {
+  initialText: '监听小游戏展示事件：\n小游戏回到前台后会触发此事件\n监听小游戏隐藏到后台事件：\n锁屏、按 HOME 键退到桌面、显示在聊天顶部等操作会触发此事件。',
+};
+
+let setInfo: ((text: string) => void) | null = null;
+export const onInfoTextReady = (fn: (text: string) => void) => {
+  setInfo = fn;
+};
+
+// ============== 生命周期监听 ==============
+
 let showListener: ((res: any) => void) | null = null;
 let hideListener: (() => void) | null = null;
 
 /** 监听小游戏回到前台 */
-export function listenOnShow() {
+export function onShow() {
   if (showListener) {
     wx.showToast({ title: '已在监听 onShow，请先停止', icon: 'none' });
     return;
   }
   showListener = (res: any) => {
-    display.text(formatObj(res));
+    setInfo?.('onShow 已触发\n' + formatObj(res));
   };
   wx.onShow(showListener);
-  wx.showToast({ title: '已注册 onShow，切到后台再回来观察', icon: 'none' });
+  setInfo?.('已注册 onShow，切到后台再回来观察');
 }
 
 /** 停止监听 onShow */
-export function stopOnShow() {
+export function offShow() {
   if (showListener) {
     wx.offShow(showListener);
     showListener = null;
@@ -37,20 +51,20 @@ export function stopOnShow() {
 }
 
 /** 监听小游戏进入后台 */
-export function listenOnHide() {
+export function onHide() {
   if (hideListener) {
     wx.showToast({ title: '已在监听 onHide，请先停止', icon: 'none' });
     return;
   }
   hideListener = () => {
-    display.text('onHide已触发');
+    setInfo?.('onHide 已触发 — 小游戏进入后台');
   };
   wx.onHide(hideListener);
-    wx.showToast({ title: '已注册 onHide，切到后台再回来观察', icon: 'none' });
+  setInfo?.('已注册 onHide，切到后台再回来观察');
 }
 
 /** 停止监听 onHide */
-export function stopOnHide() {
+export function offHide() {
   if (hideListener) {
     wx.offHide(hideListener);
     hideListener = null;
@@ -60,15 +74,15 @@ export function stopOnHide() {
 
 /** 获取冷启动参数 */
 export function getLaunchOptionsSync() {
-  display.text(formatObj(wx.getLaunchOptionsSync()));
+  setInfo?.(formatObj(wx.getLaunchOptionsSync()));
 }
 
 /** 获取启动参数（冷启动和热启动均可） */
 export function getEnterOptionsSync() {
-  display.text(formatObj(wx.getEnterOptionsSync()));
+  setInfo?.(formatObj(wx.getEnterOptionsSync()));
 }
 
 export function onUnload() {
-  stopOnShow();
-  stopOnHide();
+  offShow();
+  offHide();
 }

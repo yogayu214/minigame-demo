@@ -112,7 +112,7 @@ const signIn = [
             path: 'share/showShareImageMenu/index',
           },
           {
-            label: '获取转发信息',
+            label: '进群信息',
             name: 'getShareInfo',
             path: 'share/getShareInfo/index',
           },
@@ -125,11 +125,6 @@ const signIn = [
             label: '收藏',
             name: 'addToFavorites',
             path: 'share/addToFavorites/index',
-          },
-          {
-            label: 'PC 接力',
-            name: 'handoff',
-            path: 'share/handoff/index',
           },
         ],
       },

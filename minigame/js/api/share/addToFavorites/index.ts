@@ -16,20 +16,10 @@ let favoritesFn: any = null;
 /** 监听用户添加收藏 */
 export function onAddToFavorites() {
   favoritesFn = () => {
-    let imageUrl = '';
-    try {
-      imageUrl = canvas.toTempFilePathSync({
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: (canvas.width * 4) / 5,
-      });
-    } catch (e: any) {
-      console.error('[addToFavorites] toTempFilePathSync 失败', e);
-    }
+    wx.showToast({ title: '已触发收藏事件', icon: 'none' });
     return {
       title: '小游戏 API 示例 - 收藏',
-      imageUrl,
+      imageUrl: '',
       query: `pathName=${window.router.getNowPageName()}`,
     };
   };

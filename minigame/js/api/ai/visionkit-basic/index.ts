@@ -24,14 +24,14 @@ export function startSession() {
       track: { plane: { mode: 3 } },
     });
   } catch (e: any) {
-    wx.showToast({ title: '创建失败: ' + (e?.errMsg || e?.message || e), icon: 'none' });
+    wx.showToast({ title: '当前设备不支持', icon: 'none' });
     return;
   }
 
   // 2. 启动 session
   vkSession.start((errCode) => {
     if (errCode) {
-      wx.showToast({ title: 'VK启动失败: ' + errCode, icon: 'none' });
+      wx.showToast({ title: '当前设备不支持', icon: 'none' });
       return;
     }
     console.log('VKSession.version', vkSession!.version);

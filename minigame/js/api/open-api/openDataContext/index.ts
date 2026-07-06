@@ -6,7 +6,7 @@
  * 主域需要将 sharedCanvas 绘制到 PIXI 舞台上才能看到子域内容，
  * 该部分由 libs/rich-configs/openDataContext.ts 的 buildTopView 负责（每帧刷纹理）。
  *
- * 与 demo2 abilityOpen/openDataContext 对齐的 6 个功能：
+ * 与 demo2 abilityOpen/openDataContext 对齐的功能：
  *   setUserRecord          - 上报随机分数
  *   showFriendRank         - 显示好友排行榜（子域渲染到 sharedCanvas）
  *   showFriendsOnlineStatus - 显示好友在线状态（子域渲染到 sharedCanvas）
@@ -28,6 +28,35 @@ function toast(msg: string) {
 const RANK_KEY = 'rankid';
 
 let onShowFn: ((res: any) => void) | null = null;
+
+// ============== PC 接力 ==============
+
+/** 设置接力 query 参数（游戏域同步 API，返回 Boolean） */
+export function setHandoffQuery() {
+  const query = 'from=demo&ts=' + Date.now();
+  const ok = (wx as any).setHandoffQuery(query);
+  toast(`query: ${query} | 设置结果: ${ok ? '成功' : '失败'}`);
+}
+
+/**
+ * 展示 PC 接力面板。
+ *
+ * 向子域发送 PCHandoff 消息，子域会在 sharedCanvas 上渲染：
+ *   1. "查询是否支持接力" 按钮 → 点击调用 wx.checkHandoffEnabled（子域 API）
+ *   2. 若支持则显示 "在电脑上打开" 按钮 → 点击调用 wx.startHandoff（子域 API）
+ */
+export function showPCHandoff() {
+  try {
+    display.showCanvas?.();
+    wx.getOpenDataContext().postMessage({
+      event: 'PCHandoff',
+    });
+  } catch (e: any) {
+    toast(`发送失败: ${e.message}`);
+  }
+}
+
+// ============== 排行榜 / 好友 ==============
 
 /** 上报随机分数（主域直接调用 setUserCloudStorage，与子域使用同一个 key） */
 export function setUserRecord() {

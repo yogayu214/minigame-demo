@@ -28,26 +28,6 @@ function isPC(): boolean {
   return true;
 }
 
-/** 设置窗口大小 */
-export function setWindowSize() {
-  if (!isPC()) return;
-  wx.setWindowSize({
-    width: 400,
-    height: 600,
-    success() {
-      wx.showToast({ title: '窗口已设为 400x600', icon: 'none', duration: 1000 });
-    },
-    fail(err: any) {
-      display.text(
-        formatObj({
-          状态: '设置失败',
-          原因: err?.errMsg || '未知错误',
-        })
-      );
-    },
-  } as any);
-}
-
 /** 监听窗口尺寸变化（横竖屏切换、PC 端拖拽窗口） */
 export function onWindowResize() {
   if (!isPC()) return;
