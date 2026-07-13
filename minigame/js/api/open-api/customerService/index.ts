@@ -5,9 +5,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 打开客服会话 */
 export function openCustomerService() {
@@ -16,7 +20,7 @@ export function openCustomerService() {
     success() {
     },
     fail(err: any) {
-      display.text(`打开失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`打开失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

@@ -24,6 +24,13 @@ function toast(msg: string) {
   wx.showToast({ title: msg, icon: 'none' });
 }
 
+/** 判断当前是否为 PC 端 */
+function isPCPlatform(): boolean {
+  const { platform } = wx.getSystemInfoSync();
+  const p = (platform || '').toLowerCase();
+  return p === 'windows' || p === 'mac' || p === 'devtools';
+}
+
 /** 排行榜使用的托管数据 key，需与子域 data.ts 保持一致 */
 const RANK_KEY = 'rankid';
 
@@ -33,6 +40,10 @@ let onShowFn: ((res: any) => void) | null = null;
 
 /** 设置接力 query 参数（游戏域同步 API，返回 Boolean） */
 export function setHandoffQuery() {
+  if (isPCPlatform()) {
+    toast('当前处于 PC 端，不支持 PC 接力');
+    return;
+  }
   const query = 'from=demo&ts=' + Date.now();
   const ok = (wx as any).setHandoffQuery(query);
   toast(`query: ${query} | 设置结果: ${ok ? '成功' : '失败'}`);
@@ -46,6 +57,10 @@ export function setHandoffQuery() {
  *   2. 若支持则显示 "在电脑上打开" 按钮 → 点击调用 wx.startHandoff（子域 API）
  */
 export function showPCHandoff() {
+  if (isPCPlatform()) {
+    toast('当前处于 PC 端，PC 接力查询不可用');
+    return;
+  }
   try {
     display.showCanvas?.();
     wx.getOpenDataContext().postMessage({

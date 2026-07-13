@@ -4,20 +4,24 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 获取设备电量信息 */
 export function getBatteryInfo() {
   wx.getBatteryInfo({
     success(res: any) {
-      display.text(
+      setInfo(
         `当前电量: ${res.level}%\n电池状态: ${res.isCharging ? '充电中' : '未充电'}`
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

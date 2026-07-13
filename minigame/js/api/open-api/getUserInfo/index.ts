@@ -4,35 +4,30 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 import { calcNativeButtonPos, GREEN_BUTTON_STYLE } from '../../../libs/native-button-pos';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 let userInfoBtn: any = null;
 
 /** 获取用户信息（需先授权） */
 export function getUserInfo() {
-  // 若已创建原生按钮，先隐藏避免遮挡弹窗
-  if (userInfoBtn) userInfoBtn.hide();
-
   wx.getUserInfo({
     success(res: any) {
       const u = res?.userInfo;
       if (!u) {
-        userInfoBtn?.show();
         wx.showToast({ title: '用户信息为空', icon: 'none' });
         return;
       }
-      // 关闭弹窗后恢复原生按钮（与 createUserInfoButton 点击行为一致）
-      display.onClose?.(() => { userInfoBtn?.show(); });
-      setTimeout(() => {
-        display.text(`getUserInfo 成功\n${formatObj(u)}`);
-      }, 300);
+      setInfo(`getUserInfo 成功\n${formatObj(u)}`);
     },
     fail(err: any) {
-      userInfoBtn?.show();
       wx.showToast({ title: `getUserInfo 失败: ${err?.errMsg || '请先在设置中授权'}`, icon: 'none' });
     },
   });
@@ -59,17 +54,10 @@ export function createUserInfoButton() {
   });
 
   userInfoBtn.onTap?.((res: any) => {
-    // 隐藏原生按钮，避免遮挡 display-slot 弹窗
-    userInfoBtn?.hide();
     if (res.userInfo) {
-      // 注册弹窗关闭回调：用户关闭弹窗后自动恢复按钮
-      display.onClose?.(() => { userInfoBtn?.show(); });
-      setTimeout(() => {
-        display.text(`用户信息\n${formatObj(res.userInfo)}`);
-      }, 300);
+      setInfo(`用户信息\n${formatObj(res.userInfo)}`);
     } else {
       wx.showToast({ title: '用户拒绝授权', icon: 'none' });
-      userInfoBtn?.show(); // 未授权则恢复按钮，允许重试
     }
   });
   wx.showToast({ title: '已创建授权按钮，请在下方点击', icon: 'none' });

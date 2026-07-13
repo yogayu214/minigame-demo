@@ -8,10 +8,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 const DEMO_SUBPACKAGE = 'chattool'; // 复用项目里已有的分包名
 
@@ -32,7 +36,7 @@ export function loadSubpackage() {
 
   if (task && task.onProgressUpdate) {
     task.onProgressUpdate((res: any) => {
-      display.text(
+      setInfo(
         formatObj({
           进度: `${res.progress}%`,
           已下载: `${res.totalBytesWritten} B`,
@@ -60,7 +64,7 @@ export function preDownloadSubpackage() {
 
   if (task && task.onProgressUpdate) {
     task.onProgressUpdate((res: any) => {
-      display.text(
+      setInfo(
         formatObj({
           预下载进度: `${res.progress}%`,
           已下载: `${res.totalBytesWritten} B`,

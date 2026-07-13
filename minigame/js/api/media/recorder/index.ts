@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let recorder: any = null;
 let tempPath = '';
@@ -21,7 +25,7 @@ function ensure() {
   recorder.onResume(() => wx.showToast({ title: '录音恢复', icon: 'none' }));
   recorder.onStop((res: any) => {
     tempPath = res?.tempFilePath || '';
-    display.text(
+    setInfo(
       formatObj({
         状态: '录音结束',
         时长: `${res?.duration ?? 0} ms`,

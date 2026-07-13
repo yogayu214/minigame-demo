@@ -8,10 +8,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 返回上一个小程序（不带数据） */
 export function navigateBackMiniProgram() {
@@ -20,7 +24,7 @@ export function navigateBackMiniProgram() {
       console.log('[navigateBackMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(
+      setInfo(
         formatObj({
           状态: '返回失败',
           原因: err?.errMsg || '未知错误',
@@ -39,7 +43,7 @@ export function navigateBackWithExtra() {
       console.log('[navigateBackMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(
+      setInfo(
         formatObj({
           状态: '返回失败',
           原因: err?.errMsg || '未知错误',

@@ -8,9 +8,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 const listeners: Record<string, any> = {};
 let autoStopTimer: ReturnType<typeof setTimeout> | null = null;
@@ -18,20 +22,20 @@ let autoStopTimer: ReturnType<typeof setTimeout> | null = null;
 /** 监听所有触摸事件（5秒后自动停止，避免拦截UI交互） */
 export function listenAll() {
   if (listeners.start) {
-    display.text('已在监听');
+    setInfo('已在监听');
     return;
   }
   listeners.start = (res: any) => {
     const t = res.touches?.[0];
-    display.text(
+    setInfo(
       `事件: touchstart\nx: ${t?.clientX}\ny: ${t?.clientY}\n触点数: ${res.touches?.length || 0}`
     );
   };
   listeners.end = (res: any) =>
-    display.text(
+    setInfo(
       `事件: touchend\nchangedTouches: ${res.changedTouches?.length || 0}`
     );
-  listeners.cancel = () => display.text('事件: touchcancel\n说明: 被打断');
+  listeners.cancel = () => setInfo('事件: touchcancel\n说明: 被打断');
 
   // touchmove 仅记录到变量，不频繁刷新 display，避免阻塞 UI
   let lastMoveInfo = '';
@@ -44,12 +48,12 @@ export function listenAll() {
   wx.onTouchMove(listeners.move);
   wx.onTouchEnd(listeners.end);
   wx.onTouchCancel(listeners.cancel);
-  display.text('已注册触摸事件，5秒后自动停止\n请在屏幕上触摸');
+  setInfo('已注册触摸事件，5秒后自动停止\n请在屏幕上触摸');
 
   // 5秒后自动停止监听，恢复 UI 交互
   autoStopTimer = setTimeout(() => {
     stopAll();
-    display.text(
+    setInfo(
       `触摸监听已自动停止\n最后一次 touchmove: ${lastMoveInfo || '无'}`
     );
   }, 5000);
@@ -66,7 +70,7 @@ export function stopAll() {
   if (listeners.end) wx.offTouchEnd(listeners.end);
   if (listeners.cancel) wx.offTouchCancel(listeners.cancel);
   Object.keys(listeners).forEach((k) => delete listeners[k]);
-  display.text('已停止触摸监听');
+  setInfo('已停止触摸监听');
 }
 
 export function onUnload() {

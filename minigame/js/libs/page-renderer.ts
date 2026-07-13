@@ -17,7 +17,7 @@ import type { PageConfig } from './demo-types';
  */
 function buildConfigFromModule(mod: any, pageLabel?: string): PageConfig {
   const actions: { label: string; handler: () => void }[] = [];
-  const skipKeys = ['__esModule', 'default', 'title', 'apiName', 'onLoad', 'onUnload', 'setDisplay'];
+  const skipKeys = ['__esModule', 'default', 'title', 'apiName', 'onLoad', 'onUnload', 'setDisplay', 'infoArea', 'onInfoTextReady'];
 
   for (const key of Object.keys(mod)) {
     if (skipKeys.includes(key)) continue;
@@ -99,15 +99,10 @@ module.exports = function renderPage(PIXI: any, app: any, obj: any, configOrMod:
   });
 
   // 3. 返回按钮回调
+  //    不塞 reload —— 走 router 的 delPage 路径彻底销毁 container，
+  //    并由 router 的 _onUnload 统一调用 onUnload（避免此处再调导致重复）。
   goBack.callBack = () => {
-    if (config.onUnload) {
-      config.onUnload();
-    }
-    window.router.getNowPage((page: any) => {
-      if (!page.reload) {
-        page.reload = function () {};
-      }
-    });
+    // no-op: onUnload 由 router.delPage 里的 _onUnload 触发
   };
 
   // 4. 组装

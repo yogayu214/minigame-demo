@@ -5,9 +5,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let lastEncoded: ArrayBuffer | null = null;
 
@@ -16,7 +20,7 @@ export function encodeUtf8() {
   const text = 'Hello 小游戏';
   const buf: ArrayBuffer = wx.encode({ data: text, format: 'utf8' });
   lastEncoded = buf;
-  display.text(
+  setInfo(
     `原文: ${text}\n编码: utf8\n字节长度: ${buf.byteLength}\n十六进制: ${bufToHex(new Uint8Array(buf))}`
   );
 }
@@ -24,11 +28,11 @@ export function encodeUtf8() {
 /** 用上一步的 ArrayBuffer 解码回字符串 */
 export function decodeUtf8() {
   if (!lastEncoded) {
-    display.text('请先点 encodeUtf8');
+    setInfo('请先点 encodeUtf8');
     return;
   }
   const text: string = wx.decode({ data: lastEncoded, format: 'utf8' });
-  display.text(
+  setInfo(
     `输入字节长度: ${lastEncoded.byteLength}\n解码格式: utf8\n结果: ${text}`
   );
 }

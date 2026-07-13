@@ -7,10 +7,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let ctx: any = null;
 
@@ -31,7 +35,7 @@ export function playBeep() {
   gain.connect(c.destination);
   osc.start();
   setTimeout(() => osc.stop(), 500);
-  display.text(
+  setInfo(
     formatObj({
       sampleRate: c.sampleRate,
       currentTime: c.currentTime.toFixed(2),
@@ -60,7 +64,7 @@ export function playAudioBuffer() {
   source.connect(c.destination);
   source.start();
 
-  display.text(
+  setInfo(
     formatObj({
       类型: 'AudioBuffer',
       采样率: sampleRate,
@@ -99,7 +103,7 @@ export function demoListener() {
   osc.start();
   setTimeout(() => osc.stop(), 1000);
 
-  display.text(
+  setInfo(
     formatObj({
       类型: 'AudioListener + PannerNode',
       听者位置: 'z=1',
@@ -128,7 +132,7 @@ export function demoAudioParam() {
   osc.start();
   osc.stop(c.currentTime + 2);
 
-  display.text(
+  setInfo(
     formatObj({
       类型: 'AudioParam 自动化',
       频率: '200Hz → 800Hz',

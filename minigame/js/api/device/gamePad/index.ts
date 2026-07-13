@@ -6,9 +6,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let connectListener: any = null;
 let disconnectListener: any = null;
@@ -20,10 +24,10 @@ export function listenGamepad() {
     return;
   }
   connectListener = (res: any) => {
-    display.text(`事件: connected\nid: ${res?.id}\nmapping: ${res?.mapping}`);
+    setInfo(`事件: connected\nid: ${res?.id}\nmapping: ${res?.mapping}`);
   };
   disconnectListener = (res: any) => {
-    display.text(`事件: disconnected\nid: ${res?.id}`);
+    setInfo(`事件: disconnected\nid: ${res?.id}`);
   };
   wx.onGamepadConnected(connectListener);
   wx.onGamepadDisconnected(disconnectListener);

@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 打开调试模式（正式版生效，调用后会重启小游戏） */
 export function enableDebug() {
@@ -39,7 +43,7 @@ export function disableDebug() {
 /** 写入 LogManager 各级别日志 */
 export function writeLogManager() {
   const logger: any = wx.getLogManager({ level: 0 });
-  if (!logger) { display.text('获取 LogManager 失败'); return; }
+  if (!logger) { setInfo('获取 LogManager 失败'); return; }
   const time = Date.now();
   const logs: Record<string, any> = {
     log: { time },
@@ -51,13 +55,13 @@ export function writeLogManager() {
   logger.info('LogManager info:', 'hello');
   logger.debug('LogManager debug:', 'hello');
   logger.warn('LogManager warn:', 'hello');
-  display.text('已写入 4 条 LogManager 日志\n\n' + formatObj(logs));
+  setInfo('已写入 4 条 LogManager 日志\n\n' + formatObj(logs));
 }
 
 /** 写入 RealtimeLogManager 实时日志 */
 export function writeRealtimeLog() {
   const logger: any = wx.getRealtimeLogManager();
-  if (!logger) { display.text('获取 RealtimeLogManager 失败'); return; }
+  if (!logger) { setInfo('获取 RealtimeLogManager 失败'); return; }
   const logs: Record<string, any> = {
     info: 'realtime info: hello',
     warn: 'realtime warn: hello',
@@ -68,7 +72,7 @@ export function writeRealtimeLog() {
   logger.warn('realtime warn:', 'hello');
   logger.error('realtime error:', 'hello');
   logger.addFilterMsg && logger.addFilterMsg('demoFilter');
-  display.text(
+  setInfo(
     '已写入 3 条实时日志（可通过 mp 后台查看）\n\n' + formatObj(logs)
   );
 }
@@ -83,7 +87,7 @@ export function consoleAllLevels() {
   console.group?.('group test');
   console.log('group log inside');
   console.groupEnd?.();
-  display.text(
+  setInfo(
     '已输出 5 个级别 + 1 个分组到 console\n\n' +
       formatObj({
         debug: 'console debug test',

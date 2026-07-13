@@ -98,18 +98,53 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     underline ? (underline.y || 0) + (underline.height || 0) + 80 * PIXI.ratio : 0
   );
 
-  // 可滚动区域：从 baseY 到屏幕底部（留出 logo 空间）
+  // 可滚动区域：从 baseY 到屏幕底部（留出 logo 空间 + 额外底部间距）
   const scrollY = baseY;
-  const logoH = logo ? (logo.height || 0) + 20 * PIXI.ratio : 100 * PIXI.ratio;
-  const scrollH = obj.height - scrollY - logoH;
+  const bottomPadding = 60 * PIXI.ratio; // 滚动区底部与 logo 之间的额外间距
+  const logoH = logo ? (logo.height || 0) + bottomPadding : 140 * PIXI.ratio;
   const btnW = 580 * PIXI.ratio;
   const btnH = 80 * PIXI.ratio;
   const btnGap = 20 * PIXI.ratio;
   const totalBtnH = (config.actions ? config.actions.length : 0) * (btnH + btnGap) - btnGap;
 
-  // ============== 信息展示区（infoArea） ==============
-  let actualScrollY = scrollY;
+  // ============== 统一滚动区（info 区 + 按钮，一起滚动） ==============
+  // 只有配置了 infoArea 或有 actions 时才创建。否则 topView 自己负责整个页面
+  // （避免 scrollWrapper 的全屏 hitArea 遮挡 topView 内的交互组件）
+  const hasScrollableContent =
+    !!config.infoArea || (!!config.actions && config.actions.length > 0);
+
+  const scrollH = obj.height - scrollY - logoH;
+  const infoBtnGap = 30 * PIXI.ratio; // info 与按钮的间距
+
+  let scrollWrapper: any = null;
+  let scrollInner: any = null;
+  let scroller: any = null;
+
+  if (hasScrollableContent) {
+    scrollWrapper = new PIXI.Container();
+    scrollWrapper.x = 0;
+    scrollWrapper.y = scrollY;
+    scrollWrapper.interactive = true;
+
+    scrollInner = new PIXI.Container();
+
+    const scrollMask = new PIXI.Graphics();
+    scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
+    scrollInner.mask = scrollMask;
+
+    const scrollHitArea = new PIXI.Graphics();
+    scrollHitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
+    scrollHitArea.interactive = true;
+
+    scrollWrapper.addChild(scrollHitArea, scrollInner, scrollMask);
+    container.addChild(scrollWrapper);
+  }
+
+  // ---- info 区（如果配置了）----
   let infoAreaContainer: any = null;
+  let infoAreaHeight = 0;
+  let infoAreaLayout: (() => void) | null = null;
+
   if (config.infoArea) {
     const ia = config.infoArea;
     const iaBgColor = ia.backgroundColor ?? 0xf5f0dc;
@@ -121,25 +156,17 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     const iaPadY = (ia.paddingY || 20) * PIXI.ratio;
     const iaBorderRadius = (ia.borderRadius || 8) * PIXI.ratio;
 
-    // 容器宽度：左右留边距
-    const iaW = obj.width - 40 * PIXI.ratio;
+    const iaW = btnW;
     const iaInnerW = iaW - iaPadX * 2;
     const iaX = (obj.width - iaW) / 2;
 
     infoAreaContainer = new PIXI.Container();
     infoAreaContainer.x = iaX;
-    infoAreaContainer.y = scrollY;
+    infoAreaContainer.y = 0;
 
-    // 背景底色
     const iaBg = new PIXI.Graphics();
-    iaBg.beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, 10, iaBorderRadius).endFill();
-
-    // 边框（用 lineStyle 绘制圆角矩形描边）
     const iaBorder = new PIXI.Graphics();
-    iaBorder.lineStyle(2 * PIXI.ratio, iaBorderColor)
-      .drawRoundedRect(0, 0, iaW, 10, iaBorderRadius);
 
-    // 文本
     const iaText = new PIXI.Text(ia.initialText || '', {
       fontSize: `${iaFontSize}px`,
       fill: iaTextColor,
@@ -152,70 +179,34 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     iaText.y = iaPadY;
 
     infoAreaContainer.addChild(iaBg, iaBorder, iaText);
-    container.addChild(infoAreaContainer);
+    scrollInner.addChild(infoAreaContainer);
 
-    // 根据实际文本高度调整背景和边框尺寸
-    const iaContentH = iaText.height + iaPadY * 2;
-    const iaH = Math.max(iaContentH, 60 * PIXI.ratio);
-    iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, iaH, iaBorderRadius).endFill();
-    iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, iaH, iaBorderRadius);
-    infoAreaContainer.height; // 触发 bounds 更新
-
-    // 按钮区起始 y 下移（信息区高度 + 间距）
-    actualScrollY = scrollY + iaH + 30 * PIXI.ratio;
-
-    // 暴露 setText 回调给业务层
-    if (config.onInfoTextReady) {
-      try {
-        config.onInfoTextReady((text: string) => {
-          if (!iaText || !iaBg || !iaBorder || !infoAreaContainer) return;
-          iaText.text = text || '';
-          const newContentH = iaText.height + iaPadY * 2;
-          const newH = Math.max(newContentH, 60 * PIXI.ratio);
-          iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, newH, iaBorderRadius).endFill();
-          iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, newH, iaBorderRadius);
-          // 更新后重新计算按钮区位置
-          const newScrollY = scrollY + newH + 30 * PIXI.ratio;
-          if (scrollWrapper) scrollWrapper.y = newScrollY;
-        });
-      } catch (e) { /* ignore */ }
-    }
+    infoAreaLayout = () => {
+      const hasText = !!(iaText.text && iaText.text.trim());
+      if (!hasText) {
+        infoAreaContainer.visible = false;
+        infoAreaHeight = 0;
+        return;
+      }
+      infoAreaContainer.visible = true;
+      const contentH = iaText.height + iaPadY * 2;
+      infoAreaHeight = contentH;
+      iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, contentH, iaBorderRadius).endFill();
+      iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, contentH, iaBorderRadius);
+    };
   }
 
-  // 仅当有按钮时才创建滚动容器（否则 scrollWrapper 的 interactive/hitArea
-  // 会拦截触摸事件，导致 topView 中的滑块等组件无法操作）
-  let scrollWrapper: any = null;
+  // ---- 按钮 ----
+  const btnX = (obj.width - btnW) / 2;
+  const btnElements: any[] = [];
+
   if (config.actions && config.actions.length > 0) {
-    // 滚动容器
-    scrollWrapper = new PIXI.Container();
-    scrollWrapper.x = 0;
-    scrollWrapper.y = actualScrollY;
-    scrollWrapper.interactive = true;
-
-    // 内容层（存放按钮）
-    const scrollInner = new PIXI.Container();
-
-    // 遮罩
-    const scrollMask = new PIXI.Graphics();
-    scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
-    scrollInner.mask = scrollMask;
-
-    // 透明命中区（保证空白可拖动滚动）
-    const hitArea = new PIXI.Graphics();
-    hitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
-    hitArea.interactive = true;
-
-    scrollWrapper.addChild(hitArea, scrollInner, scrollMask);
-
-    // 按钮居中偏移
-    const btnX = (obj.width - btnW) / 2;
-
-    config.actions.forEach((action, i) => {
+    config.actions.forEach((action) => {
       const btn = p_button(PIXI, {
         width: btnW,
         height: btnH,
         color: 0x05c25f,
-        y: i * (btnH + btnGap),
+        y: 0,
       });
       btn.x = btnX;
       btn.myAddChildFn(
@@ -233,36 +224,64 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
         }
       });
       scrollInner.addChild(btn);
+      btnElements.push(btn);
+    });
+  }
+
+  // ---- 统一 scroller（仅在有滚动内容时创建）----
+  const layoutAll = () => {
+    if (!scroller) return;
+    let totalH = 0;
+    if (infoAreaLayout) {
+      infoAreaLayout();
+      totalH += infoAreaHeight;
+      if (infoAreaHeight > 0) totalH += infoBtnGap;
+    }
+    btnElements.forEach((btn, i) => {
+      btn.y = totalH + i * (btnH + btnGap);
+    });
+    totalH += totalBtnH;
+    scroller.contentSize(obj.width, scrollH, obj.width, totalH);
+  };
+
+  if (hasScrollableContent) {
+    scroller = new Scroller((_l: number, t: number) => {
+      scrollInner.y = -t;
     });
 
-    container.addChild(scrollWrapper);
+    (scrollWrapper as any).touchstart = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchStart(e.data.global.x, e.data.global.y);
+    };
+    (scrollWrapper as any).touchmove = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
+    };
+    (scrollWrapper as any).touchend = (e: any) => {
+      e.stopPropagation();
+      scroller.doTouchEnd(e.data.originalEvent.timeStamp);
+    };
 
-    // 滚动逻辑（仅当内容超出可视区域时启用）
-    if (totalBtnH > scrollH) {
-      const scroller = new Scroller((_l: number, t: number) => {
-        scrollInner.y = -t;
-      });
-      scroller.contentSize(obj.width, scrollH, obj.width, totalBtnH);
-
-      (scrollWrapper as any).touchstart = (e: any) => {
-        e.stopPropagation();
-        scroller.doTouchStart(e.data.global.x, e.data.global.y);
-      };
-      (scrollWrapper as any).touchmove = (e: any) => {
-        e.stopPropagation();
-        scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
-      };
-      (scrollWrapper as any).touchend = (e: any) => {
-        e.stopPropagation();
-        scroller.doTouchEnd(e.data.originalEvent.timeStamp);
-      };
+    // setText 回调
+    if (config.onInfoTextReady && infoAreaContainer) {
+      try {
+        config.onInfoTextReady((text: string) => {
+          // iaText 是第 3 个子元素
+          const iaText = infoAreaContainer.children[2];
+          if (!iaText) return;
+          iaText.text = text || '';
+          layoutAll();
+        });
+      } catch (e) { /* ignore */ }
     }
+
+    layoutAll();
   }
 
   // 返回按钮回调
-  goBack.callBack = () => {
-    if (config.onUnload) config.onUnload(app);
-  };
+  //   onUnload 的清理统一由 router.delPage 里的 _onUnload 负责调用（见 router.ts），
+  //   这里不再直接调，避免 onUnload 被调用两次（第一次销毁异步资源可能与第二次冲突，
+  //   导致返回卡住，如 mediaAudioPlayer 的 player.destroy 场景）。
 
   // 组装固定元素（覆盖在 topView 之上）
   container.addChild(goBack, title, api_name);

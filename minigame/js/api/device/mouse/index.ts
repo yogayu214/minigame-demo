@@ -6,9 +6,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let downListener: any = null;
 let upListener: any = null;
@@ -29,18 +33,18 @@ export function listenAll() {
     return;
   }
   downListener = (res: any) =>
-    display.text(
+    setInfo(
       `事件: mousedown\n按键: ${res?.button}\nx: ${res?.x}\ny: ${res?.y}`
     );
   upListener = (res: any) =>
-    display.text(
+    setInfo(
       `事件: mouseup\n按键: ${res?.button}\nx: ${res?.x}\ny: ${res?.y}`
     );
   moveListener = (res: any) => {
     const now = Date.now();
     if (now - lastMoveAt < 100) return; // 节流
     lastMoveAt = now;
-    display.text(`事件: mousemove\nx: ${res?.x}\ny: ${res?.y}`);
+    setInfo(`事件: mousemove\nx: ${res?.x}\ny: ${res?.y}`);
   };
   wx.onMouseDown(downListener);
   wx.onMouseUp(upListener);

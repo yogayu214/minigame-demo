@@ -7,16 +7,24 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let favoritesFn: any = null;
 
 /** 监听用户添加收藏 */
 export function onAddToFavorites() {
+  if (favoritesFn) {
+    setInfo('已在监听中，请先取消');
+    return;
+  }
   favoritesFn = () => {
-    wx.showToast({ title: '已触发收藏事件', icon: 'none' });
+    setInfo('收藏事件已触发\n\n返回参数:\n  title: 小游戏 API 示例 - 收藏\n  query: pathName=' + window.router.getNowPageName());
     return {
       title: '小游戏 API 示例 - 收藏',
       imageUrl: '',
@@ -24,7 +32,7 @@ export function onAddToFavorites() {
     };
   };
   (wx as any).onAddToFavorites(favoritesFn);
-  wx.showToast({ title: '点击右上角菜单收藏查看效果', icon: 'none' });
+  setInfo('已注册收藏监听\n\n请点击右上角菜单 → 收藏，触发后此处会显示回调结果');
 }
 
 /** 取消监听收藏 */
@@ -32,9 +40,9 @@ export function offAddToFavorites() {
   if (favoritesFn) {
     (wx as any).offAddToFavorites(favoritesFn);
     favoritesFn = null;
-    wx.showToast({ title: '已取消监听', icon: 'none' });
+    setInfo('已取消收藏监听');
   } else {
-    wx.showToast({ title: '当前无监听，无需取消', icon: 'none' });
+    setInfo('当前无监听，无需取消');
   }
 }
 

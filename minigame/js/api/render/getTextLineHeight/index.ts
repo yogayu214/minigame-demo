@@ -5,15 +5,19 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 /** 获取文本行高 */
 export function getTextLineHeight() {
   if (typeof (wx as any).getTextLineHeight !== 'function') {
-    display.text('当前环境不支持 wx.getTextLineHeight');
+    setInfo('当前环境不支持 wx.getTextLineHeight');
     return;
   }
   const lineHeight = (wx as any).getTextLineHeight({
@@ -21,7 +25,7 @@ export function getTextLineHeight() {
     fontFamily: 'sans-serif',
     text: 'Hello 微信小游戏',
   });
-  display.text(
+  setInfo(
     formatObj({
       lineHeight: lineHeight,
       fontSize: 24,

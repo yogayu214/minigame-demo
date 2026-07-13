@@ -5,15 +5,19 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 跳转到更新微信页面（当前微信版本过低时） */
 export function updateWeChatApp() {
   wx.updateWeChatApp({
     fail(err: any) {
-      display.text(`无需更新或调用失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`无需更新或调用失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

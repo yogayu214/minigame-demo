@@ -14,10 +14,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 function toast(msg: string) {
   wx.showToast({ title: msg, icon: 'none' });
@@ -65,7 +69,7 @@ export function useTag() {
 export function getCommonInfo() {
   const mgr = getLogManager();
   const info = mgr.getCommonInfo?.();
-  display.text(formatObj(info || {}));
+  setInfo(formatObj(info || {}));
 }
 
 /** 将对象与全局 commonInfo 合并（仅第一层属性） */
@@ -82,7 +86,7 @@ export function reportMiniMetric() {
   }
   try {
     reportManager.report?.('demo_event', { ts: Date.now() });
-    display.text('MiniReportManager.report 已上报');
+    setInfo('MiniReportManager.report 已上报');
   } catch (e: any) {
     toast(`上报失败: ${e.message || e}`);
   }

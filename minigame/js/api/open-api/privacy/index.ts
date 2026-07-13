@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 主动唤起隐私授权确认弹窗 */
 export function requirePrivacyAuthorize() {
@@ -38,7 +42,7 @@ export function openPrivacyContract() {
 export function getPrivacySetting() {
   wx.getPrivacySetting({
     success(res: any) {
-      display.text(`隐私授权设置\n${formatObj(res)}`);
+      setInfo(`隐私授权设置\n${formatObj(res)}`);
     },
     fail(err: any) {
       wx.showToast({ title: `查询失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });

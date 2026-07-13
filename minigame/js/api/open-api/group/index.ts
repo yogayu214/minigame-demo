@@ -5,16 +5,20 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 /** 获取群聊场景入参（仅在从群聊进入小游戏时有效） */
 export function getGroupEnterInfo() {
   wx.getGroupEnterInfo({
     success(res: any) {
-      display.text(`群聊入参\n${formatObj(res)}`);
+      setInfo(`群聊入参\n${formatObj(res)}`);
     },
     fail(err: any) {
       wx.showToast({ title: `查询失败: ${'请从群聊场景进入'}`, icon: 'none' });

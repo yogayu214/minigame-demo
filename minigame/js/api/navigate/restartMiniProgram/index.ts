@@ -8,9 +8,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 直接重启（不带启动参数） */
 export function restartMiniProgram() {
@@ -20,7 +24,7 @@ export function restartMiniProgram() {
       console.log('[restartMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`重启失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`重启失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -28,14 +32,14 @@ export function restartMiniProgram() {
 /** 重启并附带启动参数 query */
 export function restartWithQuery() {
   wx.showToast({ title: '调用 wx.restartMiniProgram（带 path）…', icon: 'none' });
-  display.text('调用 wx.restartMiniProgram（带 path）…');
+  setInfo('调用 wx.restartMiniProgram（带 path）…');
   wx.restartMiniProgram({
     path: '?from=demo&ts=' + Date.now(),
     success(res: any) {
       console.log('[restartMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`重启失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`重启失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

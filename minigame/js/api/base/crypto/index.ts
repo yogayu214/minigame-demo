@@ -7,18 +7,22 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 /** 获取最新的用户加密密钥 */
 export function getLatestUserKey() {
   const mgr: any = wx.getUserCryptoManager();
-  if (!mgr) { display.text('获取 CryptoManager 失败'); return; }
+  if (!mgr) { setInfo('获取 CryptoManager 失败'); return; }
   mgr.getLatestUserKey({
     success(res: any) {
-      display.text(
+      setInfo(
         formatObj({
           encryptKey: shorten(res?.encryptKey),
           iv: shorten(res?.iv),
@@ -28,7 +32,7 @@ export function getLatestUserKey() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -36,13 +40,13 @@ export function getLatestUserKey() {
 /** 获取 6 字节密码学安全随机数 */
 export function getRandomValues() {
   const mgr: any = wx.getUserCryptoManager();
-  if (!mgr) { display.text('获取 CryptoManager 失败'); return; }
+  if (!mgr) { setInfo('获取 CryptoManager 失败'); return; }
   mgr.getRandomValues({
     length: 6,
     success(res: any) {
-      if (!res?.randomValues) { display.text('获取随机数失败：randomValues 为空'); return; }
+      if (!res?.randomValues) { setInfo('获取随机数失败：randomValues 为空'); return; }
       const bytes = new Uint8Array(res.randomValues);
-      display.text(
+      setInfo(
         formatObj({
           长度: String(bytes.byteLength),
           十六进制: bufToHex(bytes),
@@ -50,7 +54,7 @@ export function getRandomValues() {
       );
     },
     fail(err: any) {
-      display.text(`获取失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

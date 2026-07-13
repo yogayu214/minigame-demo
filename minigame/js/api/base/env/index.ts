@@ -14,12 +14,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 export function getEnv() {
   const env = wx.env;
-  display.text(formatObj(env));
+  setInfo(formatObj(env));
 }

@@ -5,9 +5,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let wheelListener: any = null;
 let count = 0;
@@ -28,7 +32,7 @@ export function onWheel() {
   count = 0;
   wheelListener = (res: any) => {
     count += 1;
-    display.text(
+    setInfo(
       `触发次数: ${count}\ndeltaX: ${res?.deltaX}\ndeltaY: ${res?.deltaY}\ndeltaZ: ${res?.deltaZ}`
     );
   };

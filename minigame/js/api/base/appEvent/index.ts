@@ -7,10 +7,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let errorListener: ((res: any) => void) | null = null;
 let rejectionListener: ((res: any) => void) | null = null;
@@ -20,7 +24,7 @@ let errorCount = 0;
 let rejectionCount = 0;
 
 /** 监听全局错误事件 */
-export function listenOnError() {
+export function onError() {
   if (errorListener) {
     wx.showToast({ title: '已在监听 onError', icon: 'none' });
     return;
@@ -32,7 +36,7 @@ export function listenOnError() {
       onError触发次数: errorCount,
       最近错误: res.message || res,
     };
-    display.text(formatObj(data));
+    setInfo(formatObj(data));
   };
   wx.onError(errorListener);
   wx.showToast({ title: '已注册 onError，点击"触发错误"测试', icon: 'none' });
@@ -46,7 +50,7 @@ export function triggerError() {
 }
 
 /** 停止监听全局错误 */
-export function stopOnError() {
+export function offError() {
   if (errorListener) {
     wx.offError(errorListener);
     errorListener = null;
@@ -55,7 +59,7 @@ export function stopOnError() {
 }
 
 /** 监听未处理的 Promise 异常 */
-export function listenOnUnhandledRejection() {
+export function onUnhandledRejection() {
   if (rejectionListener) {
     wx.showToast({ title: '已在监听 onUnhandledRejection', icon: 'none' });
     return;
@@ -67,7 +71,7 @@ export function listenOnUnhandledRejection() {
       Rejection触发次数: rejectionCount,
       最近原因: res.reason,
     };
-    display.text(formatObj(data));
+    setInfo(formatObj(data));
   };
   wx.onUnhandledRejection(rejectionListener);
   wx.showToast({ title: '已注册 onUnhandledRejection', icon: 'none' });
@@ -81,7 +85,7 @@ export function triggerUnhandledRejection() {
 }
 
 /** 停止监听 Promise 异常 */
-export function stopOnUnhandledRejection() {
+export function offUnhandledRejection() {
   if (rejectionListener) {
     wx.offUnhandledRejection(rejectionListener);
     rejectionListener = null;
@@ -90,12 +94,12 @@ export function stopOnUnhandledRejection() {
 }
 
 /** 监听音频中断（来电、其他 App 抢占音频时触发） */
-export function listenAudioInterruption() {
+export function onAudioInterruption() {
   audioBeginListener = () => {
-    display.text('音频被中断（Begin）');
+    setInfo('音频被中断（Begin）');
   };
   audioEndListener = () => {
-    display.text('音频中断结束（End）');
+    setInfo('音频中断结束（End）');
   };
   wx.onAudioInterruptionBegin(audioBeginListener);
   wx.onAudioInterruptionEnd(audioEndListener);
@@ -103,7 +107,7 @@ export function listenAudioInterruption() {
 }
 
 /** 停止监听音频中断 */
-export function stopAudioInterruption() {
+export function offAudioInterruption() {
   if (audioBeginListener) {
     wx.offAudioInterruptionBegin(audioBeginListener);
     audioBeginListener = null;
@@ -116,7 +120,7 @@ export function stopAudioInterruption() {
 }
 
 export function onUnload() {
-  stopOnError();
-  stopOnUnhandledRejection();
-  stopAudioInterruption();
+  offError();
+  offUnhandledRejection();
+  offAudioInterruption();
 }

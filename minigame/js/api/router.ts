@@ -977,8 +977,8 @@ function loadPage(
 
   if (richPages[name]) {
     const { config } = require(richPages[name]);
-    // rich-renderer 的 onUnload 在 goBack.callBack 里已由 rich-renderer 自己调用，
-    // 但 delPage 路径需要额外存一份供 router 调用
+    // onUnload 统一由 delPage 里的 _onUnload 调用（rich-renderer 的 goBack.callBack
+    // 已改为 no-op，避免异步资源销毁被调用两次导致返回卡住）
     if (treePage && config.onUnload) {
       treePage[name]._onUnload = () => config.onUnload(null);
     }

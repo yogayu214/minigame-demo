@@ -1,6 +1,6 @@
 /**
  * 窗口
- * wx.setWindowSize / wx.onWindowResize / wx.offWindowResize
+ * wx.onWindowResize / wx.offWindowResize
  * wx.onWindowStateChange / wx.offWindowStateChange
  * 官方文档：
  *   https://developers.weixin.qq.com/minigame/dev/api/ui/window/wx.onWindowResize.html
@@ -10,15 +10,19 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 let resizeListener: any = null;
 let stateListener: any = null;
 
-/** 检测是否为 PC 端，非 PC 则提示并返回 false */
+/** 检测是否为 PC 端（含开发者工具），非 PC 则提示并返回 false */
 function isPC(): boolean {
   const { platform } = wx.getDeviceInfo();
   if (platform !== 'windows' && platform !== 'mac') {
@@ -31,8 +35,12 @@ function isPC(): boolean {
 /** 监听窗口尺寸变化（横竖屏切换、PC 端拖拽窗口） */
 export function onWindowResize() {
   if (!isPC()) return;
+  if (resizeListener) {
+    wx.showToast({ title: '已在监听，请先取消', icon: 'none', duration: 1000 });
+    return;
+  }
   resizeListener = (res: any) => {
-    display.text(
+    setInfo(
       formatObj({
         事件: 'resize',
         windowWidth: String(res.windowWidth),
@@ -41,7 +49,7 @@ export function onWindowResize() {
     );
   };
   wx.onWindowResize(resizeListener);
-  wx.showToast({ title: '已注册 resize 监听', icon: 'none', duration: 1000 });
+  setInfo('已注册 resize 监听，请拖拽窗口边缘观察');
 }
 
 /** 取消监听窗口尺寸变化 */
@@ -64,7 +72,7 @@ export function onWindowStateChange() {
     return;
   }
   stateListener = (res: any) => {
-    display.text(
+    setInfo(
       formatObj({
         事件: 'stateChange',
         state: res.state || '-',
@@ -85,25 +93,6 @@ export function offWindowStateChange() {
   } else {
     wx.showToast({ title: '当前无监听，无需取消', icon: 'none', duration: 1000 });
   }
-}
-
-/** 当前窗口信息 */
-export function getCurrentWindow() {
-  if (!isPC()) return;
-  const info: any = wx.getWindowInfo();
-  if (!info) {
-    wx.showToast({ title: '获取窗口信息失败', icon: 'none', duration: 1000 });
-    return;
-  }
-  display.text(
-    formatObj({
-      width: String(info.windowWidth),
-      height: String(info.windowHeight),
-      screenWidth: String(info.screenWidth),
-      screenHeight: String(info.screenHeight),
-      pixelRatio: String(info.pixelRatio),
-    })
-  );
 }
 
 export function onUnload() {

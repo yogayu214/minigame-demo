@@ -4,10 +4,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 同步获取第三方平台自定义数据 */
 export function getExtConfigSync() {
@@ -17,7 +21,7 @@ export function getExtConfigSync() {
     if (keys.length === 0) {
       wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
     } else {
-      display.text(`getExtConfigSync\n${formatObj(res)}`);
+      setInfo(`getExtConfigSync\n${formatObj(res)}`);
     }
   } catch (e: any) {
     wx.showToast({ title: `获取失败：${e?.message || '未知错误'}`, icon: 'none', duration: 1000 });
@@ -32,7 +36,7 @@ export function getExtConfig() {
       if (keys.length === 0) {
         wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
       } else {
-        display.text(`getExtConfig\n${formatObj(res)}`);
+        setInfo(`getExtConfig\n${formatObj(res)}`);
       }
     },
     fail(err: any) {

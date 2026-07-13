@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 主动触发 JavaScriptCore 垃圾回收 */
 export function triggerGC() {
@@ -27,7 +31,7 @@ export function reportPerformance() {
 export function getPerformance() {
   const perf: any = wx.getPerformance();
   const now = perf.now();
-  display.text(
+  setInfo(
     formatObj({
       'performance.now()': now,
       单位: '微秒（μs）',
@@ -43,7 +47,7 @@ export function measureDelta() {
   let sum = 0;
   for (let i = 0; i < 100000; i++) sum += i;
   const t2 = perf.now();
-  display.text(
+  setInfo(
     formatObj({
       起始时刻: t1,
       结束时刻: t2,

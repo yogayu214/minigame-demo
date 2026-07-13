@@ -8,10 +8,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let offCanvas: any = null;
 
@@ -23,7 +27,7 @@ export function createOffscreen() {
   const ctx = offCanvas.getContext('2d');
   ctx.fillStyle = '#ff0000';
   ctx.fillRect(0, 0, 200, 100);
-  display.text(
+  setInfo(
     formatObj({
       width: offCanvas.width,
       height: offCanvas.height,
@@ -36,14 +40,14 @@ export function createOffscreen() {
 /** 把离屏 canvas 转成临时图片 */
 export function toTempFile() {
   if (!offCanvas) {
-    display.text('请先 createOffscreen');
+    setInfo('请先 createOffscreen');
     return;
   }
   offCanvas.toTempFilePath?.({
     fileType: 'png',
     quality: 1,
     success(res: any) {
-      display.text(
+      setInfo(
         formatObj({
           临时图片: res.tempFilePath,
           操作: '已生成 PNG',
@@ -51,7 +55,7 @@ export function toTempFile() {
       );
     },
     fail(err: any) {
-      display.text(`生成失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`生成失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -59,7 +63,7 @@ export function toTempFile() {
 /** 预览该图片 */
 export function previewOffscreen() {
   if (!offCanvas) {
-    display.text('请先 createOffscreen');
+    setInfo('请先 createOffscreen');
     return;
   }
   offCanvas.toTempFilePath?.({
@@ -67,7 +71,7 @@ export function previewOffscreen() {
       display.image(res?.tempFilePath);
     },
     fail(err: any) {
-      display.text(`预览失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`预览失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

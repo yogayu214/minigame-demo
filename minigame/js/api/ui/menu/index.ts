@@ -9,10 +9,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let officialListener: any = null;
 
@@ -20,10 +24,10 @@ let officialListener: any = null;
 export function getMenuRect() {
   const rect = wx.getMenuButtonBoundingClientRect();
   if (!rect) {
-    display.text('获取菜单按钮位置失败');
+    setInfo('获取菜单按钮位置失败');
     return;
   }
-  display.text(
+  setInfo(
     formatObj({
       top: String(rect.top),
       right: String(rect.right),
@@ -59,7 +63,7 @@ export function setMenuLight() {
 /** 查询官方组件信息（胶囊、tabbar 等） */
 export function getOfficialComponents() {
   const info: any = wx.getOfficialComponentsInfo?.() || {};
-  display.text(
+  setInfo(
     formatObj({
       数据: JSON.stringify(info).slice(0, 100),
     })
@@ -69,7 +73,7 @@ export function getOfficialComponents() {
 /** 监听官方组件变化 */
 export function onOfficialChange() {
   officialListener = (res: any) => {
-    display.text(
+    setInfo(
       formatObj({
         事件: 'officialChange',
         详情: JSON.stringify(res).slice(0, 100),

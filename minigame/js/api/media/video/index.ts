@@ -4,9 +4,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let video: any = null;
 
@@ -33,19 +37,19 @@ export function onLoad() {
   });
 
   video.onPlay(() => {
-    display.text('视频播放中');
+    setInfo('视频播放中');
   });
   video.onPause(() => {
-    display.text('视频已暂停');
+    setInfo('视频已暂停');
   });
   video.onEnded(() => {
-    display.text('视频播放结束');
+    setInfo('视频播放结束');
   });
   video.onWaiting(() => {
-    display.text('视频缓冲中');
+    setInfo('视频缓冲中');
   });
   video.onError((res: any) => {
-    display.text(`视频错误: ${res?.errMsg || '未知错误'}`);
+    setInfo(`视频错误: ${res?.errMsg || '未知错误'}`);
   });
 }
 

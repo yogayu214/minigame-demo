@@ -5,9 +5,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let listener: ((res: any) => void) | null = null;
 let warningCount = 0;
@@ -21,7 +25,7 @@ export function onMemoryWarning() {
   warningCount = 0;
   listener = (res: any) => {
     warningCount += 1;
-    display.text(
+    setInfo(
       `触发次数: ${warningCount}\n警告等级: ${res?.level}\n说明: 5=临界 10=低 15=中 20=高`
     );
   };

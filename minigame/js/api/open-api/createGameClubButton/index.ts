@@ -10,9 +10,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let clubBtn: any = null;
 
@@ -26,10 +30,10 @@ export function getGameClubData() {
         wx.showToast({ title: '游戏圈数据为空', icon: 'none' });
         return;
       }
-      display.text(`游戏圈数据\n${JSON.stringify(res, null, 2)}`);
+      setInfo(`游戏圈数据\n${JSON.stringify(res, null, 2)}`);
     },
     fail(err: any) {
-      display.text(`获取游戏圈数据失败\n${err?.errMsg || '未知错误'}`);
+      setInfo(`获取游戏圈数据失败\n${err?.errMsg || '未知错误'}`);
     },
     complete() {
       wx.showToast({ title: 'getGameClubData 请求完成', icon: 'none' });

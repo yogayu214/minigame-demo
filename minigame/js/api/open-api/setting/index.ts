@@ -10,9 +10,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 const SCOPE_LABELS: Record<string, string> = {
   'scope.userInfo': '用户信息',
@@ -33,7 +37,7 @@ function renderSettings(authSetting: Record<string, boolean>) {
       value === true ? '已授权' : value === false ? '已拒绝' : '未设置';
     lines.push(`${SCOPE_LABELS[scope]}: ${status}`);
   });
-  display.text(lines.join('\n'));
+  setInfo(lines.join('\n'));
 }
 
 /** 获取用户当前授权设置 (AuthSetting) */
@@ -43,13 +47,13 @@ export function getSetting() {
       renderSettings(res.authSetting);
       // SubscriptionsSetting
       if (res.subscriptionsSetting) {
-        display.text(
+        setInfo(
           `--- 订阅消息设置 ---\n${JSON.stringify(res.subscriptionsSetting).slice(0, 300)}`
         );
       }
     },
     fail(err: any) {
-      display.text(`获取失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -60,7 +64,7 @@ export function openSetting() {
     success(res: any) {
     },
     fail(err: any) {
-      display.text(`打开失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`打开失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }

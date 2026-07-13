@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 let frameId: number | null = null;
 let frameCount = 0;
@@ -24,7 +28,7 @@ export function requestAnimationFrameDemo() {
     const elapsed = Date.now() - startTime;
     if (elapsed < 3000) {
       frameId = requestAnimationFrame(onFrame);
-      display.text(
+      setInfo(
         formatObj({
           已执行帧数: frameCount,
           耗时: elapsed + 'ms',
@@ -32,7 +36,7 @@ export function requestAnimationFrameDemo() {
         })
       );
     } else {
-      display.text(
+      setInfo(
         formatObj({
           总帧数: frameCount,
           总耗时: elapsed + 'ms',
@@ -44,14 +48,14 @@ export function requestAnimationFrameDemo() {
   }
 
   frameId = requestAnimationFrame(onFrame);
-  display.text('已请求 requestAnimationFrame');
+  setInfo('已请求 requestAnimationFrame');
 }
 
 /** cancelAnimationFrame 取消帧回调 */
 export function cancelAnimationFrameDemo() {
   if (frameId !== null) {
     cancelAnimationFrame(frameId);
-    display.text(
+    setInfo(
       formatObj({
         已取消帧ID: frameId,
         已执行帧数: frameCount,
@@ -60,7 +64,7 @@ export function cancelAnimationFrameDemo() {
     );
     frameId = null;
   } else {
-    display.text('当前没有正在进行的动画帧');
+    setInfo('当前没有正在进行的动画帧');
   }
 }
 

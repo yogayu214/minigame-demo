@@ -9,10 +9,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 const TIP = '参数皆为虚拟，用户可下载demo后自行填入可用参数查看效果';
 const TIP_DURATION = 1500;
@@ -83,7 +87,7 @@ export async function requestMidasPayment() {
         wx.showToast({ title: '支付成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
-        display.text(
+        setInfo(
           formatObj({
             状态: '支付失败',
             原因: err?.errMsg || '未知错误',
@@ -111,7 +115,7 @@ export async function requestMidasPaymentGameItem() {
         wx.showToast({ title: '道具购买成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
-        display.text(
+        setInfo(
           formatObj({
             状态: '道具购买失败',
             原因: err?.errMsg || '未知错误',
@@ -140,7 +144,7 @@ export async function requestMidasFriendPayment() {
         wx.showToast({ title: '好友代付成功', icon: 'none', duration: 1000 });
       },
       fail(err: any) {
-        display.text(
+        setInfo(
           formatObj({
             状态: '好友代付失败',
             原因: err?.errMsg || '未知错误',

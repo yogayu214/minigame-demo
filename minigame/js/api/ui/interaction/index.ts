@@ -10,9 +10,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 显示 success Toast */
 export function showSuccessToast() {
@@ -21,7 +25,7 @@ export function showSuccessToast() {
     icon: 'success',
     duration: 1500,
     fail(err: any) {
-      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showToast 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -33,7 +37,7 @@ export function showLoadingToast() {
     icon: 'loading',
     duration: 1500,
     fail(err: any) {
-      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showToast 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -45,7 +49,7 @@ export function showNoneToast() {
     icon: 'none',
     duration: 1500,
     fail(err: any) {
-      display.text(`showToast 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showToast 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -61,7 +65,7 @@ export function showLoading() {
   wx.showLoading({
     title: '加载中...',
     fail(err: any) {
-      display.text(`showLoading 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showLoading 失败：${err?.errMsg || '未知错误'}`);
     },
   });
   setTimeout(() => wx.hideLoading(), 2000);
@@ -81,7 +85,7 @@ export function showConfirmModal() {
     success(res: any) {
     },
     fail(err: any) {
-      display.text(`showModal 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showModal 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -94,7 +98,7 @@ export function showSimpleModal() {
     showCancel: false,
     confirmColor: '#02BB00',
     fail(err: any) {
-      display.text(`showModal 失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`showModal 失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

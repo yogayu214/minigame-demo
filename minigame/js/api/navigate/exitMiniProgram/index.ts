@@ -7,9 +7,13 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 退出小游戏 */
 export function exitMiniProgram() {
@@ -18,7 +22,7 @@ export function exitMiniProgram() {
       console.log('[exitMiniProgram] success', res);
     },
     fail(err: any) {
-      display.text(`退出失败：${err?.errMsg || '未知错误'}`);
+      setInfo(`退出失败：${err?.errMsg || '未知错误'}`);
     },
   });
 }

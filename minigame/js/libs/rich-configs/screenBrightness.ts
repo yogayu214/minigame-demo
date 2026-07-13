@@ -10,6 +10,10 @@ export const config: RichConfig = {
   title: '屏幕亮度',
   apiName: 'get/set/ScreenBrightness',
 
+  // 透传信息展示区配置（与 createDisplayConfig 一致）
+  infoArea: (logic as any).infoArea,
+  onInfoTextReady: (logic as any).onInfoTextReady,
+
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_text, p_box, p_circle } = require('../component/index');
     const baseY = underline ? underline.y + underline.height : 0;

@@ -6,13 +6,17 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
+
 /** 获取当前小游戏的账号信息 */
 export function getAccountInfoSync() {
   const info: any = wx.getAccountInfoSync();
-  display.text(`账号信息\n${formatObj(info)}`);
+  setInfo(`账号信息\n${formatObj(info)}`);
 }

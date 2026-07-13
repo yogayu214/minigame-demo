@@ -5,10 +5,14 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+export { onInfoTextReady, infoArea };
 
 /** 请求写相册授权，已授权则直接调用保存 */
 export function authorizeWritePhotosAlbum() {
@@ -23,13 +27,13 @@ export function authorizeWritePhotosAlbum() {
             wx.showToast({ title: '相册授权成功', icon: 'none' });
           },
           fail(err: any) {
-            display.text(`授权失败\n${formatObj(err)}`);
+            setInfo(`授权失败\n${formatObj(err)}`);
           },
         });
       }
     },
     fail(err: any) {
-      display.text(`查询授权设置失败\n${formatObj(err)}`);
+      setInfo(`查询授权设置失败\n${formatObj(err)}`);
     },
   });
 }
