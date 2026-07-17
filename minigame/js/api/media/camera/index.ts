@@ -37,6 +37,11 @@ function authorizeCamera(): Promise<void> {
  *  @param pos 可选的位置参数 {x, y, width, height}，由 rich-config 传入以控制布局
  *  @returns Promise<Camera> 相机实例，用于滚动同步 */
 export function createCamera(pos?: { x?: number; y?: number; width?: number; height?: number }): Promise<any> {
+  const { platform } = wx.getSystemInfoSync();
+  if (platform === 'windows' || platform === 'mac') {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return Promise.resolve(null);
+  }
   return authorizeCamera()
     .then(() => {
       if (camera) {

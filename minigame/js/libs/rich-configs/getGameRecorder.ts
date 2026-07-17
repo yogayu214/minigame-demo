@@ -8,6 +8,8 @@ import type { RichConfig } from '../rich-renderer';
 
 // 模块级变量：存储旋转动画函数，供 onUnload 清理
 let rotatingFn: (() => void) | null = null;
+// 存储 app 引用，供 onUnload 移除 ticker（router 传 null 时仍可清理）
+let tickerApp: any = null;
 
 export const config: RichConfig = {
   title: '游戏对局回放',
@@ -48,7 +50,9 @@ export const config: RichConfig = {
 
     // 旋转动画
     let angle = 0;
+    tickerApp = app;
     rotatingFn = () => {
+      if (!trilateral || trilateral.destroyed) return;
       if (angle >= 360) angle = 5;
       angle += 5;
       trilateral.rotation = (angle * Math.PI) / 180;
@@ -92,12 +96,14 @@ export const config: RichConfig = {
 
   onLoad: logic.onLoad,
 
-  onUnload(app: any) {
-    // 清理旋转动画
-    if (rotatingFn && app?.ticker) {
-      app.ticker.remove(rotatingFn);
-      rotatingFn = null;
+  onUnload() {
+    // 清理旋转动画（router 传 null，用闭包保存的 tickerApp）
+    const ticker = tickerApp?.ticker;
+    if (rotatingFn && ticker) {
+      ticker.remove(rotatingFn);
     }
+    rotatingFn = null;
+    tickerApp = null;
     logic.onUnload();
   },
 };

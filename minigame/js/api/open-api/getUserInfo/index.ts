@@ -6,7 +6,7 @@
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
-import { calcNativeButtonPos, GREEN_BUTTON_STYLE } from '../../../libs/native-button-pos';
+import { calcNativeButtonPosBottom, GREEN_BUTTON_STYLE } from '../../../libs/native-button-pos';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -33,15 +33,17 @@ export function getUserInfo() {
   });
 }
 
-/** 创建获取用户信息按钮（点击后会请求授权，位置在 destroyButton 下方） */
+/** 创建获取用户信息按钮（点击后会请求授权，位置在屏幕底部 logo 上方） */
 export function createUserInfoButton() {
   if (userInfoBtn) {
     wx.showToast({ title: '按钮已创建，请点击按钮', icon: 'none' });
     return;
   }
 
-  // 第4个按钮位置 (index=3): getUserInfo[0] / createUserInfoButton[1] / destroyButton[2] / ★原生按钮[3]
-  const pos = calcNativeButtonPos(3);
+  // 原生按钮固定在屏幕底部 logo 上方，避免被长文本信息区（infoArea）遮挡。
+  // 不能用 calcNativeButtonPos(3)：当 setInfo 内容很多时，
+  // 信息区会撑高并穿过按索引计算的位置，导致原生授权按钮落在 info 区中间。
+  const pos = calcNativeButtonPosBottom();
 
   userInfoBtn = wx.createUserInfoButton({
     type: 'text',

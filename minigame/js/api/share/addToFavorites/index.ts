@@ -17,8 +17,18 @@ export { onInfoTextReady, infoArea };
 
 let favoritesFn: any = null;
 
+/** 是否为 PC 平台 */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
 /** 监听用户添加收藏 */
 export function onAddToFavorites() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   if (favoritesFn) {
     setInfo('已在监听中，请先取消');
     return;
@@ -37,6 +47,10 @@ export function onAddToFavorites() {
 
 /** 取消监听收藏 */
 export function offAddToFavorites() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   if (favoritesFn) {
     (wx as any).offAddToFavorites(favoritesFn);
     favoritesFn = null;

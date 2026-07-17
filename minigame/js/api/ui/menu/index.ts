@@ -37,8 +37,18 @@ export function getMenuRect() {
   );
 }
 
+/** 是否为 PC 平台 */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
 /** 切换菜单为深色样式 */
 export function setMenuDark() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   wx.setMenuStyle({
     style: 'dark',
     success() {
@@ -52,6 +62,10 @@ export function setMenuDark() {
 
 /** 切换菜单为浅色样式 */
 export function setMenuLight() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   wx.setMenuStyle({
     style: 'light',
     success() {
@@ -65,7 +79,7 @@ export function getOfficialComponents() {
   const info: any = wx.getOfficialComponentsInfo?.() || {};
   setInfo(
     formatObj({
-      数据: JSON.stringify(info).slice(0, 100),
+      数据: JSON.stringify(info),
     })
   );
 }
@@ -76,7 +90,7 @@ export function onOfficialChange() {
     setInfo(
       formatObj({
         事件: 'officialChange',
-        详情: JSON.stringify(res).slice(0, 100),
+        详情: JSON.stringify(res),
       })
     );
   };

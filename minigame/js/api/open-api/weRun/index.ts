@@ -14,8 +14,18 @@ export const setDisplay = display.setter;
 const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
 export { onInfoTextReady, infoArea };
 
+/** 是否为 PC 平台（微信运动仅支持移动端） */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
 /** 获取用户最近 30 天的步数，通过云函数自动解密 */
 export function getWeRunData() {
+  if (isPC()) {
+    setInfo('微信运动仅支持移动端，请在手机上体验');
+    return;
+  }
   wx.getWeRunData({
     success(res: any) {
       const cloudID = res.cloudID;

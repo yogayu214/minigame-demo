@@ -18,6 +18,11 @@ let recorder: any = null;
 let tempPath = '';
 
 function ensure() {
+  const { platform } = wx.getSystemInfoSync();
+  if (platform === 'windows' || platform === 'mac') {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return null;
+  }
   if (recorder) return recorder;
   recorder = wx.getRecorderManager();
   recorder.onStart(() => wx.showToast({ title: '开始录音', icon: 'none' }));
@@ -40,7 +45,9 @@ function ensure() {
 
 /** 开始录音（10s 上限） */
 export function start() {
-  ensure().start({
+  const r = ensure();
+  if (!r) return;
+  r.start({
     duration: 10000,
     sampleRate: 44100,
     numberOfChannels: 1,
@@ -52,15 +59,15 @@ export function start() {
 
 /** 暂停 */
 export function pause() {
-  ensure().pause();
+  ensure()?.pause();
 }
 /** 恢复 */
 export function resume() {
-  ensure().resume();
+  ensure()?.resume();
 }
 /** 停止 */
 export function stop() {
-  ensure().stop();
+  ensure()?.stop();
 }
 
 /** 播放上一次录音 */

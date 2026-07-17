@@ -103,8 +103,13 @@ export function openSystemBluetoothSetting() {
   });
 }
 
-/** 跳转微信授权管理页 */
+/** 跳转微信授权管理页（仅移动端） */
 export function openAppAuthorizeSetting() {
+  const systemInfo = wx.getSystemInfoSync();
+  if (systemInfo.platform === 'windows' || systemInfo.platform === 'mac') {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   wx.openAppAuthorizeSetting({
     fail(err: any) {
       setInfo(`打开失败：${err?.errMsg || '未知错误'}`);

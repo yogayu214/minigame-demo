@@ -21,6 +21,10 @@ export function createImageDataDemo() {
     return;
   }
   const imageData = (wx as any).createImageData(100, 100);
+  if (!imageData) {
+    setInfo('wx.createImageData 调用失败，请确认基础库版本 ≥ 3.4.10或更换设备使用');
+    return;
+  }
 
   // 填充渐变色像素，让效果可视化
   for (let y = 0; y < imageData.height; y++) {

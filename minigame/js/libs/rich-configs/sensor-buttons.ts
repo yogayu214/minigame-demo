@@ -6,8 +6,8 @@ export function createSensorButtons(
   PIXI: any,
   obj: any,
   baseY: number,
-  onStart: () => void,
-  onStop: () => void
+  onStart: () => void | boolean,
+  onStop: () => void | boolean
 ) {
   const { p_button, p_text } = require('../component/index');
 
@@ -48,12 +48,15 @@ export function createSensorButtons(
   stopBtn.isTouchable(false);
 
   function start() {
+    const ok = onStart();
+    // onStart 返回 false（如 PC 平台不支持）时不切换到"监听中"状态
+    if (ok === false) return;
     switchState(startBtn, 0xe9e9e9, stopBtn, 0x353535);
-    onStart();
   }
   function stop() {
+    const ok = onStop();
+    if (ok === false) return;
     switchState(stopBtn, 0xe9e9e9, startBtn, 0x353535);
-    onStop();
   }
 
   startBtn.onClickFn(start);

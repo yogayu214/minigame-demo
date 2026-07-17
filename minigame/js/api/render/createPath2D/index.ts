@@ -13,15 +13,16 @@ export const setDisplay = display.setter;
 const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
 export { onInfoTextReady, infoArea };
 
-/** 创建离屏 canvas 并绘制 */
-function drawOnOffscreen(drawFn: (ctx: any, canvas: any) => void) {
+/** 创建离屏 canvas 并绘制，drawFn 返回 false 表示绘制失败，跳过截图 */
+function drawOnOffscreen(drawFn: (ctx: any, canvas: any) => boolean) {
   const offCanvas = wx.createCanvas();
   offCanvas.width = 200;
   offCanvas.height = 150;
   const ctx = offCanvas.getContext('2d');
   ctx.clearRect(0, 0, 200, 150);
 
-  drawFn(ctx, offCanvas);
+  const ok = drawFn(ctx, offCanvas);
+  if (!ok) return;
 
   offCanvas.toTempFilePath({
     fileType: 'png',
@@ -38,24 +39,34 @@ function drawOnOffscreen(drawFn: (ctx: any, canvas: any) => void) {
 /** 创建 Path2D 并绘制矩形和弧形路径 */
 export function createPath2D() {
   drawOnOffscreen((ctx: any) => {
-    const path = (wx as any).createPath2D();
+    const path = (wx as any).createPath2D?.();
+    if (!path) {
+      setInfo('wx.createPath2D 调用失败，请确认基础库版本 ≥ 2.24.6');
+      return false;
+    }
     path.rect(10, 10, 100, 50);
     path.arc(60, 85, 40, 0, Math.PI * 2);
     ctx.strokeStyle = '#07c160';
     ctx.lineWidth = 2;
     ctx.stroke(path);
+    return true;
   });
 }
 
 /** 添加路径指令绘制三角形 */
 export function addPathCommand() {
   drawOnOffscreen((ctx: any) => {
-    const path = (wx as any).createPath2D();
+    const path = (wx as any).createPath2D?.();
+    if (!path) {
+      setInfo('wx.createPath2D 调用失败，请确认基础库版本 ≥ 2.24.6');
+      return false;
+    }
     path.moveTo(10, 10);
     path.lineTo(180, 10);
     path.lineTo(180, 130);
     path.closePath();
     ctx.fillStyle = '#ff6600';
     ctx.fill(path);
+    return true;
   });
 }

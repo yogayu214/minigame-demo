@@ -17,8 +17,18 @@ export { onInfoTextReady, infoArea };
 
 let copyUrlFn: any = null;
 
+/** 是否为 PC 平台 */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
 /** 基础用法：同步返回分享参数 */
 export function onCopyUrl() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   copyUrlFn = () => {
     setInfo('复制链接回调已触发（同步）\n\n返回参数:\n  query: a=1&b=2');
     return { query: 'a=1&b=2' };
@@ -29,6 +39,10 @@ export function onCopyUrl() {
 
 /** 使用 promise 异步返回分享参数 */
 export function onCopyUrlAsync() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   copyUrlFn = () => {
     setInfo('复制链接回调已触发（异步）\n\n默认参数:\n  query: a=1\n  title: 默认标题\n\n500ms 后异步覆盖:\n  query: a=1&b=2&async=true\n  title: 异步标题');
     return {
@@ -47,6 +61,10 @@ export function onCopyUrlAsync() {
 
 /** 取消绑定复制链接 */
 export function offCopyUrl() {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return;
+  }
   if (copyUrlFn) {
     wx.offCopyUrl();
     copyUrlFn = null;

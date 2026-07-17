@@ -94,6 +94,12 @@ function stopRenderLoop() {
 
 /** 启动：创建解码器 + 音频播放器 */
 export function start() {
+  const { platform } = wx.getSystemInfoSync();
+  if (platform === 'windows' || platform === 'mac') {
+    toast('该功能仅支持移动端');
+    return;
+  }
+
   // 清理旧实例
   destroyAll(true);
 

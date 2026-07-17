@@ -69,38 +69,5 @@ export function openSetting() {
   });
 }
 
-let settingButton: any = null;
-
-/** 创建设置按钮 (OpenSettingButton) */
-export function createOpenSettingButton() {
-  if (settingButton) {
-    wx.showToast({ title: '按钮已创建，请点击下方按钮', icon: 'none' });
-    return;
-  }
-  const sysInfo = wx.getSystemInfoSync();
-  const windowWidth = sysInfo?.windowWidth || 375;
-  const windowHeight = sysInfo?.windowHeight || 667;
-  settingButton = wx.createOpenSettingButton({
-    type: 'text',
-    text: '打开设置',
-    style: {
-      left: windowWidth / 2 - 100,
-      top: 350,
-      width: 200,
-      height: 40,
-      backgroundColor: '#ffffff',
-      color: '#07c160',
-      fontSize: 14,
-      textAlign: 'center',
-      lineHeight: 40,
-    },
-  });
-  settingButton.show?.();
-}
-
 export function onUnload() {
-  if (settingButton) {
-    settingButton.destroy?.();
-    settingButton = null;
-  }
 }

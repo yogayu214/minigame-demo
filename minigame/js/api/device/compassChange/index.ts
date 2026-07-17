@@ -10,8 +10,18 @@ export function setOnData(fn: ((res: any) => void) | null) {
   _onData = fn;
 }
 
-/** 开始监听罗盘数据 */
-export function startListening() {
+/** 是否为 PC 平台（罗盘仅支持移动端） */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
+/** 开始监听罗盘数据（PC 平台返回 false 表示未启动） */
+export function startListening(): boolean {
+  if (isPC()) {
+    wx.showToast({ title: '罗盘仅支持移动端', icon: 'none', duration: 1500 });
+    return false;
+  }
   wx.startCompass({
     fail(err: any) {
       console.error('启动罗盘监听失败：', err?.errMsg || '未知错误');
@@ -23,6 +33,7 @@ export function startListening() {
       if (_onData) _onData(res);
     })
   );
+  return true;
 }
 
 /** 停止监听罗盘 */

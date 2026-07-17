@@ -24,7 +24,7 @@ export function onLoad() {
   const vWidth = Math.min(windowWidth - 40, 300);
   const vHeight = vWidth * 0.56;
   const x = (windowWidth - vWidth) / 2;
-  const y = windowHeight * 0.5;
+  const y = windowHeight * 0.55;
 
   video = wx.createVideo({
     x,

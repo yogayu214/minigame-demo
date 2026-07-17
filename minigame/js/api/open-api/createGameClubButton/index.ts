@@ -44,22 +44,37 @@ export function getGameClubData() {
 /** 创建游戏圈按钮 (GameClubButton) */
 export function createGameClubButton() {
   const sysInfo = wx.getSystemInfoSync();
-  const windowWidth = sysInfo?.windowWidth || 375;
-  const windowHeight = sysInfo?.windowHeight || 667;
+  const pixelRatio = sysInfo.pixelRatio || 2;
+  const windowWidth = sysInfo.windowWidth || 375;
+  const ratio = (windowWidth * pixelRatio) / 750;
+
+  // 对齐 fixedTemplate 中 goBack 按钮的位置：
+  //   goBack.y = menuBtn.top * ratio * 2 - 22 * ratio
+  //   goBack.height = 80 * ratio
+  // 把原生按钮放在 goBack 正下方（标题左侧空白区），
+  // 左边与下方绿色函数按钮对齐，避免写死 top: 600 被 infoArea 长文本遮挡。
+  const menuBtn = wx.getMenuButtonBoundingClientRect();
+  const goBackBottom = (menuBtn.top * ratio * 2 - 22 * ratio) + 80 * ratio;
+  // 绿色函数按钮左边距：btnX = (obj.width - 580*ratio) / 2
+  const btnLeft = (windowWidth * pixelRatio - 580 * ratio) / 2;
+  const btnTop = goBackBottom + 16 * ratio;
+  const btnW = 160 * ratio;
+  const btnH = 64 * ratio;
+
   clubBtn = wx.createGameClubButton({
     type: 'text',
     text: '游戏圈',
     style: {
-      left: windowWidth / 2 - 50,
-      top: 600,
-      width: 100,
-      height: 40,
+      left: btnLeft / pixelRatio,
+      top: btnTop / pixelRatio + 10,
+      width: btnW / pixelRatio,
+      height: btnH / pixelRatio,
       backgroundColor: '#07c160',
       color: '#ffffff',
-      fontSize: 16,
+      fontSize: 15,
       textAlign: 'center',
-      lineHeight: 40,
-      borderRadius: 4,
+      lineHeight: Math.round(btnH / pixelRatio),
+      borderRadius: 8,
     },
   } as any);
   clubBtn.onTap?.(() => {

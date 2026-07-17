@@ -90,6 +90,11 @@ function stopRenderLoop() {
 
 /** 创建解码器并开始解码 */
 export function createDecoder() {
+  const { platform } = wx.getSystemInfoSync();
+  if (platform === 'windows' || platform === 'mac') {
+    toast('该功能仅支持移动端');
+    return;
+  }
   if (decoder) {
     stopRenderLoop();
     decoder.remove?.();

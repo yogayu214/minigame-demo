@@ -14,8 +14,24 @@ export const setDisplay = display.setter;
 
 let stateListener: ((res: any) => void) | null = null;
 
+/** 是否为 PC 平台（蓝牙仅支持移动端） */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
+/** PC 平台统一拦截：提示并返回 true 表示已被拦截 */
+function guardPC(): boolean {
+  if (isPC()) {
+    wx.showToast({ title: '蓝牙仅支持移动端', icon: 'none', duration: 1500 });
+    return true;
+  }
+  return false;
+}
+
 /** 打开蓝牙适配器 */
 export function openBluetoothAdapter() {
+  if (guardPC()) return;
   wx.openBluetoothAdapter({
     mode: 'central',
     success() {
@@ -29,6 +45,7 @@ export function openBluetoothAdapter() {
 
 /** 关闭蓝牙适配器 */
 export function closeBluetoothAdapter() {
+  if (guardPC()) return;
   (wx as any).closeBluetoothAdapter({
     success() {
       wx.showToast({ title: '蓝牙适配器已关闭', icon: 'none' });
@@ -41,6 +58,7 @@ export function closeBluetoothAdapter() {
 
 /** 获取本机蓝牙状态 */
 export function getBluetoothAdapterState() {
+  if (guardPC()) return;
   wx.getBluetoothAdapterState({
     success(res: any) {
       wx.showToast({ title: `discovering: ${res.discovering}  available: ${res.available}`, icon: 'none' });
@@ -53,6 +71,7 @@ export function getBluetoothAdapterState() {
 
 /** 监听蓝牙状态变化 */
 export function onAdapterStateChange() {
+  if (guardPC()) return;
   stateListener = (res: any) => {
     wx.showToast({ title: `available: ${res?.available} discovering: ${res?.discovering}`, icon: 'none' });
   };
@@ -62,6 +81,7 @@ export function onAdapterStateChange() {
 
 /** 停止监听蓝牙状态 */
 export function offAdapterStateChange() {
+  if (guardPC()) return;
   if (stateListener) {
     (wx as any).offBluetoothAdapterStateChange(stateListener);
     stateListener = null;
@@ -71,6 +91,7 @@ export function offAdapterStateChange() {
 
 /** 开始搜索附近蓝牙设备 */
 export function startDevicesDiscovery() {
+  if (guardPC()) return;
   wx.startBluetoothDevicesDiscovery({
     success() {
       wx.showToast({ title: '已开始搜索附近设备', icon: 'none' });
@@ -83,6 +104,7 @@ export function startDevicesDiscovery() {
 
 /** 停止搜索 */
 export function stopDevicesDiscovery() {
+  if (guardPC()) return;
   wx.stopBluetoothDevicesDiscovery({
     success() {
       wx.showToast({ title: '已停止搜索', icon: 'none' });
@@ -95,6 +117,7 @@ export function stopDevicesDiscovery() {
 
 /** 获取已发现的设备列表 */
 export function getDevices() {
+  if (guardPC()) return;
   wx.getBluetoothDevices({
     success(res: any) {
       const list = res.devices || [];

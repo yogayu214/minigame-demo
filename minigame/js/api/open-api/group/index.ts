@@ -2,26 +2,55 @@
  * 群相关
  * wx.getGroupEnterInfo
  * 官方文档：https://developers.weixin.qq.com/minigame/dev/api/open-api/group/wx.getGroupEnterInfo.html
+ *
+ * 完整流程（分享+回流检测逻辑见 libs/group-share.ts）：
+ *   1. 点击「分享到群」按钮 → 分享到微信群
+ *   2. 群友点击会话卡片重新打开小游戏（携带 shareTicket）
+ *   3. onShow / 启动参数检测到 shareTicket → 自动调用 getGroupEnterInfo
+ *   4. 结果展示到按钮上方常驻信息区
  */
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
+import { createGroupShareFlow } from '../../../libs/group-share';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击「分享到群」按钮，\n然后从群聊点击会话卡片进入，\n将自动获取群进群信息'
+);
 export { onInfoTextReady, infoArea };
 
-/** 获取群聊场景入参（仅在从群聊进入小游戏时有效） */
+// 群分享回流流程（shareToGroup / onLoad / onUnload 委托给它）
+const flow = createGroupShareFlow({
+  onStatus: (msg) => setInfo(msg),
+  onResult: (info) => setInfo(`获取成功\n${formatObj(info)}`),
+  onError: (errMsg) => setInfo(`获取失败: ${errMsg}`),
+});
+
+/** 分享到群（引导用户从群聊进入） */
+export function shareToGroup() {
+  flow.shareToGroup();
+}
+
+/** 手动获取群进群信息（兜底，直接调用 wx API） */
 export function getGroupEnterInfo() {
   wx.getGroupEnterInfo({
     success(res: any) {
       setInfo(`群聊入参\n${formatObj(res)}`);
     },
     fail(err: any) {
-      wx.showToast({ title: `查询失败: ${'请从群聊场景进入'}`, icon: 'none' });
+      setInfo(`查询失败: ${err?.errMsg || '请从群聊场景进入'}`);
     },
   });
+}
+
+export function onLoad() {
+  flow.onLoad();
+}
+
+export function onUnload() {
+  flow.onUnload(); 
 }

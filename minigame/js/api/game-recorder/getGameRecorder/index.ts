@@ -10,12 +10,22 @@ let writeTime = 0;
 // 原生分享按钮的样式（由 rich-config 计算后注入）
 let shareButtonStyle: { left: number; top: number; width: number; height: number } | null = null;
 
+/** 是否为 PC 平台 */
+function isPC() {
+  const { platform } = wx.getSystemInfoSync();
+  return platform === 'windows' || platform === 'mac';
+}
+
 /** 注入原生分享按钮的位置和尺寸（供 rich-config 调用） */
 export function setShareButtonStyle(style: { left: number; top: number; width: number; height: number }) {
   shareButtonStyle = style;
 }
 
 export function onLoad() {
+  if (isPC()) {
+    console.log('[game-recorder] PC 端不支持游戏对局回放');
+    return;
+  }
   try {
     gr = wx.getGameRecorder();
     if (!gr) {
@@ -26,12 +36,22 @@ export function onLoad() {
   }
 }
 
-/** 开始录制 */
-export function startGameRecord() {
+/** 检查录制器是否可用，PC 端或 gr 未就绪时提示并返回 false */
+function checkReady(): boolean {
+  if (isPC()) {
+    wx.showToast({ title: '该功能仅支持移动端', icon: 'none', duration: 1000 });
+    return false;
+  }
   if (!gr) {
     wx.showToast({ title: '录制器未就绪，当前环境可能不支持', icon: 'none', duration: 1000 });
-    return;
+    return false;
   }
+  return true;
+}
+
+/** 开始录制 */
+export function startGameRecord() {
+  if (!checkReady()) return;
   writeTime = 0;
   wx.showToast({ title: '正在启动录制...', icon: 'none', duration: 1000 });
   gr.start()
@@ -52,10 +72,7 @@ export function startGameRecord() {
 
 /** 暂停录制 */
 export function pause() {
-  if (!gr) {
-    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
-    return;
-  }
+  if (!checkReady()) return;
   gr.pause()
     .then((res: any) => {
       if (res.error?.code) {
@@ -71,10 +88,7 @@ export function pause() {
 
 /** 继续录制 */
 export function resume() {
-  if (!gr) {
-    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
-    return;
-  }
+  if (!checkReady()) return;
   gr.resume()
     .then((res: any) => {
       if (res.error?.code) {
@@ -90,10 +104,7 @@ export function resume() {
 
 /** 停止录制 */
 export function stopGameRecord() {
-  if (!gr) {
-    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
-    return;
-  }
+  if (!checkReady()) return;
   if (writeTime < 2000) {
     wx.showToast({ title: '录屏时间需大于2秒才能停止', icon: 'none', duration: 1000 });
     return;
@@ -147,10 +158,7 @@ export function stopGameRecord() {
 
 /** 放弃录制 */
 export function abort() {
-  if (!gr) {
-    wx.showToast({ title: '录制器未就绪', icon: 'none', duration: 1000 });
-    return;
-  }
+  if (!checkReady()) return;
   gr.abort()
     .then((res: any) => {
       if (res.error?.code) {
@@ -168,10 +176,7 @@ export function abort() {
 
 /** 通过 API 分享对局回放（支持分享到游戏圈/会话） */
 export function operateGameRecorderVideo() {
-  if (typeof (wx as any).operateGameRecorderVideo !== 'function') {
-    wx.showToast({ title: '当前环境不支持该功能', icon: 'none', duration: 1000 });
-    return;
-  }
+  if (!checkReady()) return;
   if (writeTime < 2000) {
     wx.showToast({ title: '请先录制至少2秒的对局回放', icon: 'none', duration: 1000 });
     return;
