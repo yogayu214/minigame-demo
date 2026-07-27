@@ -451,6 +451,6 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       }
     },
 
-    onUnload: mod.onUnload ? () => mod.onUnload!() : undefined,
+    onUnload: () => { if (mod.onUnload) mod.onUnload(); },
   };
 }

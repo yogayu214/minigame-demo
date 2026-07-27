@@ -11,7 +11,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+
 
 const display = createDisplay();
 export const setDisplay = display.setter;

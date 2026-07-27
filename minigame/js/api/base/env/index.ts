@@ -15,7 +15,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -27,5 +27,5 @@ export { onInfoTextReady, infoArea };
 export const apiName = 'env';
 export function getEnv() {
   const env = wx.env;
-  setInfo(formatObj(env));
+  setInfo(formatJSON(env));
 }

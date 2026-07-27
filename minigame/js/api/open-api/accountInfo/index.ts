@@ -7,7 +7,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -20,5 +20,5 @@ export const apiName = 'accountInfo';
 /** 获取当前小游戏的账号信息 */
 export function getAccountInfoSync() {
   const info: any = wx.getAccountInfoSync();
-  setInfo(`账号信息\n${formatObj(info)}`);
+  setInfo(formatJSON(info));
 }

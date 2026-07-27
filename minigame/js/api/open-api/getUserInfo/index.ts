@@ -5,7 +5,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 import { calcNativeButtonPosBottom, GREEN_BUTTON_STYLE } from '../../../libs/native-button-pos';
 
 const display = createDisplay();
@@ -27,7 +27,7 @@ export function getUserInfo() {
         wx.showToast({ title: '用户信息为空', icon: 'none' });
         return;
       }
-      setInfo(`getUserInfo 成功\n${formatObj(u)}`);
+      setInfo(formatJSON(u));
     },
     fail(err: any) {
       wx.showToast({ title: `getUserInfo 失败: ${err?.errMsg || '请先在设置中授权'}`, icon: 'none' });
@@ -59,7 +59,7 @@ export function createUserInfoButton() {
 
   userInfoBtn.onTap?.((res: any) => {
     if (res.userInfo) {
-      setInfo(`用户信息\n${formatObj(res.userInfo)}`);
+      setInfo(formatJSON(res.userInfo));
     } else {
       wx.showToast({ title: '用户拒绝授权', icon: 'none' });
     }

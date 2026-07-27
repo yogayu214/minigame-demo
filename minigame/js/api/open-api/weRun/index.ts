@@ -6,7 +6,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -45,9 +45,9 @@ export function getWeRunData() {
       }).then((resp: any) => {
         const data = resp.result?.weRunData?.data;
         if (data) {
-          setInfo(`微信运动数据:\n${formatObj(data)}`);
+          setInfo(formatJSON(data));
         } else {
-          setInfo(`云函数返回:\n${formatObj(resp.result)}`);
+          setInfo(formatJSON(resp.result));
         }
       }).catch((err: any) => {
         wx.showToast({ title: `云函数调用失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });

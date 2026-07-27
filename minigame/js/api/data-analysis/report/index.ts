@@ -37,9 +37,6 @@ export function reportEvent() {
 export function reportScene() {
   wx.reportScene({
     sceneId: 1001,
-    costTime: 200,
-    dimension: { custom: 'demo' },
-    metric: { score: 100 },
     success() {
       toast('reportScene 已上报');
     },

@@ -15,7 +15,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -71,7 +71,7 @@ export function useTag() {
 export function getCommonInfo() {
   const mgr = getLogManager();
   const info = mgr.getCommonInfo?.();
-  setInfo(formatObj(info || {}));
+  setInfo(formatJSON(info || {}));
 }
 
 /** 将对象与全局 commonInfo 合并（仅第一层属性） */

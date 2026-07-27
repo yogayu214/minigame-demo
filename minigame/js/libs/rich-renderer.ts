@@ -9,6 +9,7 @@
 const fixedTemplate = require('./template/fixed');
 const { p_button, p_text } = require('./component/index');
 const Scroller = require('./Scroller/index');
+import { renderHighlightedJSON, isJSONString } from './json-highlighter';
 
 export interface RichConfig {
   /** 页面标题 */
@@ -98,60 +99,48 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     underline ? (underline.y || 0) + (underline.height || 0) + 80 * PIXI.ratio : 0
   );
 
-  // 可滚动区域：从 baseY 到屏幕底部（留出 logo 空间 + 额外底部间距）
-  const scrollY = baseY;
-  const bottomPadding = 110 * PIXI.ratio; // 滚动区底部与 logo 之间的额外间距
+  // ============== 两区独立布局：info 区（上）+ 按钮区（下），各自固定高度独立滚动 ==============
+  const bottomPadding = 110 * PIXI.ratio;
   const logoH = logo ? (logo.height || 0) + bottomPadding : 140 * PIXI.ratio;
   const btnW = 580 * PIXI.ratio;
   const btnH = 88 * PIXI.ratio;
   const btnGap = 24 * PIXI.ratio;
-  const totalBtnH = (config.actions ? config.actions.length : 0) * (btnH + btnGap) - btnGap;
+  const totalAvailableH = obj.height - baseY - logoH; // 可用总高度
+  const regionGap = 20 * PIXI.ratio; // info 区与按钮区之间间距
 
-  // ============== 统一滚动区（info 区 + 按钮，一起滚动） ==============
-  // 只有配置了 infoArea 或有 actions 时才创建。否则 topView 自己负责整个页面
-  // （避免 scrollWrapper 的全屏 hitArea 遮挡 topView 内的交互组件）
-  const hasScrollableContent =
-    !!config.infoArea || (!!config.actions && config.actions.length > 0);
+  const hasInfoArea = !!config.infoArea;
+  const hasButtons = !!config.actions && config.actions.length > 0;
 
-  const scrollH = obj.height - scrollY - logoH;
-  const infoBtnGap = 30 * PIXI.ratio; // info 与按钮的间距
-
-  let scrollWrapper: any = null;
-  let scrollInner: any = null;
-  let scroller: any = null;
-
-  if (hasScrollableContent) {
-    scrollWrapper = new PIXI.Container();
-    scrollWrapper.x = 0;
-    scrollWrapper.y = scrollY;
-    scrollWrapper.interactive = true;
-
-    scrollInner = new PIXI.Container();
-
-    const scrollMask = new PIXI.Graphics();
-    scrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, scrollH).endFill();
-    scrollInner.mask = scrollMask;
-
-    const scrollHitArea = new PIXI.Graphics();
-    scrollHitArea.beginFill(0xffffff, 0).drawRect(0, 0, obj.width, scrollH).endFill();
-    scrollHitArea.interactive = true;
-
-    scrollWrapper.addChild(scrollHitArea, scrollInner, scrollMask);
-    container.addChild(scrollWrapper);
+  // 分配高度：有 info 区时上 27.5% 下 72.5%，无 info 区时按钮占满
+  let infoRegionH = 0;
+  let btnRegionH = 0;
+  if (hasInfoArea && hasButtons) {
+    infoRegionH = Math.floor((totalAvailableH - regionGap) * 0.275);
+    btnRegionH = totalAvailableH - regionGap - infoRegionH;
+  } else if (hasInfoArea) {
+    infoRegionH = totalAvailableH;
+  } else if (hasButtons) {
+    btnRegionH = totalAvailableH;
   }
 
-  // ---- info 区（如果配置了）----
-  let infoAreaContainer: any = null;
-  let infoAreaHeight = 0;
-  let infoAreaLayout: (() => void) | null = null;
+  const infoRegionY = baseY;
+  const btnRegionY = hasInfoArea ? baseY + infoRegionH + regionGap : baseY;
 
-  // info 区域最大高度：可滚动区高度的 45%，保证按钮始终可见
-  const iaMaxH = Math.min(scrollH * 0.45, 480 * PIXI.ratio);
-  let iaInnerScroller: any = null; // info 区内部滚动器
+  // JSON 高亮模式状态
+  let isHighlightMode = false;
+  let highlightContentH = 0;
+  let iaHighlightContainer: any = null;
+  let iaHighlightBg: any = null;
+  let iaTextRef: any = null;
+  let iaRef: any = null;
+  let iaInnerWRef = 0;
 
-  if (config.infoArea) {
-    const ia = config.infoArea;
-    // 白色卡片在灰色页面底上自然凸出（--wx-bg-2 / --wx-bg-0 对比）
+  // ============== info 区（独立滚动） ==============
+  let iaInnerScroller: any = null;
+  let infoWrapperRef: any = null; // 引用 info 容器，按钮区之后再 addChild
+
+  if (hasInfoArea) {
+    const ia = config.infoArea!;
     const iaBgColor = ia.backgroundColor ?? 0xFFFFFF;
     const iaBorderColor = ia.borderColor ?? 0xE5E5E5;
     const iaTextColor = ia.textColor ?? 0x353535;
@@ -165,22 +154,30 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     const iaInnerW = iaW - iaPadX * 2;
     const iaX = (obj.width - iaW) / 2;
 
-    infoAreaContainer = new PIXI.Container();
-    infoAreaContainer.x = iaX;
-    infoAreaContainer.y = 0;
+    // info 区外壳容器（固定位置）——延迟添加到 container（在按钮区之后），确保 z-order 更高
+    const infoWrapper = new PIXI.Container();
+    infoWrapper.x = iaX;
+    infoWrapper.y = infoRegionY;
 
+    // 背景和边框
     const iaBg = new PIXI.Graphics();
+    iaBg.beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, infoRegionH, iaBorderRadius).endFill();
     const iaBorder = new PIXI.Graphics();
+    if (iaBgColor !== 0xFFFFFF) {
+      iaBorder.lineStyle(1 * PIXI.ratio, iaBorderColor, 0.4).drawRoundedRect(0, 0, iaW, infoRegionH, iaBorderRadius);
+    }
 
-    // 内容滚动容器（嵌套滚动：info 区内部独立滚动）
-    const iaScrollWrapper = new PIXI.Container();
-    iaScrollWrapper.x = 0;
-    iaScrollWrapper.y = 0;
-    iaScrollWrapper.interactive = true;
-
+    // 滚动内容
     const iaScrollInner = new PIXI.Container();
-    const iaScrollMask = new PIXI.Graphics(); // 动态更新尺寸
+    const iaScrollMask = new PIXI.Graphics();
+    iaScrollMask.beginFill(0xffffff).drawRoundedRect(0, 0, iaW, infoRegionH, iaBorderRadius).endFill();
+    iaScrollInner.mask = iaScrollMask;
 
+    // 透明命中区（不再使用 PIXI 事件，改用 canvas 原生事件统一处理）
+    const iaHitArea = new PIXI.Graphics();
+    iaHitArea.beginFill(0xffffff, 0.001).drawRect(0, 0, iaW, infoRegionH).endFill();
+
+    // 文本
     const iaText = new PIXI.Text(ia.initialText || '', {
       fontSize: `${iaFontSize}px`,
       fill: iaTextColor,
@@ -192,75 +189,114 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     iaText.x = iaPadX;
     iaText.y = iaPadY;
 
-    iaScrollInner.addChild(iaText);
-    iaScrollInner.mask = iaScrollMask;
+    // JSON 高亮容器
+    iaHighlightContainer = new PIXI.Container();
+    iaHighlightContainer.x = iaPadX;
+    iaHighlightContainer.y = iaPadY;
+    iaHighlightContainer.visible = false;
 
-    // 透明命中区保证空白区域也能接收触摸
-    const iaHitArea = new PIXI.Graphics();
-    iaHitArea.interactive = true;
+    iaHighlightBg = new PIXI.Graphics();
+    iaHighlightBg.visible = false;
 
-    iaScrollWrapper.addChild(iaHitArea, iaScrollInner, iaScrollMask);
-    infoAreaContainer.addChild(iaBg, iaBorder, iaScrollWrapper);
-    scrollInner.addChild(infoAreaContainer);
+    // 赋值外部引用
+    iaTextRef = iaText;
+    iaRef = ia;
+    iaInnerWRef = iaInnerW;
 
-    // info 区内部滚动器
+    iaScrollInner.addChild(iaHighlightBg, iaText, iaHighlightContainer);
+
+    // 注意添加顺序：iaHitArea 在最上层（最后添加），确保能拦截触摸
+    infoWrapper.addChild(iaBg, iaBorder, iaScrollInner, iaScrollMask, iaHitArea);
+    // 保存引用，按钮区之后再 addChild 到 container（确保 z-order 最高）
+    infoWrapperRef = infoWrapper;
+
+    // info 区滚动器
     iaInnerScroller = new Scroller((_l: number, t: number) => {
+      if (!iaScrollInner.transform) return;
       iaScrollInner.y = -t;
     });
 
-    // 嵌套滚动逻辑由外层 scrollWrapper 统一驱动（基于坐标判断）：
-    //   - 手指不在 info 区 → 只外层滚动
-    //   - 手指在 info 区且内层未到边界 → 只内层滚动，外层不动
-    //   - 手指在 info 区且内层到边界后继续同方向 → 穿透给外层
-    iaScrollWrapper.interactive = false; // 禁用子元素交互，由外层统一分发
+    // info 区触摸事件改为 canvas 原生事件（在按钮区代码之后统一绑定）
 
-    infoAreaLayout = () => {
-      const hasText = !!(iaText.text && iaText.text.trim());
-      if (!hasText) {
-        infoAreaContainer.visible = false;
-        infoAreaHeight = 0;
-        return;
-      }
-      infoAreaContainer.visible = true;
-      const rawContentH = iaText.height + iaPadY * 2;
-      // 如果内容超出最大高度，则固定高度并启用内部滚动
-      const needScroll = rawContentH > iaMaxH;
-      const displayH = needScroll ? iaMaxH : rawContentH;
-      infoAreaHeight = displayH;
-
-      iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius).endFill();
-      if (iaBgColor !== 0xFFFFFF) {
-        iaBorder.clear().lineStyle(1 * PIXI.ratio, iaBorderColor, 0.4).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius);
+    // 布局函数：更新滚动器内容尺寸
+    const updateInfoScroller = () => {
+      let rawContentH: number;
+      if (isHighlightMode) {
+        rawContentH = highlightContentH + iaPadY * 2;
+        iaHighlightBg.visible = false;
+        iaText.visible = false;
+        iaHighlightContainer.visible = true;
       } else {
-        iaBorder.clear();
+        rawContentH = iaText.height + iaPadY * 2;
+        iaHighlightBg.visible = false;
+        iaText.visible = true;
+        iaHighlightContainer.visible = false;
       }
-
-      // 更新滚动 mask 和命中区
-      iaScrollMask.clear().beginFill(0xffffff).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius).endFill();
-      iaHitArea.clear().beginFill(0xffffff, 0).drawRect(0, 0, iaW, displayH).endFill();
-
-      // 更新内部滚动器的内容尺寸
-      if (needScroll) {
-        iaInnerScroller.contentSize(iaW, displayH, iaW, rawContentH);
-      } else {
-        // 不需要滚动时重置（内容区 = 显示区）
-        iaInnerScroller.contentSize(iaW, displayH, iaW, displayH);
-        iaScrollInner.y = 0;
-      }
+      iaInnerScroller.contentSize(iaW, infoRegionH, iaW, Math.max(rawContentH, infoRegionH));
     };
+
+    // setText 回调（支持 JSON 语法高亮）
+    if (config.onInfoTextReady) {
+      try {
+        config.onInfoTextReady((text: string) => {
+          if (!iaTextRef || !iaHighlightContainer) return;
+          if (!text) {
+            isHighlightMode = false;
+            iaTextRef.text = '';
+            while (iaHighlightContainer.children.length > 0) {
+              iaHighlightContainer.removeChildAt(0);
+            }
+          } else if (isJSONString(text)) {
+            isHighlightMode = true;
+            iaTextRef.text = '';
+            const hlResult = renderHighlightedJSON(PIXI, iaHighlightContainer, text, {
+              fontSize: iaRef?.fontSize || 26,
+              lineHeight: iaRef?.lineHeight || 1.5,
+              maxWidth: iaInnerWRef,
+              maxLines: 0,
+              theme: 'light',
+            });
+            highlightContentH = hlResult.contentHeight;
+          } else {
+            isHighlightMode = false;
+            iaTextRef.text = text;
+            while (iaHighlightContainer.children.length > 0) {
+              iaHighlightContainer.removeChildAt(0);
+            }
+          }
+          iaScrollInner.y = 0;
+          updateInfoScroller();
+        });
+      } catch (e) { /* ignore */ }
+    }
+
+    // 初始布局
+    updateInfoScroller();
   }
 
-  // ---- 按钮 ----
+  // ============== 按钮区（独立滚动） ==============
   const btnX = (obj.width - btnW) / 2;
-  const btnElements: any[] = [];
 
-  if (config.actions && config.actions.length > 0) {
-    config.actions.forEach((action) => {
+  if (hasButtons) {
+    const btnWrapper = new PIXI.Container();
+    btnWrapper.x = 0;
+    btnWrapper.y = btnRegionY;
+
+    const btnScrollInner = new PIXI.Container();
+    const btnScrollMask = new PIXI.Graphics();
+    btnScrollMask.beginFill(0xffffff).drawRect(0, 0, obj.width, btnRegionH).endFill();
+    btnScrollInner.mask = btnScrollMask;
+
+    // 创建按钮
+    // 注意：不调用 btn.onClickFn()，避免按钮设置 interactive=true 后抢夺 btnHitArea 的触摸事件，
+    // 导致按钮区无法滚动。点击逻辑统一由 btnHitArea 的 touchend 手动命中测试实现。
+    const totalBtnH = config.actions!.length * (btnH + btnGap) - btnGap;
+    config.actions!.forEach((action, i) => {
       const btn = p_button(PIXI, {
         width: btnW,
         height: btnH,
         color: 0x07C160,
-        y: 0,
+        y: i * (btnH + btnGap),
         radius: 8 * PIXI.ratio,
       });
       btn.x = btnX;
@@ -273,127 +309,137 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
           relative_middle: { containerWidth: btn.width, containerHeight: btn.height },
         })
       );
-      btn.onClickFn(() => {
-        try { action.handler(); } catch (e: any) {
-          wx.showModal({ title: '错误', content: e.errMsg || String(e), showCancel: false });
-        }
-      });
-      scrollInner.addChild(btn);
-      btnElements.push(btn);
+      // 不调用 btn.onClickFn()，保持按钮非 interactive 状态
+      btnScrollInner.addChild(btn);
     });
+
+    btnWrapper.addChild(btnScrollInner, btnScrollMask);
+    container.addChild(btnWrapper);
+
+    // 按钮区滚动器（回调中检查 transform 防止 destroy 后访问崩溃）
+    const btnScroller = new Scroller((_l: number, t: number) => {
+      if (!btnScrollInner.transform) return;
+      btnScrollInner.y = -t;
+    });
+    btnScroller.contentSize(obj.width, btnRegionH, obj.width, Math.max(totalBtnH, btnRegionH));
+
+    // 保存引用到 container，供统一原生事件处理函数使用
+    (container as any).__btnScroller = btnScroller;
+    (container as any).__btnScrollInner = btnScrollInner;
   }
 
-  // ---- 统一 scroller（仅在有滚动内容时创建）----
-  const layoutAll = () => {
-    if (!scroller) return;
-    let totalH = 0;
-    if (infoAreaLayout) {
-      infoAreaLayout();
-      totalH += infoAreaHeight;
-      if (infoAreaHeight > 0) totalH += infoBtnGap;
+  // info 区在按钮区之后添加，确保 z-order 最高
+  if (infoWrapperRef) {
+    container.addChild(infoWrapperRef);
+  }
+
+  // ============== 统一 canvas 原生触摸事件：info 区 + 按钮区互斥滚动 ==============
+  // PIXI 4.8.8 Canvas 模式下 touchmove 不可靠，全部改用原生事件实现滚动。
+  // 坐标关系：PIXI全局坐标 = clientY * pixelRatio（见 game.ts mapPositionToPoint）
+  const { pixelRatio: _dpr } = wx.getSystemInfoSync();
+  const dpr = _dpr || 2;
+
+  // 屏幕坐标（clientY）范围
+  const infoScreenTop = hasInfoArea ? infoRegionY / dpr : 0;
+  const infoScreenBottom = hasInfoArea ? (infoRegionY + infoRegionH) / dpr : 0;
+  const btnScreenTop = hasButtons ? btnRegionY / dpr : 0;
+  const btnScreenBottom = hasButtons ? (btnRegionY + btnRegionH) / dpr : 0;
+
+  // 当前触摸归属：'info' | 'btn' | null
+  let activeRegion: 'info' | 'btn' | null = null;
+  let touchMoved = false;
+  let touchStartY = 0;
+  let scrollDestroyed = false; // 页面销毁标记
+
+  const onTouchStart = (e: any) => {
+    if (scrollDestroyed) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const y = touch.clientY;
+    touchMoved = false;
+    touchStartY = y;
+
+    if (hasInfoArea && iaInnerScroller && y >= infoScreenTop && y <= infoScreenBottom) {
+      activeRegion = 'info';
+      iaInnerScroller.doTouchStart(touch.clientX * dpr, y * dpr);
+    } else if (hasButtons && y >= btnScreenTop && y <= btnScreenBottom) {
+      activeRegion = 'btn';
+      const btnScroller = (container as any).__btnScroller;
+      if (btnScroller) btnScroller.doTouchStart(touch.clientX * dpr, y * dpr);
+    } else {
+      activeRegion = null;
     }
-    btnElements.forEach((btn, i) => {
-      btn.y = totalH + i * (btnH + btnGap);
-    });
-    totalH += totalBtnH;
-    scroller.contentSize(obj.width, scrollH, obj.width, totalH);
   };
 
-  if (hasScrollableContent) {
-    scroller = new Scroller((_l: number, t: number) => {
-      scrollInner.y = -t;
-    });
+  const onTouchMove = (e: any) => {
+    if (scrollDestroyed || !activeRegion) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchMoved = true;
 
-    // ---- 嵌套滚动状态 ----
-    let touchInInfo = false;   // 本次手势是否起始于 info 区域
-    let innerConsuming = false; // 内层是否正在消费滚动
-    let lastTouchY = 0;
-
-    // 判断触点是否在 info 区域内（全局坐标）
-    const isPointInInfoArea = (globalY: number): boolean => {
-      if (!infoAreaContainer || !infoAreaContainer.visible) return false;
-      if (!iaInnerScroller || iaInnerScroller.rangeMovement.bottom <= 0) return false;
-      // info 容器在屏幕上的实际 Y 位置
-      const iaScreenY = scrollY + scrollInner.y + infoAreaContainer.y;
-      return globalY >= iaScreenY && globalY <= iaScreenY + infoAreaHeight;
-    };
-
-    (scrollWrapper as any).touchstart = (e: any) => {
-      e.stopPropagation();
-      const y = e.data.global.y;
-      lastTouchY = y;
-
-      touchInInfo = isPointInInfoArea(y);
-      if (touchInInfo) {
-        // 手指在 info 区域：内层接管
-        innerConsuming = true;
-        iaInnerScroller.doTouchStart(e.data.global.x, y);
-      } else {
-        // 手指不在 info 区域：外层接管
-        innerConsuming = false;
-        scroller.doTouchStart(e.data.global.x, y);
-      }
-    };
-    (scrollWrapper as any).touchmove = (e: any) => {
-      e.stopPropagation();
-      const y = e.data.global.y;
-      const ts = e.data.originalEvent.timeStamp;
-
-      if (!touchInInfo) {
-        // 手指不在 info 区域：只外层滚动
-        scroller.doTouchMove(e.data.global.x, y, ts);
-      } else if (innerConsuming) {
-        // 手指在 info 区域，内层正在消费滚动
-        const deltaY = lastTouchY - y; // >0 向上滑（内容向下）
-        const { top, bottom } = iaInnerScroller.rangeMovement;
-        const atTop = top <= 0 && deltaY < 0;
-        const atBottom = top >= bottom && deltaY > 0;
-
-        if (atTop || atBottom) {
-          // 内层到达边界，穿透给外层
-          innerConsuming = false;
-          iaInnerScroller.doTouchEnd(ts);
-          scroller.doTouchStart(e.data.global.x, y);
-        } else {
-          iaInnerScroller.doTouchMove(e.data.global.x, y, ts);
-        }
-      } else {
-        // 已穿透给外层
-        scroller.doTouchMove(e.data.global.x, y, ts);
-      }
-      lastTouchY = y;
-    };
-    (scrollWrapper as any).touchend = (e: any) => {
-      e.stopPropagation();
-      const ts = e.data.originalEvent.timeStamp;
-      if (touchInInfo && innerConsuming) {
-        iaInnerScroller.doTouchEnd(ts);
-      } else {
-        scroller.doTouchEnd(ts);
-      }
-      touchInInfo = false;
-      innerConsuming = false;
-    };
-
-    // setText 回调
-    if (config.onInfoTextReady && infoAreaContainer) {
-      try {
-        config.onInfoTextReady((text: string) => {
-          // iaText 在嵌套结构中：infoAreaContainer > iaScrollWrapper(child[2]) > iaScrollInner(child[1]) > iaText(child[0])
-          const iaScrollWrapper = infoAreaContainer.children[2]; // bg, border, scrollWrapper
-          const iaScrollInner = iaScrollWrapper?.children?.[1]; // hitArea, scrollInner, mask
-          const iaText = iaScrollInner?.children?.[0];
-          if (!iaText) return;
-          iaText.text = text || '';
-          // 重置内部滚动位置
-          if (iaScrollInner) iaScrollInner.y = 0;
-          layoutAll();
-        });
-      } catch (e) { /* ignore */ }
+    if (activeRegion === 'info' && iaInnerScroller) {
+      iaInnerScroller.doTouchMove(touch.clientX * dpr, touch.clientY * dpr, e.timeStamp);
+    } else if (activeRegion === 'btn') {
+      const btnScroller = (container as any).__btnScroller;
+      if (btnScroller) btnScroller.doTouchMove(touch.clientX * dpr, touch.clientY * dpr, e.timeStamp);
     }
+  };
 
-    layoutAll();
+  const onTouchEnd = (e: any) => {
+    if (scrollDestroyed || !activeRegion) return;
+    const region = activeRegion;
+    activeRegion = null;
+
+    if (region === 'info' && iaInnerScroller) {
+      iaInnerScroller.doTouchEnd(e.timeStamp);
+    } else if (region === 'btn') {
+      const btnScroller = (container as any).__btnScroller;
+      const btnScrollInner = (container as any).__btnScrollInner;
+      if (btnScroller) btnScroller.doTouchEnd(e.timeStamp);
+      if (!touchMoved && hasButtons && btnScrollInner) {
+        // 没有滑动 = 点击，找到对应按钮并触发
+        const touchY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : touchStartY;
+        const globalY = touchY * dpr;
+        const localY = globalY - btnRegionY + (-btnScrollInner.y);
+        for (let i = 0; i < config.actions!.length; i++) {
+          const btnTop = i * (btnH + btnGap);
+          const btnBottom = btnTop + btnH;
+          if (localY >= btnTop && localY <= btnBottom) {
+            try { config.actions![i].handler(); } catch (err: any) {
+              wx.showModal({ title: '错误', content: err.errMsg || String(err), showCancel: false });
+            }
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  // 绑定 canvas 原生触摸事件
+  const gameCanvas = canvas || (typeof GameGlobal !== 'undefined' && (GameGlobal as any).canvas);
+  if (gameCanvas) {
+    gameCanvas.addEventListener('touchstart', onTouchStart);
+    gameCanvas.addEventListener('touchmove', onTouchMove);
+    gameCanvas.addEventListener('touchend', onTouchEnd);
+    gameCanvas.addEventListener('touchcancel', onTouchEnd);
   }
+
+  // 清理函数：标记销毁 + 停止惯性动画 + 移除事件监听器
+  const cleanupScrollEvents = () => {
+    scrollDestroyed = true;
+    activeRegion = null;
+    // 停止 Scroller 惯性动画
+    if (iaInnerScroller) iaInnerScroller.tickerStop = true;
+    const btnScroller = (container as any).__btnScroller;
+    if (btnScroller) btnScroller.tickerStop = true;
+    if (gameCanvas) {
+      gameCanvas.removeEventListener('touchstart', onTouchStart);
+      gameCanvas.removeEventListener('touchmove', onTouchMove);
+      gameCanvas.removeEventListener('touchend', onTouchEnd);
+      gameCanvas.removeEventListener('touchcancel', onTouchEnd);
+    }
+  };
+  (container as any).__btnScrollCleanup = cleanupScrollEvents;
 
   // 返回按钮回调
   //   onUnload 的清理统一由 router.delPage 里的 _onUnload 负责调用（见 router.ts），
@@ -415,6 +461,16 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   if (config.onLoad) {
     try { config.onLoad(); } catch (e) { console.error('onLoad error:', e); }
   }
+
+  // 增强 onUnload：在页面卸载时清理 canvas 原生事件监听器
+  const originalOnUnload = config.onUnload;
+  config.onUnload = (appRef: any) => {
+    if ((container as any).__btnScrollCleanup) {
+      (container as any).__btnScrollCleanup();
+      (container as any).__btnScrollCleanup = null;
+    }
+    if (originalOnUnload) originalOnUnload(appRef);
+  };
 
   return container;
 };

@@ -9,7 +9,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -22,14 +22,14 @@ export const apiName = 'system';
 /** 同步获取系统信息 */
 export function getSystemInfoSync() {
   const info = wx.getSystemInfoSync();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 异步获取系统信息（回调风格） */
 export function getSystemInfo() {
   wx.getSystemInfo({
     success(res: any) {
-      setInfo(formatObj(res));
+      setInfo(formatJSON(res));
     },
     fail(err: any) {
       setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
@@ -41,7 +41,7 @@ export function getSystemInfo() {
 export function getSystemInfoAsync() {
   wx.getSystemInfoAsync({
     success(res: any) {
-      setInfo(formatObj(res));
+      setInfo(formatJSON(res));
     },
     fail(err: any) {
       setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
@@ -52,26 +52,26 @@ export function getSystemInfoAsync() {
 /** 获取窗口信息 */
 export function getWindowInfo() {
   const info = wx.getWindowInfo();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 获取设备设置（蓝牙/Wi-Fi/定位等开关） */
 export function getSystemSetting() {
   const info = wx.getSystemSetting();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 获取设备基础信息 */
 export function getDeviceInfo() {
   const info = wx.getDeviceInfo();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 获取设备性能档位 */
 export function getDeviceBenchmarkInfo() {
   wx.getDeviceBenchmarkInfo({
     success(res: any) {
-      setInfo(formatObj(res));
+      setInfo(formatJSON(res));
     },
     fail(err: any) {
       setInfo(`获取失败：${err?.errMsg || '未知错误'}`);
@@ -82,13 +82,13 @@ export function getDeviceBenchmarkInfo() {
 /** 获取微信 App 基础信息 */
 export function getAppBaseInfo() {
   const info = wx.getAppBaseInfo();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 获取微信 App 授权设置 */
 export function getAppAuthorizeSetting() {
   const info = wx.getAppAuthorizeSetting();
-  setInfo(formatObj(info));
+  setInfo(formatJSON(info));
 }
 
 /** 跳转系统蓝牙设置页（仅 Android） */

@@ -26,3 +26,22 @@ export function formatObj(obj: any): string {
     .map((k) => `${k}: ${formatValue(obj[k])}`)
     .join('\n');
 }
+
+/**
+ * 将对象格式化为 JSON 字符串（带缩进）
+ * 传给 setInfo 后会自动触发 JSON 语法高亮渲染
+ *
+ * @param obj - 要格式化的对象
+ * @param indent - 缩进空格数，默认 2
+ * @returns JSON 格式字符串
+ */
+export function formatJSON(obj: any, indent: number = 2): string {
+  if (obj === null || obj === undefined) return 'null';
+  if (typeof obj !== 'object') return JSON.stringify(obj);
+  try {
+    return JSON.stringify(obj, null, indent);
+  } catch {
+    // 循环引用等异常情况回退到 formatObj
+    return formatObj(obj);
+  }
+}

@@ -7,7 +7,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -31,7 +31,7 @@ export function onShow() {
     return;
   }
   showListener = (res: any) => {
-    setInfo('onShow 已触发\n' + formatObj(res));
+    setInfo(formatJSON(res));
   };
   wx.onShow(showListener);
   setInfo('已注册 onShow，切到后台再回来观察');
@@ -70,12 +70,12 @@ export function offHide() {
 
 /** 获取冷启动参数 */
 export function getLaunchOptionsSync() {
-  setInfo(formatObj(wx.getLaunchOptionsSync()));
+  setInfo(formatJSON(wx.getLaunchOptionsSync()));
 }
 
 /** 获取启动参数（冷启动和热启动均可） */
 export function getEnterOptionsSync() {
-  setInfo(formatObj(wx.getEnterOptionsSync()));
+  setInfo(formatJSON(wx.getEnterOptionsSync()));
 }
 
 export function onUnload() {

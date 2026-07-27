@@ -12,7 +12,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 import { createGroupShareFlow } from '../../../libs/group-share';
 
 const display = createDisplay();
@@ -26,7 +26,7 @@ export const apiName = 'group';
 // 群分享回流流程（shareToGroup / onLoad / onUnload 委托给它）
 const flow = createGroupShareFlow({
   onStatus: (msg) => setInfo(msg),
-  onResult: (info) => setInfo(`获取成功\n${formatObj(info)}`),
+  onResult: (info) => setInfo(formatJSON(info)),
   onError: (errMsg) => setInfo(`获取失败: ${errMsg}`),
 });
 
@@ -39,7 +39,7 @@ export function shareToGroup() {
 export function getGroupEnterInfo() {
   wx.getGroupEnterInfo({
     success(res: any) {
-      setInfo(`群聊入参\n${formatObj(res)}`);
+      setInfo(formatJSON(res));
     },
     fail(err: any) {
       setInfo(`查询失败: ${err?.errMsg || '请从群聊场景进入'}`);

@@ -6,7 +6,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -44,7 +44,7 @@ export function openPrivacyContract() {
 export function getPrivacySetting() {
   wx.getPrivacySetting({
     success(res: any) {
-      setInfo(`隐私授权设置\n${formatObj(res)}`);
+      setInfo(formatJSON(res));
     },
     fail(err: any) {
       wx.showToast({ title: `查询失败: ${err?.errMsg || '未知错误'}`, icon: 'none' });

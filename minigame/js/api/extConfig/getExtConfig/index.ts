@@ -5,7 +5,7 @@
 
 import { createDisplay } from '../../../libs/display-slot';
 import { createInfoArea } from '../../../libs/info-area';
-import { formatObj } from '../../../libs/format';
+import { formatJSON } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
@@ -23,7 +23,7 @@ export function getExtConfigSync() {
     if (keys.length === 0) {
       wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
     } else {
-      setInfo(`getExtConfigSync\n${formatObj(res)}`);
+      setInfo(formatJSON(res));
     }
   } catch (e: any) {
     wx.showToast({ title: `获取失败：${e?.message || '未知错误'}`, icon: 'none', duration: 1000 });
@@ -38,7 +38,7 @@ export function getExtConfig() {
       if (keys.length === 0) {
         wx.showToast({ title: '当前非第三方平台小程序', icon: 'none', duration: 1000 });
       } else {
-        setInfo(`getExtConfig\n${formatObj(res)}`);
+        setInfo(formatJSON(res));
       }
     },
     fail(err: any) {
