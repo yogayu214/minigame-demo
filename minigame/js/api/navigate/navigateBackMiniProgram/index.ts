@@ -14,8 +14,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮返回上一个小程序，操作结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
+export const apiName = 'navigateBackMiniProgram';
 
 /** 返回上一个小程序（不带数据） */
 export function navigateBackMiniProgram() {

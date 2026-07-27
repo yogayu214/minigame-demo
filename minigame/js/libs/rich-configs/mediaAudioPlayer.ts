@@ -17,7 +17,11 @@ import type { DisplayApi } from './display';
 
 export const config: RichConfig = {
   title: '媒体音频播放器',
-  apiName: 'createMediaAudioPlayer',
+  apiName: 'mediaAudioPlayer',
+
+  // 透传信息展示区
+  infoArea: logic.infoArea,
+  onInfoTextReady: logic.onInfoTextReady,
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_button, p_scroll } = require('../component/index');
@@ -55,7 +59,7 @@ export const config: RichConfig = {
           content: action.label,
           fontSize: 30 * ratio,
           fill: 0xffffff,
-          fontWeight: 'bold',
+          fontWeight: 'normal',
           relative_middle: { containerWidth: btn.width, containerHeight: btn.height },
         })
       );

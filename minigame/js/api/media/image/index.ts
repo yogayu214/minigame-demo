@@ -7,10 +7,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮预览/保存/编辑图片。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'image';
 let lastImagePath = '';
 
 function toast(title: string) {

@@ -3,6 +3,13 @@
  * wx.onShareAppMessage / wx.offShareAppMessage / wx.showShareMenu
  */
 
+import { createInfoArea } from '../../../libs/info-area';
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击"开启被动转发"后，可通过右上角菜单或系统分享触发转发。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'onShareAppMessage';
 let transpondFn: any = null;
 
 /** 开启被动转发监听 */
@@ -28,7 +35,7 @@ export function enableShare() {
     };
   };
   wx.onShareAppMessage(transpondFn);
-  wx.showToast({ title: '已开启' });
+  setInfo('已开启被动转发监听，可通过右上角菜单触发分享');
 }
 
 /** 关闭转发 */
@@ -36,8 +43,8 @@ export function disableShare() {
   if (transpondFn) {
     wx.offShareAppMessage(transpondFn);
     transpondFn = null;
+    setInfo('已关闭被动转发监听');
   }
-  wx.showToast({ title: '已关闭' });
 }
 
 export function onUnload() {

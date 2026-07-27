@@ -5,9 +5,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮调起扫码功能，扫码结果通过 Toast 提示。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'scanCode';
 
 /** 调起扫码（相机 + 相册皆可） */
 export function scanCode() {

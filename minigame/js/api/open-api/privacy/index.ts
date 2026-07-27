@@ -11,9 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮管理隐私授权接口，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'privacy';
 /** 主动唤起隐私授权确认弹窗 */
 export function requirePrivacyAuthorize() {
   wx.requirePrivacyAuthorize({

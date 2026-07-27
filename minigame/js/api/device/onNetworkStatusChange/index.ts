@@ -9,9 +9,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮监听网络状态变化，网络切换信息将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'onNetworkStatusChange';
 let listener: any = null;
 
 /** 开始监听网络状态变化 */

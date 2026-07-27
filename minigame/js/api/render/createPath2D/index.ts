@@ -10,9 +10,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮创建 Path2D 路径并绘制，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'createPath2D';
 /** 创建离屏 canvas 并绘制，drawFn 返回 false 表示绘制失败，跳过截图 */
 function drawOnOffscreen(drawFn: (ctx: any, canvas: any) => boolean) {
   const offCanvas = wx.createCanvas();

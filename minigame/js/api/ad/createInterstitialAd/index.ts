@@ -5,6 +5,13 @@
 
 export const setDisplay = () => {};
 
+import { createInfoArea } from '../../../libs/info-area';
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮创建/展示插屏广告。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'createInterstitialAd';
+
 let interstitialAd: any = null;
 
 const toast = (title: string) => wx.showToast({ title, icon: 'none', duration: 1000 });

@@ -27,6 +27,8 @@ export function createOpenDataContextConfig(
     'onLoad',
     'onUnload',
     'setDisplay',
+    'infoArea',
+    'onInfoTextReady',
   ];
   const actions: { label: string; handler: () => void }[] = [];
   for (const key of Object.keys(mod)) {
@@ -168,8 +170,12 @@ export function createOpenDataContextConfig(
 
   return {
     title: mod.title || pageLabel || '开放数据域',
-    apiName: mod.apiName || '排行榜',
+    apiName: mod.apiName || 'openDataContext',
     actions,
+
+    // 透传信息展示区配置
+    infoArea: mod.infoArea,
+    onInfoTextReady: mod.onInfoTextReady,
 
     buildTopView(PIXI: any, app: any, obj: any, _underline: any) {
       const root = new PIXI.Container();

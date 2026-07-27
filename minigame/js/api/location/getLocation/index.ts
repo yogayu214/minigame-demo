@@ -9,8 +9,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取当前地理位置信息，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
+export const apiName = 'getLocation';
 
 /** 获取当前地理位置（精确） */
 export function getLocation() {

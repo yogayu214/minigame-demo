@@ -15,9 +15,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮展示 Toast / Loading / Modal / ActionSheet 等交互组件。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'interaction';
 /** 显示 success Toast */
 export function showSuccessToast() {
   wx.showToast({

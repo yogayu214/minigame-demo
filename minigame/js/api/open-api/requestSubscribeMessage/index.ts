@@ -7,9 +7,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮发起订阅消息授权。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'requestSubscribeMessage';
 
 /** 请求一次性订阅消息 */
 export function requestSubscribeMessage() {

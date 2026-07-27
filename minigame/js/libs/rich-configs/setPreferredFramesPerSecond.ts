@@ -31,7 +31,7 @@ export const config: RichConfig = {
     const bw = box.width;
     const circumR = (Math.sqrt(3) * bw / 6) ** 3 / (4 * (bw / 4) * Math.sqrt(3) * (bw / 12));
     const trilateral = new PIXI.Graphics();
-    trilateral.beginFill(0x1aad19).drawPolygon([
+    trilateral.beginFill(0x07C160).drawPolygon([
       -(Math.sqrt(3) * (bw / 12)), bw / 4 - circumR,
       Math.sqrt(3) * (bw / 12), bw / 4 - circumR,
       0, -circumR,
@@ -65,10 +65,10 @@ export const config: RichConfig = {
     });
     const greenLine = p_box(PIXI, {
       width: grayLine.width, height: grayLine.height, radius: 2 * PIXI.ratio,
-      background: { color: 0x09bb07 }, y: grayLine.y,
+      background: { color: 0x07C160 }, y: grayLine.y,
     });
     const circle = p_circle(PIXI, {
-      radius: 20 * PIXI.ratio, background: { color: 0x09bb07 },
+      radius: 20 * PIXI.ratio, background: { color: 0x07C160 },
       x: greenLine.x + greenLine.width, y: greenLine.y + greenLine.height / 2,
     });
 

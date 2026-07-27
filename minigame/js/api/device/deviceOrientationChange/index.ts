@@ -4,10 +4,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮监听设备方向变化，事件通过 Toast 提示。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'deviceOrientationChange';
 function toast(msg: string) {
   wx.showToast({ title: msg, icon: 'none' });
 }

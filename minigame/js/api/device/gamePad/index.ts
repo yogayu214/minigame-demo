@@ -11,9 +11,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮监听手柄连接与按键事件，手柄数据将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'gamePad';
 let connectListener: any = null;
 let disconnectListener: any = null;
 

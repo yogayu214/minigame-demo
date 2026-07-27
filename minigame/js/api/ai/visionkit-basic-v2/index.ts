@@ -76,6 +76,7 @@ export function onUnload() {
 
 export const arConfig: ARModuleConfig = {
   title: 'VisionKit基础-v2',
+  apiName: 'visionkit-basic-v2',
   tip: '提示：v2版本识别平面, 触碰屏幕任意点,\n在平面位置会生成示例的机器小人',
   buttonName: null,
   mode: 'default',

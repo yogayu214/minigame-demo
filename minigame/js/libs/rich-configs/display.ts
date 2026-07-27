@@ -124,15 +124,15 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       const modal = new PIXI.Container();
       modal.visible = false;
 
-      // 全屏遮罩
+      // 全屏遮罩（对齐 --wx-overlay-50）
       const overlay = new PIXI.Graphics();
-      overlay.beginFill(0x000000, 0.45).drawRect(0, 0, obj.width, obj.height).endFill();
+      overlay.beginFill(0x000000, 0.5).drawRect(0, 0, obj.width, obj.height).endFill();
       overlay.interactive = true;
       modal.addChild(overlay);
 
-      // 卡片尺寸（居中）
-      const cardW = Math.min(obj.width - 60 * PIXI.ratio, 620 * PIXI.ratio);
-      const cardH = Math.min(obj.height - 240 * PIXI.ratio, 900 * PIXI.ratio);
+      // 卡片尺寸（居中，宽度约束参考 --wx 大屏 600pt 主体区）
+      const cardW = Math.min(obj.width - 80 * PIXI.ratio, 620 * PIXI.ratio);
+      const cardH = Math.min(obj.height - 280 * PIXI.ratio, 880 * PIXI.ratio);
       const cardX = (obj.width - cardW) / 2;
       const cardY = (obj.height - cardH) / 2;
 
@@ -144,51 +144,51 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
       (card as any).touchstart = (e: any) => e.stopPropagation();
       (card as any).touchend = (e: any) => e.stopPropagation();
 
-      // 卡片底
+      // 卡片底（--wx-radius-xl = 16px 圆角）
       const cardBg = new PIXI.Graphics();
       cardBg.beginFill(0xffffff).drawRoundedRect(0, 0, cardW, cardH, 16 * PIXI.ratio).endFill();
       card.addChild(cardBg);
 
-      // 标题
-      const headerH = 80 * PIXI.ratio;
+      // 标题（--wx-size-title-1 = 17px → 34 设计稿，Medium 字重）
+      const headerH = 96 * PIXI.ratio;
       const titleText = p_text(PIXI, {
         content: '调用结果',
-        fontSize: 30 * PIXI.ratio,
-        fill: 0x353535,
-        fontWeight: 'bold',
-        x: 30 * PIXI.ratio,
-        y: 24 * PIXI.ratio,
+        fontSize: 34 * PIXI.ratio,
+        fill: 0x000000,
+        fontWeight: 'normal',
+        x: 32 * PIXI.ratio,
+        y: 30 * PIXI.ratio,
       });
       card.addChild(titleText);
 
       // 关闭按钮（右上角圆形 ✕）
-      const closeSize = 56 * PIXI.ratio;
+      const closeSize = 52 * PIXI.ratio;
       const closeBtn = new PIXI.Container();
-      closeBtn.x = cardW - closeSize - 16 * PIXI.ratio;
-      closeBtn.y = 12 * PIXI.ratio;
+      closeBtn.x = cardW - closeSize - 24 * PIXI.ratio;
+      closeBtn.y = 22 * PIXI.ratio;
       const closeBg = new PIXI.Graphics();
-      closeBg.beginFill(0xf2f2f2).drawCircle(closeSize / 2, closeSize / 2, closeSize / 2).endFill();
+      closeBg.beginFill(0xF2F2F2).drawCircle(closeSize / 2, closeSize / 2, closeSize / 2).endFill();
       const closeIcon = p_text(PIXI, {
         content: '✕',
-        fontSize: 28 * PIXI.ratio,
-        fill: 0x666666,
+        fontSize: 24 * PIXI.ratio,
+        fill: 0x999999,
         relative_middle: { containerWidth: closeSize, containerHeight: closeSize },
       });
       closeBtn.addChild(closeBg, closeIcon);
       closeBtn.interactive = true;
       card.addChild(closeBtn);
 
-      // 标题下分割线
+      // 标题下分割线（更轻量的灰色线，等同 --wx-bg-0 / separator）
       const headerLine = new PIXI.Graphics();
       headerLine
-        .beginFill(0xeeeeee)
-        .drawRect(20 * PIXI.ratio, headerH, cardW - 40 * PIXI.ratio, PIXI.ratio | 0)
+        .beginFill(0xEDEDED)
+        .drawRect(0, headerH, cardW, PIXI.ratio | 0)
         .endFill();
       card.addChild(headerLine);
 
       // 内容区（mask + 可滚动）
-      const contentTop = headerH + 16 * PIXI.ratio;
-      const contentBottom = cardH - 20 * PIXI.ratio;
+      const contentTop = headerH + 8 * PIXI.ratio;
+      const contentBottom = cardH - 24 * PIXI.ratio;
       const contentH = contentBottom - contentTop;
       const contentW = cardW;
 
@@ -286,9 +286,9 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
 
       // 使用原生 PIXI.Text 以启用 wordWrap（p_text 不透传换行参数）
       const textView: any = new PIXI.Text('', {
-        fontSize: `${28 * PIXI.ratio}px`,
-        fill: 0x555555,
-        lineHeight: 40 * PIXI.ratio,
+        fontSize: `${26 * PIXI.ratio}px`,
+        fill: 0x353535,
+        lineHeight: 38 * PIXI.ratio,
         wordWrap: true,
         wordWrapWidth: innerW,
         breakWords: true,
@@ -334,12 +334,12 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
           }
 
           const keyFontSize = 24 * PIXI.ratio;
-          const valFontSize = 26 * PIXI.ratio;
-          const lineHeight = 36 * PIXI.ratio;
-          const rowMinH = 64 * PIXI.ratio;
-          const rowPadX = 16 * PIXI.ratio;
-          const rowPadY = 18 * PIXI.ratio;
-          const colGap = 24 * PIXI.ratio;
+          const valFontSize = 24 * PIXI.ratio;
+          const lineHeight = 34 * PIXI.ratio;
+          const rowMinH = 72 * PIXI.ratio;
+          const rowPadX = 20 * PIXI.ratio;
+          const rowPadY = 20 * PIXI.ratio;
+          const colGap = 16 * PIXI.ratio;
           // value 列起点的硬上限（避免极端长 key 把 value 挤没）
           const keyColMax = Math.floor(innerW * 0.5);
 
@@ -349,7 +349,7 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
           for (const [key, value] of Object.entries(kv)) {
             const keyT = new PIXI.Text(String(key), {
               fontSize: `${keyFontSize}px`,
-              fill: 0x353535,
+              fill: 0x808080,
               lineHeight,
               wordWrap: true,
               wordWrapWidth: keyColMax,
@@ -369,7 +369,7 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
             const valWrapWidth = Math.max(valMaxW, innerW * 0.45);
           const valT = new PIXI.Text(String(value), {
               fontSize: `${valFontSize}px`,
-              fill: 0x666666,
+              fill: 0x353535,
               lineHeight,
               wordWrap: true,
               wordWrapWidth: valWrapWidth,
@@ -389,11 +389,12 @@ export function createDisplayConfig(mod: DisplayModule, pageLabel?: string): Ric
               width: innerW,
               height: rowH,
               y: yOffset,
-              color: 0xfafafa,
+              background: { color: 0xF7F7F7, alpha: 1 },
+              radius: 8 * PIXI.ratio,
             });
             row.addChild(keyT, valT);
             dataView.addChild(row);
-            yOffset += rowH + 6 * PIXI.ratio;
+            yOffset += rowH + 8 * PIXI.ratio;
           }
           setTitle('调用结果');
           showModal();

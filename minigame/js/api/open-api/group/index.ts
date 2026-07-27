@@ -22,7 +22,7 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
   '点击「分享到群」按钮，\n然后从群聊点击会话卡片进入，\n将自动获取群进群信息'
 );
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'group';
 // 群分享回流流程（shareToGroup / onLoad / onUnload 委托给它）
 const flow = createGroupShareFlow({
   onStatus: (msg) => setInfo(msg),

@@ -3,6 +3,8 @@ import { ARRenderer, ARMode, ARConfig } from '../ar/arRenderer';
 
 export interface ARModuleConfig {
   title: string;
+  /** 英文 API 名称，作为页面副标题 */
+  apiName?: string;
   tip: string;
   buttonName: string | null;
   mode: ARMode;
@@ -28,7 +30,7 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
 
   return {
     title: cfg.title || pageLabel || '',
-    apiName: '',
+    apiName: cfg.apiName || '',
     actions: [],
 
     buildTopView(PIXI: any, app: any, obj: any, underline: any) {

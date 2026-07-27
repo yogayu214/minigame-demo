@@ -10,9 +10,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取第三方平台 ext 配置，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'getExtConfig';
 /** 同步获取第三方平台自定义数据 */
 export function getExtConfigSync() {
   try {

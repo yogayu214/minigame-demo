@@ -9,28 +9,36 @@ export default function(PIXI, app, obj) {
             })
         };
 
+    const barW = (obj.width * 9) / 11;
+    const barH = 5 * PIXI.ratio;
+    const barX = obj.width / 11;
+    const barY = (obj.height - barH) / 2;
+
     pmgressBar.gray
         .beginFill(0x999999)
-        .drawRect(0, 0, (obj.width * 9) / 11, 5 * PIXI.ratio)
+        .drawRect(0, 0, barW, barH)
         .endFill();
-    pmgressBar.gray.position.set(obj.width / 11, (obj.height - pmgressBar.gray.height) / 2);
-    pmgressBar.green
-        .beginFill(0x07c160)
-        .drawRect(0, 0, pmgressBar.gray.width, pmgressBar.gray.height)
-        .endFill();
-    pmgressBar.green.position.set(pmgressBar.gray.x, pmgressBar.gray.y);
-    pmgressBar.green.width = 0;
+    pmgressBar.gray.position.set(barX, barY);
+
+    // 绿色进度条：不预绘制完整矩形再缩放 width，
+    // 而是每次更新时 clear + 重绘，避免移动端 scale 反向问题
+    pmgressBar.green.position.set(barX, barY);
 
     pmgressBar.text.position.set(
         (obj.width - pmgressBar.text.width) / 2,
-        pmgressBar.gray.y + pmgressBar.gray.height + 10 * PIXI.ratio
+        barY + barH + 10 * PIXI.ratio
     );
 
     container.addChild(pmgressBar.gray, pmgressBar.green, pmgressBar.text);
     app.stage.addChild(container);
     return function(int_iPos) {
         if (!container) return;
-        pmgressBar.green.width = (pmgressBar.gray.width / 100) * int_iPos;
+        // 每次重绘绿色进度条，确保从左向右增长
+        const greenW = (barW / 100) * int_iPos;
+        pmgressBar.green.clear();
+        if (greenW > 0) {
+            pmgressBar.green.beginFill(0x07c160).drawRect(0, 0, greenW, barH).endFill();
+        }
         if (int_iPos === 100) {
             container.visible = false;
             app.stage.removeChild(container);

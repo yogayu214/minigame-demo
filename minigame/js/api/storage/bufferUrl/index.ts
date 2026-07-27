@@ -11,9 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮创建/预览/销毁 BufferURL，操作结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'bufferUrl';
 const SAMPLE_URL =
   'https://mmgame.qpic.cn/image/50e4b673d8b0743ba48ce2a8b5e655b12ca05f9e0b530650d2dfd8e64c53ee31/0';
 let bufUrl = '';

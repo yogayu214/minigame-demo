@@ -13,8 +13,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮重启当前小程序，操作结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
+export const apiName = 'restartMiniProgram';
 
 /** 直接重启（不带启动参数） */
 export function restartMiniProgram() {

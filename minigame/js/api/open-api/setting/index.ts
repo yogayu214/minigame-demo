@@ -15,9 +15,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取用户授权设置，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'setting';
 const SCOPE_LABELS: Record<string, string> = {
   'scope.userInfo': '用户信息',
   'scope.userLocation': '地理位置',

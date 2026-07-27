@@ -5,6 +5,13 @@
 
 export const setDisplay = () => {};
 
+import { createInfoArea } from '../../../libs/info-area';
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮加载/展示激励视频广告，观看完成后可触发奖励回调。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'createRewardedVideoAd';
+
 let rewardedVideoAd: any = null;
 let firstLoaded = false;
 

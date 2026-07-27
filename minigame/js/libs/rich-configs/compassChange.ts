@@ -11,7 +11,7 @@ let _start: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '监听罗盘数据',
-  apiName: 'on/off/CompassChange',
+  apiName: 'compassChange',
 
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_text, p_box, p_img } = require('../component/index');
@@ -47,7 +47,7 @@ export const config: RichConfig = {
 
     const needle = p_box(PIXI, {
       width: 6 * PIXI.ratio, height: 56 * PIXI.ratio,
-      background: { color: 0x1aad19 }, radius: 3 * PIXI.ratio,
+      background: { color: 0x07C160 }, radius: 3 * PIXI.ratio,
       y: -16 * PIXI.ratio, parentWidth: imgContainer.width,
     });
     imgContainer.addChild(img, needle, degreeText, unitText);

@@ -15,9 +15,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取菜单信息或切换菜单样式，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'menu';
 let officialListener: any = null;
 
 /** 查询胶囊菜单按钮位置 */

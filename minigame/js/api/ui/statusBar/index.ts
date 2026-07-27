@@ -21,7 +21,7 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
   '注意：此 API 仅在以下条件同时满足时生效：\n1. game.json 配置中已设置 showStatusBar\n2. 运行环境为 iOS\n配置 showStatusBar 后屏幕顶部会显示状态栏，此接口可修改其样式。'
 );
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'statusBar';
 /** 设置状态栏为深色样式（白字） */
 export function setStatusBarDark() {
   wx.setStatusBarStyle({

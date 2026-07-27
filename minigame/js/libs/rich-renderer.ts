@@ -69,12 +69,10 @@ export interface RichConfig {
 module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: RichConfig) {
   const container = new PIXI.Container();
 
-  // 背景色
-  if (config.background !== undefined) {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(config.background).drawRect(0, 0, obj.width, obj.height).endFill();
-    container.addChild(bg);
-  }
+  // 背景色（默认使用 --wx-bg-0 #EDEDED 灰色底，让白色卡片和按钮有层级感）
+  const pageBg = new PIXI.Graphics();
+  pageBg.beginFill(config.background ?? 0xEDEDED).drawRect(0, 0, obj.width, obj.height).endFill();
+  container.addChild(pageBg);
 
   // 顶部固定模板（先生成，把 underline 传给 buildTopView）
   const { goBack, title, api_name, underline, logo, logoName } = fixedTemplate(PIXI, {
@@ -82,6 +80,8 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     title: config.title,
     api_name: config.apiName || config.title,
   });
+
+  // 统一灰色底贯穿全屏（包括导航栏），不做白色头部分区
 
   // 自定义顶部视图
   const topView = config.buildTopView(PIXI, app, obj, underline);
@@ -100,11 +100,11 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
 
   // 可滚动区域：从 baseY 到屏幕底部（留出 logo 空间 + 额外底部间距）
   const scrollY = baseY;
-  const bottomPadding = 60 * PIXI.ratio; // 滚动区底部与 logo 之间的额外间距
+  const bottomPadding = 110 * PIXI.ratio; // 滚动区底部与 logo 之间的额外间距
   const logoH = logo ? (logo.height || 0) + bottomPadding : 140 * PIXI.ratio;
   const btnW = 580 * PIXI.ratio;
-  const btnH = 80 * PIXI.ratio;
-  const btnGap = 20 * PIXI.ratio;
+  const btnH = 88 * PIXI.ratio;
+  const btnGap = 24 * PIXI.ratio;
   const totalBtnH = (config.actions ? config.actions.length : 0) * (btnH + btnGap) - btnGap;
 
   // ============== 统一滚动区（info 区 + 按钮，一起滚动） ==============
@@ -145,16 +145,21 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   let infoAreaHeight = 0;
   let infoAreaLayout: (() => void) | null = null;
 
+  // info 区域最大高度：可滚动区高度的 45%，保证按钮始终可见
+  const iaMaxH = Math.min(scrollH * 0.45, 480 * PIXI.ratio);
+  let iaInnerScroller: any = null; // info 区内部滚动器
+
   if (config.infoArea) {
     const ia = config.infoArea;
-    const iaBgColor = ia.backgroundColor ?? 0xf5f0dc;
-    const iaBorderColor = ia.borderColor ?? 0x333333;
-    const iaTextColor = ia.textColor ?? 0x333333;
-    const iaFontSize = (ia.fontSize || 28) * PIXI.ratio;
-    const iaLineH = iaFontSize * (ia.lineHeight || 1.4);
-    const iaPadX = (ia.paddingX || 24) * PIXI.ratio;
-    const iaPadY = (ia.paddingY || 20) * PIXI.ratio;
-    const iaBorderRadius = (ia.borderRadius || 8) * PIXI.ratio;
+    // 白色卡片在灰色页面底上自然凸出（--wx-bg-2 / --wx-bg-0 对比）
+    const iaBgColor = ia.backgroundColor ?? 0xFFFFFF;
+    const iaBorderColor = ia.borderColor ?? 0xE5E5E5;
+    const iaTextColor = ia.textColor ?? 0x353535;
+    const iaFontSize = (ia.fontSize || 26) * PIXI.ratio;
+    const iaLineH = iaFontSize * (ia.lineHeight || 1.5);
+    const iaPadX = (ia.paddingX || 28) * PIXI.ratio;
+    const iaPadY = (ia.paddingY || 28) * PIXI.ratio;
+    const iaBorderRadius = (ia.borderRadius || 12) * PIXI.ratio;
 
     const iaW = btnW;
     const iaInnerW = iaW - iaPadX * 2;
@@ -167,6 +172,15 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     const iaBg = new PIXI.Graphics();
     const iaBorder = new PIXI.Graphics();
 
+    // 内容滚动容器（嵌套滚动：info 区内部独立滚动）
+    const iaScrollWrapper = new PIXI.Container();
+    iaScrollWrapper.x = 0;
+    iaScrollWrapper.y = 0;
+    iaScrollWrapper.interactive = true;
+
+    const iaScrollInner = new PIXI.Container();
+    const iaScrollMask = new PIXI.Graphics(); // 动态更新尺寸
+
     const iaText = new PIXI.Text(ia.initialText || '', {
       fontSize: `${iaFontSize}px`,
       fill: iaTextColor,
@@ -178,8 +192,27 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     iaText.x = iaPadX;
     iaText.y = iaPadY;
 
-    infoAreaContainer.addChild(iaBg, iaBorder, iaText);
+    iaScrollInner.addChild(iaText);
+    iaScrollInner.mask = iaScrollMask;
+
+    // 透明命中区保证空白区域也能接收触摸
+    const iaHitArea = new PIXI.Graphics();
+    iaHitArea.interactive = true;
+
+    iaScrollWrapper.addChild(iaHitArea, iaScrollInner, iaScrollMask);
+    infoAreaContainer.addChild(iaBg, iaBorder, iaScrollWrapper);
     scrollInner.addChild(infoAreaContainer);
+
+    // info 区内部滚动器
+    iaInnerScroller = new Scroller((_l: number, t: number) => {
+      iaScrollInner.y = -t;
+    });
+
+    // 嵌套滚动逻辑由外层 scrollWrapper 统一驱动（基于坐标判断）：
+    //   - 手指不在 info 区 → 只外层滚动
+    //   - 手指在 info 区且内层未到边界 → 只内层滚动，外层不动
+    //   - 手指在 info 区且内层到边界后继续同方向 → 穿透给外层
+    iaScrollWrapper.interactive = false; // 禁用子元素交互，由外层统一分发
 
     infoAreaLayout = () => {
       const hasText = !!(iaText.text && iaText.text.trim());
@@ -189,10 +222,31 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
         return;
       }
       infoAreaContainer.visible = true;
-      const contentH = iaText.height + iaPadY * 2;
-      infoAreaHeight = contentH;
-      iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, contentH, iaBorderRadius).endFill();
-      iaBorder.clear().lineStyle(2 * PIXI.ratio, iaBorderColor).drawRoundedRect(0, 0, iaW, contentH, iaBorderRadius);
+      const rawContentH = iaText.height + iaPadY * 2;
+      // 如果内容超出最大高度，则固定高度并启用内部滚动
+      const needScroll = rawContentH > iaMaxH;
+      const displayH = needScroll ? iaMaxH : rawContentH;
+      infoAreaHeight = displayH;
+
+      iaBg.clear().beginFill(iaBgColor).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius).endFill();
+      if (iaBgColor !== 0xFFFFFF) {
+        iaBorder.clear().lineStyle(1 * PIXI.ratio, iaBorderColor, 0.4).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius);
+      } else {
+        iaBorder.clear();
+      }
+
+      // 更新滚动 mask 和命中区
+      iaScrollMask.clear().beginFill(0xffffff).drawRoundedRect(0, 0, iaW, displayH, iaBorderRadius).endFill();
+      iaHitArea.clear().beginFill(0xffffff, 0).drawRect(0, 0, iaW, displayH).endFill();
+
+      // 更新内部滚动器的内容尺寸
+      if (needScroll) {
+        iaInnerScroller.contentSize(iaW, displayH, iaW, rawContentH);
+      } else {
+        // 不需要滚动时重置（内容区 = 显示区）
+        iaInnerScroller.contentSize(iaW, displayH, iaW, displayH);
+        iaScrollInner.y = 0;
+      }
     };
   }
 
@@ -205,8 +259,9 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
       const btn = p_button(PIXI, {
         width: btnW,
         height: btnH,
-        color: 0x05c25f,
+        color: 0x07C160,
         y: 0,
+        radius: 8 * PIXI.ratio,
       });
       btn.x = btnX;
       btn.myAddChildFn(
@@ -214,7 +269,7 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
           content: action.label,
           fontSize: 30 * PIXI.ratio,
           fill: 0xffffff,
-          fontWeight: 'bold',
+          fontWeight: 'normal',
           relative_middle: { containerWidth: btn.width, containerHeight: btn.height },
         })
       );
@@ -249,27 +304,89 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
       scrollInner.y = -t;
     });
 
+    // ---- 嵌套滚动状态 ----
+    let touchInInfo = false;   // 本次手势是否起始于 info 区域
+    let innerConsuming = false; // 内层是否正在消费滚动
+    let lastTouchY = 0;
+
+    // 判断触点是否在 info 区域内（全局坐标）
+    const isPointInInfoArea = (globalY: number): boolean => {
+      if (!infoAreaContainer || !infoAreaContainer.visible) return false;
+      if (!iaInnerScroller || iaInnerScroller.rangeMovement.bottom <= 0) return false;
+      // info 容器在屏幕上的实际 Y 位置
+      const iaScreenY = scrollY + scrollInner.y + infoAreaContainer.y;
+      return globalY >= iaScreenY && globalY <= iaScreenY + infoAreaHeight;
+    };
+
     (scrollWrapper as any).touchstart = (e: any) => {
       e.stopPropagation();
-      scroller.doTouchStart(e.data.global.x, e.data.global.y);
+      const y = e.data.global.y;
+      lastTouchY = y;
+
+      touchInInfo = isPointInInfoArea(y);
+      if (touchInInfo) {
+        // 手指在 info 区域：内层接管
+        innerConsuming = true;
+        iaInnerScroller.doTouchStart(e.data.global.x, y);
+      } else {
+        // 手指不在 info 区域：外层接管
+        innerConsuming = false;
+        scroller.doTouchStart(e.data.global.x, y);
+      }
     };
     (scrollWrapper as any).touchmove = (e: any) => {
       e.stopPropagation();
-      scroller.doTouchMove(e.data.global.x, e.data.global.y, e.data.originalEvent.timeStamp);
+      const y = e.data.global.y;
+      const ts = e.data.originalEvent.timeStamp;
+
+      if (!touchInInfo) {
+        // 手指不在 info 区域：只外层滚动
+        scroller.doTouchMove(e.data.global.x, y, ts);
+      } else if (innerConsuming) {
+        // 手指在 info 区域，内层正在消费滚动
+        const deltaY = lastTouchY - y; // >0 向上滑（内容向下）
+        const { top, bottom } = iaInnerScroller.rangeMovement;
+        const atTop = top <= 0 && deltaY < 0;
+        const atBottom = top >= bottom && deltaY > 0;
+
+        if (atTop || atBottom) {
+          // 内层到达边界，穿透给外层
+          innerConsuming = false;
+          iaInnerScroller.doTouchEnd(ts);
+          scroller.doTouchStart(e.data.global.x, y);
+        } else {
+          iaInnerScroller.doTouchMove(e.data.global.x, y, ts);
+        }
+      } else {
+        // 已穿透给外层
+        scroller.doTouchMove(e.data.global.x, y, ts);
+      }
+      lastTouchY = y;
     };
     (scrollWrapper as any).touchend = (e: any) => {
       e.stopPropagation();
-      scroller.doTouchEnd(e.data.originalEvent.timeStamp);
+      const ts = e.data.originalEvent.timeStamp;
+      if (touchInInfo && innerConsuming) {
+        iaInnerScroller.doTouchEnd(ts);
+      } else {
+        scroller.doTouchEnd(ts);
+      }
+      touchInInfo = false;
+      innerConsuming = false;
     };
 
     // setText 回调
     if (config.onInfoTextReady && infoAreaContainer) {
       try {
         config.onInfoTextReady((text: string) => {
-          // iaText 是第 3 个子元素
-          const iaText = infoAreaContainer.children[2];
+          // iaText 在嵌套结构中：infoAreaContainer > iaScrollWrapper(child[2]) > iaScrollInner(child[1]) > iaText(child[0])
+          const iaScrollWrapper = infoAreaContainer.children[2]; // bg, border, scrollWrapper
+          const iaScrollInner = iaScrollWrapper?.children?.[1]; // hitArea, scrollInner, mask
+          const iaText = iaScrollInner?.children?.[0];
           if (!iaText) return;
           iaText.text = text || '';
+          // 重置内部滚动位置
+          if (iaScrollInner) iaScrollInner.y = 0;
           layoutAll();
         });
       } catch (e) { /* ignore */ }

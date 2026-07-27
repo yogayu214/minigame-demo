@@ -11,9 +11,11 @@ import { calcNativeButtonPosBottom, GREEN_BUTTON_STYLE } from '../../../libs/nat
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取用户信息，返回数据将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'getUserInfo';
 let userInfoBtn: any = null;
 
 /** 获取用户信息（需先授权） */

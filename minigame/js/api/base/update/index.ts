@@ -10,9 +10,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮检查小程序更新或触发更新，状态信息将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'update';
 /** 跳转到更新微信页面（当前微信版本过低时） */
 export function updateWeChatApp() {
   wx.updateWeChatApp({

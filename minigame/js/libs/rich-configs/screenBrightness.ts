@@ -8,7 +8,7 @@ import type { RichConfig } from '../rich-renderer';
 
 export const config: RichConfig = {
   title: '屏幕亮度',
-  apiName: 'get/set/ScreenBrightness',
+  apiName: 'screenBrightness',
 
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_text, p_box, p_circle } = require('../component/index');
@@ -42,10 +42,10 @@ export const config: RichConfig = {
     });
     const greenLine = p_box(PIXI, {
       width: grayLine.width, height: grayLine.height, radius: 2 * PIXI.ratio,
-      background: { color: 0x09bb07 }, y: grayLine.y,
+      background: { color: 0x07C160 }, y: grayLine.y,
     });
     const circle = p_circle(PIXI, {
-      radius: 20 * PIXI.ratio, background: { color: 0x09bb07 },
+      radius: 20 * PIXI.ratio, background: { color: 0x07C160 },
       x: greenLine.x, y: greenLine.y + greenLine.height / 2,
     });
     greenLine.width = 0;

@@ -12,9 +12,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮对本地缓存进行增删改查，操作结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'storage';
 const STORAGE_KEY = 'miniGameDemoData';
 
 /** 存储数据（异步） */

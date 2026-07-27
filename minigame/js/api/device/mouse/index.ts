@@ -11,9 +11,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮监听鼠标事件（移动/按下/滚轮），事件数据将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'mouse';
 let downListener: any = null;
 let upListener: any = null;
 let moveListener: any = null;

@@ -9,10 +9,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮检查/发起人脸识别验证。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'facial';
 /** 检查是否支持人脸识别 */
 export function checkIsSupportFacialRecognition() {
   if (typeof (wx as any).checkIsSupportFacialRecognition !== 'function') {

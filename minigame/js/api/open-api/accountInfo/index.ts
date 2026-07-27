@@ -12,9 +12,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取当前账号信息，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'accountInfo';
 /** 获取当前小游戏的账号信息 */
 export function getAccountInfoSync() {
   const info: any = wx.getAccountInfoSync();

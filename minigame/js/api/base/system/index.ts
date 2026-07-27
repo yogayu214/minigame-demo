@@ -14,9 +14,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取系统/设备/窗口等信息，返回数据将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'system';
 /** 同步获取系统信息 */
 export function getSystemInfoSync() {
   const info = wx.getSystemInfoSync();

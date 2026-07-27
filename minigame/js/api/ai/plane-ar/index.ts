@@ -78,6 +78,7 @@ export function onUnload() {
 
 export const arConfig: ARModuleConfig = {
   title: '水平面AR',
+  apiName: 'plane-ar',
   tip: '提示：触碰屏幕任意点,\n可在对应位置生成示例的机器小人,\n其中光标标记指示的是水平面',
   buttonName: null,
   mode: 'planeAR',

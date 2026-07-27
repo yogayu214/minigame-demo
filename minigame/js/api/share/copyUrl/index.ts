@@ -12,9 +12,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮注册/取消复制链接监听，事件信息将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'copyUrl';
 let copyUrlFn: any = null;
 
 /** 是否为 PC 平台 */

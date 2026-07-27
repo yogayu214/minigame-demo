@@ -8,7 +8,7 @@ import type { RichConfig } from '../rich-renderer';
 
 export const config: RichConfig = {
   title: '创建/删除目录',
-  apiName: 'mk/rm/dir',
+  apiName: 'dir',
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_box, p_button } = require('../component/index');

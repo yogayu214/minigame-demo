@@ -8,7 +8,7 @@ import type { RichConfig } from '../rich-renderer';
 
 export const config: RichConfig = {
   title: '语音对话房间',
-  apiName: 'join/exit/VoIPChat',
+  apiName: 'voipChat',
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_box, p_img, p_button } = require('../component/index');

@@ -15,6 +15,10 @@ export const config: RichConfig = {
   title: '游戏对局回放',
   apiName: 'getGameRecorder',
 
+  // 透传信息展示区
+  infoArea: logic.infoArea,
+  onInfoTextReady: logic.onInfoTextReady,
+
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_box } = require('../component/index');
     const root = new PIXI.Container();
@@ -34,7 +38,7 @@ export const config: RichConfig = {
 
     const trilateral = new PIXI.Graphics();
     trilateral
-      .beginFill(0x1aad19)
+      .beginFill(0x07C160)
       .drawPolygon([
         -(Math.sqrt(3) * (box.width / 12)),
         box.width / 4 - circumscribedRadius,

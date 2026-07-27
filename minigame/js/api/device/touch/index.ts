@@ -13,9 +13,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮开始/停止触摸监听，触摸事件将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'touch';
 const listeners: Record<string, any> = {};
 let autoStopTimer: ReturnType<typeof setTimeout> | null = null;
 

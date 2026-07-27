@@ -11,7 +11,7 @@ let _start: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '重力感应',
-  apiName: 'on/off/AccelerometerChange',
+  apiName: 'accelerometerChange',
 
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_text, p_circle } = require('../component/index');
@@ -29,7 +29,7 @@ export const config: RichConfig = {
       y: prompt.y + prompt.height + 336.5 * PIXI.ratio,
     });
     const childCircle = p_circle(PIXI, {
-      radius: 18 * PIXI.ratio, background: { color: 0x1aad19 },
+      radius: 18 * PIXI.ratio, background: { color: 0x07C160 },
     });
     circle.addChild(childCircle);
 

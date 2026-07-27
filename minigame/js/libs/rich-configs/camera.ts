@@ -17,7 +17,7 @@ let _video: any = null;
 
 export const config: RichConfig = {
   title: '相机',
-  apiName: 'createCamera',
+  apiName: 'camera',
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_button, p_img, p_scroll } = require('../component/index');

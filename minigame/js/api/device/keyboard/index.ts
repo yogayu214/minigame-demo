@@ -10,10 +10,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮显示/隐藏键盘，输入内容通过回调获取。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'keyboard';
 const listeners: Record<string, any> = {};
 
 /** 显示软键盘 */

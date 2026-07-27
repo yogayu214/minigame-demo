@@ -10,9 +10,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮对字符串进行编解码，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'encode';
 let lastEncoded: ArrayBuffer | null = null;
 
 /** 字符串编码为 ArrayBuffer（UTF-8） */

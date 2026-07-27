@@ -5,11 +5,17 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮播放/暂停/停止内部音频。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'innerAudio';
 const SRC = 'https://wxamusic.wx.qq.com/wxag/xingji/music/bg1.mp3';
 let audio: any = null;
 let rebooting: any = null;

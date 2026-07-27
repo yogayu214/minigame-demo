@@ -5,10 +5,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮设置 Token 或拉取周期性后台数据。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'backgroundFetch';
 function toast(msg: string) {
   wx.showToast({ title: msg, icon: 'none' });
 }

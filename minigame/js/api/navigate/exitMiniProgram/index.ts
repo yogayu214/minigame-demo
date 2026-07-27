@@ -12,8 +12,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮退出当前小程序，操作结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
+export const apiName = 'exitMiniProgram';
 
 /** 退出小游戏 */
 export function exitMiniProgram() {

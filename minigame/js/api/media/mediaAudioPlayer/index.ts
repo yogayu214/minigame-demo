@@ -9,9 +9,15 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击 start 开始解码并播放音频，帧数据将在下方展示区刷新。'
+);
+export { onInfoTextReady, infoArea };
 
 const SRC =
   'https://res.wx.qq.com/wechatgame/product/webpack/userupload/20190812/video.mp4';

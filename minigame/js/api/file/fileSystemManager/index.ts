@@ -4,10 +4,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮执行文件系统操作（读写/复制/删除等）。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'fileSystemManager';
 const FS = wx.getFileSystemManager();
 const USER = wx.env.USER_DATA_PATH;
 const PATH = `${USER}/fs_demo.txt`;

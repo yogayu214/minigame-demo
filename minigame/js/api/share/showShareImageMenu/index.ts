@@ -5,9 +5,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮截取画布并弹出图片分享菜单。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'showShareImageMenu';
 
 /** 截取当前画布作为分享图片，调起图片分享菜单 */
 export function showShareImageMenu() {

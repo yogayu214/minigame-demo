@@ -3,6 +3,13 @@
  * wx.getGameRecorder / wx.createGameRecorderShareButton / wx.operateGameRecorderVideo
  */
 
+import { createInfoArea } from '../../../libs/info-area';
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮开始/停止录制，录制完成后可生成分享。PC 端不支持此功能。'
+);
+export { onInfoTextReady, infoArea };
+
 let gr: any = null;
 let shareButton: any = null;
 let writeTime = 0;

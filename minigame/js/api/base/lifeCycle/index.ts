@@ -18,7 +18,7 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
   '监听小游戏展示事件：\n小游戏回到前台后会触发此事件\n监听小游戏隐藏到后台事件：\n锁屏、按 HOME 键退到桌面、显示在聊天顶部等操作会触发此事件。'
 );
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'lifeCycle';
 // ============== 生命周期监听 ==============
 
 let showListener: ((res: any) => void) | null = null;

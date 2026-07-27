@@ -11,8 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取文本行高，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
+export const apiName = 'getTextLineHeight';
 
 /** 获取文本行高 */
 export function getTextLineHeight() {

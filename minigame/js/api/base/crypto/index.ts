@@ -13,9 +13,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取用户加密密钥或安全随机数，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'crypto';
 /** 获取最新的用户加密密钥 */
 export function getLatestUserKey() {
   const mgr: any = wx.getUserCryptoManager();

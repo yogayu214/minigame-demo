@@ -11,9 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮发起授权或获取授权状态，结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'authorize';
 /** 请求写相册授权，已授权则直接调用保存 */
 export function authorizeWritePhotosAlbum() {
   wx.getSetting({

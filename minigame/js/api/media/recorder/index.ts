@@ -11,9 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮开始/停止录音，录音状态和文件信息将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'recorder';
 let recorder: any = null;
 let tempPath = '';
 

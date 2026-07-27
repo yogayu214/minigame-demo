@@ -5,36 +5,39 @@ module.exports = function(PIXI, { obj, title, api_name, underline = true }) {
 
     goBack = p_goBackBtn(PIXI, 'navigateBack');
 
+    // 页面标题（--wx-size-title-0 = 22px → 44 设计稿，Regular 字重）
     title &&
         (title = p_text(PIXI, {
             content: title,
             fontSize: 36 * PIXI.ratio,
-            fill: 0x353535,
-            // y: 52 * Math.ceil(PIXI.ratio) + 22 * PIXI.ratio,
+            fill: 0x000000,
             y: menuButtonInfo.top * PIXI.ratio * 2,
             relative_middle: { containerWidth: obj.width }
         }));
 
+    // API 名称副标题（--wx-size-desc-0 = 14px → 28 设计稿，次文字色 --wx-fg-1）
     api_name &&
         (api_name = p_text(PIXI, {
             content: api_name,
-            fontSize: 32 * PIXI.ratio,
-            fill: 0xbebebe,
-            y: title.height + title.y + 78 * PIXI.ratio,
+            fontSize: 28 * PIXI.ratio,
+            fill: 0x808080,
+            y: title.height + title.y + 16 * PIXI.ratio,
             relative_middle: { containerWidth: obj.width }
         }));
 
+    // 分割线（在灰色背景上用更深一点的颜色）
     underline &&
         (underline = p_line(
             PIXI,
             {
                 width: PIXI.ratio | 0,
-                color: 0xd8d8d8
+                color: 0xD0D0D0
             },
-            [(obj.width - 150 * PIXI.ratio) / 2, api_name.y + api_name.height + 23 * PIXI.ratio],
-            [150 * PIXI.ratio, 0]
+            [(obj.width - 120 * PIXI.ratio) / 2, api_name.y + api_name.height + 32 * PIXI.ratio],
+            [120 * PIXI.ratio, 0]
         ));
 
+    // 底部 logo（--wx-link 色 = #576B95）
     logo = p_img(PIXI, {
         width: 36 * PIXI.ratio,
         x: 288 * PIXI.ratio,
@@ -44,9 +47,9 @@ module.exports = function(PIXI, { obj, title, api_name, underline = true }) {
 
     logoName = p_text(PIXI, {
         content: '小游戏示例',
-        fontSize: 26 * PIXI.ratio,
-        fill: 0x576b95,
-        y: (obj.height - 62 * PIXI.ratio) | 0,
+        fontSize: 24 * PIXI.ratio,
+        fill: 0x808080,
+        y: (obj.height - 60 * PIXI.ratio) | 0,
         relative_middle: { point: 401 * PIXI.ratio }
     });
 

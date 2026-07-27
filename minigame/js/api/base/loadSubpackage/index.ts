@@ -14,9 +14,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮加载或预下载分包，进度和结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'loadSubpackage';
 const DEMO_SUBPACKAGE = 'chattool'; // 复用项目里已有的分包名
 
 /** 加载指定分包 */

@@ -11,7 +11,7 @@ let _start: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '监听设备方向',
-  apiName: 'on/off/DeviceMotionChange',
+  apiName: 'deviceMotionChange',
 
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
     const { p_text, p_box } = require('../component/index');

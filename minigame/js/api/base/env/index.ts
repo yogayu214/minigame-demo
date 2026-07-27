@@ -20,9 +20,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮获取环境变量信息（如 USER_DATA_PATH），结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'env';
 export function getEnv() {
   const env = wx.env;
   setInfo(formatObj(env));

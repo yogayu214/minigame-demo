@@ -8,7 +8,7 @@ import type { RichConfig } from '../rich-renderer';
 
 export const config: RichConfig = {
   title: 'WebSocket',
-  apiName: 'Web Socket',
+  apiName: 'webSocket',
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_line, p_box, p_img, p_button } = require('../component/index');
@@ -120,7 +120,7 @@ export const config: RichConfig = {
         off.hideFn();
         on.showFn();
         button.isTouchable(true);
-        button.turnColors({ color: 0x05c25f, alpha: 1 });
+        button.turnColors({ color: 0x07C160, alpha: 1 });
         sendText.turnColors(0xffffff);
       } else {
         off.showFn();

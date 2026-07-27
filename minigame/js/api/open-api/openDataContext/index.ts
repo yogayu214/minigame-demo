@@ -16,10 +16,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮上报分数或查看好友排行榜，排行榜将在弹出的卡片中展示。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'openDataContext';
 function toast(msg: string) {
   wx.showToast({ title: msg, icon: 'none' });
 }
@@ -44,7 +50,7 @@ export function setHandoffQuery() {
     toast('当前处于 PC 端，不支持 PC 接力');
     return;
   }
-  const query = 'from=demo&ts=' + Date.now();
+  const query = 'from=demo';
   const ok = (wx as any).setHandoffQuery(query);
   toast(`query: ${query} | 设置结果: ${ok ? '成功' : '失败'}`);
 }
@@ -140,18 +146,6 @@ export function shareGroupRank() {
     toast('若分享成功，请从群里点击会话查看群排行榜');
   } catch (e: any) {
     toast(`分享失败: ${e.message}`);
-  }
-}
-
-/** 关闭开放数据域画布 */
-export function closeCanvas() {
-  try {
-    wx.getOpenDataContext().postMessage({
-      event: 'close',
-    });
-    wx.triggerGC();
-  } catch (e: any) {
-    /* ignore */
   }
 }
 

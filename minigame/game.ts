@@ -44,7 +44,7 @@ const app = new PIXI.Application({
   width: windowWidth * pixelRatio,
   height: windowHeight * pixelRatio,
   view: canvas,
-  backgroundColor: 0xf6f6f6,
+  backgroundColor: 0xEDEDED,
   preserveDrawingBuffer: true,
   antialias: true,
   resolution: 1,

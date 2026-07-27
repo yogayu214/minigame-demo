@@ -8,7 +8,7 @@ import type { RichConfig } from '../rich-renderer';
 
 export const config: RichConfig = {
   title: '本地缓存文件',
-  apiName: 'get/remove/SavedFile(List?)',
+  apiName: 'savedFile',
 
   buildTopView(PIXI: any, _app: any, obj: any, underline: any) {
     const { p_text, p_box, p_button, p_scroll } = require('../component/index');

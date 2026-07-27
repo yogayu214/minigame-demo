@@ -15,9 +15,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮发起米大师支付或查询订单，支付结果将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'midas';
 const TIP = '参数皆为虚拟，用户可下载demo后自行填入可用参数查看效果';
 const TIP_DURATION = 1500;
 

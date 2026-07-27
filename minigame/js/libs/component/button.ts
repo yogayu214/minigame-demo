@@ -1,9 +1,9 @@
 module.exports = function(PIXI, deploy: any = {}) {
     let {
         width = canvas.width - 80 * PIXI.ratio,
-        height = 94 * PIXI.ratio,
+        height = 88 * PIXI.ratio,
         parentWidth = canvas.width,
-        color = 0x1aad19,
+        color = 0x07C160,
         alpha = 1,
         border = {
             width: 0,
@@ -12,7 +12,7 @@ module.exports = function(PIXI, deploy: any = {}) {
         },
         x = (parentWidth - width) / 2,
         y = 0,
-        radius = 10
+        radius = 8 * PIXI.ratio
     } = deploy;
 
     function Button() {

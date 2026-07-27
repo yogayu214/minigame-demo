@@ -95,6 +95,7 @@ export function onUnload() {
 
 export const arConfig: ARModuleConfig = {
   title: '实时人脸检测',
+  apiName: 'face-detect',
   tip: '提示：将摄像头对准人脸,\n检测到的人脸将会被标记出识别框和面部标记点',
   buttonName: '切换为前置摄像头',
   mode: 'faceDetect',

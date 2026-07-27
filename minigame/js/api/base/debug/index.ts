@@ -11,9 +11,11 @@ import { formatObj } from '../../../libs/format';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮开关调试模式或写入日志，日志输出状态将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'debug';
 /** 打开调试模式（正式版生效，调用后会重启小游戏） */
 export function enableDebug() {
   wx.setEnableDebug({

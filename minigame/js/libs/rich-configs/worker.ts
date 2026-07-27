@@ -14,7 +14,7 @@ let _removeDelta: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '多线程',
-  apiName: 'createWorker',
+  apiName: 'worker',
   background: 0x000000,
 
   buildTopView(PIXI: any, app: any, obj: any, underline: any) {
@@ -153,7 +153,7 @@ export const config: RichConfig = {
     singleBtn.myAddChildFn(
       p_text(PIXI, {
         content: '单线程计算',
-        fontSize: 30 * PIXI.ratio, fill: 0xffffff, fontWeight: 'bold',
+        fontSize: 30 * PIXI.ratio, fill: 0xffffff, fontWeight: 'normal',
         relative_middle: { containerWidth: singleBtn.width, containerHeight: singleBtn.height },
       })
     );
@@ -171,7 +171,7 @@ export const config: RichConfig = {
     workerBtn.myAddChildFn(
       p_text(PIXI, {
         content: 'Worker 线程计算',
-        fontSize: 30 * PIXI.ratio, fill: 0xffffff, fontWeight: 'bold',
+        fontSize: 30 * PIXI.ratio, fill: 0xffffff, fontWeight: 'normal',
         relative_middle: { containerWidth: workerBtn.width, containerHeight: workerBtn.height },
       })
     );

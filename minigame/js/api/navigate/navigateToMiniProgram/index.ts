@@ -10,10 +10,17 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 import { formatObj } from '../../../libs/format';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
+
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮跳转到指定小程序。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'navigateToMiniProgram';
 
 const DEMO_APPID = 'wx7a727ff7d940bb3f';
 

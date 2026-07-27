@@ -9,9 +9,11 @@ import { createInfoArea } from '../../../libs/info-area';
 const display = createDisplay();
 export const setDisplay = display.setter;
 
-const { setInfo, onInfoTextReady, infoArea } = createInfoArea();
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮控制视频播放/暂停/停止/跳转，状态变化将在此区域展示。'
+);
 export { onInfoTextReady, infoArea };
-
+export const apiName = 'video';
 let video: any = null;
 
 /** 创建并初始化视频（缩小尺寸避免遮挡 UI） */

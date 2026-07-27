@@ -80,6 +80,7 @@ export function onUnload() {
 
 export const arConfig: ARModuleConfig = {
   title: 'VisionKit基础',
+  apiName: 'visionkit-basic',
   tip: '提示：触碰屏幕任意点,\n可在对应位置生成示例的机器小人',
   buttonName: null,
   mode: 'default',

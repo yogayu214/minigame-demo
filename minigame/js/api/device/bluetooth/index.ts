@@ -8,10 +8,16 @@
  */
 
 import { createDisplay } from '../../../libs/display-slot';
+import { createInfoArea } from '../../../libs/info-area';
 
 const display = createDisplay();
 export const setDisplay = display.setter;
 
+const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
+  '点击按钮搜索/连接蓝牙设备，数据变化将通过 Toast 提示。'
+);
+export { onInfoTextReady, infoArea };
+export const apiName = 'bluetooth';
 let stateListener: ((res: any) => void) | null = null;
 
 /** 是否为 PC 平台（蓝牙仅支持移动端） */
