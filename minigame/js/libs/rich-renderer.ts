@@ -10,6 +10,7 @@ const fixedTemplate = require('./template/fixed');
 const { p_button, p_text } = require('./component/index');
 const Scroller = require('./Scroller/index');
 import { renderHighlightedJSON, isJSONString } from './json-highlighter';
+import { markDirty } from './dirty-flag';
 
 export interface RichConfig {
   /** 页面标题 */
@@ -266,6 +267,7 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
           }
           iaScrollInner.y = 0;
           updateInfoScroller();
+          markDirty();
         });
       } catch (e) { /* ignore */ }
     }
@@ -371,11 +373,17 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
     }
   };
 
+  const MOVE_THRESHOLD = 5; // 移动超过 5px 屏幕像素才算滑动
+
   const onTouchMove = (e: any) => {
     if (scrollDestroyed || !activeRegion) return;
     const touch = e.touches[0];
     if (!touch) return;
-    touchMoved = true;
+
+    // 判断是否超过移动阈值
+    if (!touchMoved && Math.abs(touch.clientY - touchStartY) > MOVE_THRESHOLD) {
+      touchMoved = true;
+    }
 
     if (activeRegion === 'info' && iaInnerScroller) {
       iaInnerScroller.doTouchMove(touch.clientX * dpr, touch.clientY * dpr, e.timeStamp);
@@ -396,20 +404,30 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
       const btnScroller = (container as any).__btnScroller;
       const btnScrollInner = (container as any).__btnScrollInner;
       if (btnScroller) btnScroller.doTouchEnd(e.timeStamp);
+      console.log('[BTN-CLICK-DEBUG] touchEnd region=btn, touchMoved:', touchMoved, 'hasButtons:', hasButtons, 'btnScrollInner:', !!btnScrollInner);
       if (!touchMoved && hasButtons && btnScrollInner) {
         // 没有滑动 = 点击，找到对应按钮并触发
         const touchY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : touchStartY;
         const globalY = touchY * dpr;
         const localY = globalY - btnRegionY + (-btnScrollInner.y);
+        console.log('[BTN-CLICK-DEBUG] touchY:', touchY, 'globalY:', globalY, 'btnRegionY:', btnRegionY, 'scrollInner.y:', btnScrollInner.y, 'localY:', localY);
+        console.log('[BTN-CLICK-DEBUG] btnH:', btnH, 'btnGap:', btnGap, '按钮数:', config.actions!.length);
+        let hit = false;
         for (let i = 0; i < config.actions!.length; i++) {
           const btnTop = i * (btnH + btnGap);
           const btnBottom = btnTop + btnH;
           if (localY >= btnTop && localY <= btnBottom) {
+            console.log('[BTN-CLICK-DEBUG] 命中按钮', i, config.actions![i].label, 'btnTop:', btnTop, 'btnBottom:', btnBottom);
+            hit = true;
             try { config.actions![i].handler(); } catch (err: any) {
               wx.showModal({ title: '错误', content: err.errMsg || String(err), showCancel: false });
             }
+            markDirty();
             break;
           }
+        }
+        if (!hit) {
+          console.log('[BTN-CLICK-DEBUG] 未命中任何按钮, localY:', localY, '第一个按钮范围: 0~' + btnH);
         }
       }
     }
@@ -457,6 +475,7 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   // topViewBottom 计算，scrollWrapper 的 hitArea 不再遮挡滑块。
 
   app.stage.addChild(container);
+  markDirty();
 
   if (config.onLoad) {
     try { config.onLoad(); } catch (e) { console.error('onLoad error:', e); }

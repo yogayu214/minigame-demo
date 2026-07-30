@@ -11,6 +11,7 @@ const { p_button, p_text } = require('./component/index');
 const fixedTemplate = require('./template/fixed');
 const Scroller = require('./Scroller/index');
 import type { PageConfig } from './demo-types';
+import { markDirty } from './dirty-flag';
 
 /**
  * 信息展示区配置（与 rich-renderer 的 infoArea 字段一致）。
@@ -267,6 +268,7 @@ module.exports = function renderPage(PIXI: any, app: any, obj: any, configOrMod:
           console.error('[renderPage] handler error:', err);
           wx.showModal({ title: '错误', content: err.errMsg || String(err), showCancel: false });
         }
+        markDirty();
       });
       scrollInner.addChild(btn);
       btnElements.push(btn);
@@ -366,6 +368,7 @@ module.exports = function renderPage(PIXI: any, app: any, obj: any, configOrMod:
           iaTextRef.text = text || '';
           if (iaScrollInnerRef) iaScrollInnerRef.y = 0;
           layoutAll();
+          markDirty();
         });
       } catch (e) { /* ignore */ }
     }
@@ -384,6 +387,7 @@ module.exports = function renderPage(PIXI: any, app: any, obj: any, configOrMod:
   container.addChild(logo, logoName);
 
   app.stage.addChild(container);
+  markDirty();
 
   // 5. 触发 onLoad
   if (config.onLoad) {
