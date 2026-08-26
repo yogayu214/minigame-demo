@@ -1,7 +1,3 @@
-const _markDirty = () => {
-    if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
-};
-
 module.exports = class Scroller {
     constructor(callBack) {
         this.tickerStop = true;
@@ -63,10 +59,7 @@ module.exports = class Scroller {
         if (this.rangeMovement.left > this.rangeMovement.right) this.rangeMovement.left = this.rangeMovement.right;
         if (this.rangeMovement.top > this.rangeMovement.bottom) this.rangeMovement.top = this.rangeMovement.bottom;
 
-        if (callBack) {
-            callBack(this.rangeMovement.left, this.rangeMovement.top);
-            _markDirty();
-        }
+        callBack && callBack(this.rangeMovement.left, this.rangeMovement.top);
     }
 
     accelerateMotion() {
@@ -118,11 +111,9 @@ module.exports = class Scroller {
             if (duration <= ((t - initialTime) / 1000) * 60) {
                 this.tickerStop = true;
                 this.callBack(this.rangeMovement.left, this.rangeMovement.top);
-                _markDirty();
                 return;
             }
             this.callBack(offsetTop(), offsetY - offsetTop(((t - initialTime) / 1000) * 60));
-            _markDirty();
         };
 
         this.tickerStart(delta);

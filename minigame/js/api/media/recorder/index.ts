@@ -27,9 +27,9 @@ function ensure() {
   }
   if (recorder) return recorder;
   recorder = wx.getRecorderManager();
-  recorder.onStart(() => wx.showToast({ title: '开始录音', icon: 'none' }));
-  recorder.onPause(() => wx.showToast({ title: '录音暂停', icon: 'none' }));
-  recorder.onResume(() => wx.showToast({ title: '录音恢复', icon: 'none' }));
+  recorder.onStart(() => setInfo('状态: 开始录音'));
+  recorder.onPause(() => setInfo('状态: 录音暂停'));
+  recorder.onResume(() => setInfo('状态: 录音恢复'));
   recorder.onStop((res: any) => {
     tempPath = res?.tempFilePath || '';
     setInfo(
@@ -41,7 +41,7 @@ function ensure() {
       })
     );
   });
-  recorder.onError((err: any) => wx.showToast({ title: `录音错误: ${err?.errMsg || '未知错误'}`, icon: 'none' }));
+  recorder.onError((err: any) => setInfo(`录音错误: ${err?.errMsg || '未知错误'}`));
   return recorder;
 }
 
@@ -83,7 +83,7 @@ export function playLast() {
   audio.onEnded(() => audio.destroy());
   audio.onError(() => audio.destroy());
   audio.play();
-  wx.showToast({ title: '播放录音', icon: 'none' });
+  setInfo('状态: 播放录音');
 }
 
 export function onUnload() {

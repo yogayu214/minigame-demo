@@ -280,7 +280,6 @@ function pixiScroll(PIXI, app, property) {
     sc.scroller.contentSize(property.width, property.height, property.height, sc.itemHeight + 40 * PIXI.ratio);
 
     app.stage.addChild(sc.po);
-    if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
     return sc.po;
 }
 

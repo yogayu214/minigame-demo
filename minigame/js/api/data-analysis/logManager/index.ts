@@ -25,9 +25,6 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
 );
 export { onInfoTextReady, infoArea };
 export const apiName = 'logManager';
-function toast(msg: string) {
-  wx.showToast({ title: msg, icon: 'none' });
-}
 
 /** 延迟初始化 logManager */
 function getLogManager(): any {
@@ -43,12 +40,11 @@ let reportManager: any = null;
 /** 通过 log(Object) 方法写入小游戏日志 */
 export function writeGameLog() {
   const mgr = getLogManager();
-  // log(Object): 支持传入日志等级、日志标签和日志内容
   mgr.log({
     level: 'info',
     content: 'demo log: ts=' + Date.now(),
   });
-  toast('已通过 log({level, content}) 上报');
+  setInfo('已通过 log({level, content}) 上报');
 }
 
 /** tag 方法 — tag(key) 返回 {info, warn, error, debug}，用返回的方法上报 */
@@ -56,15 +52,14 @@ export function useTag() {
   const mgr = getLogManager();
   const t = mgr.tag?.('demo_tag');
   if (!t) {
-    toast('tag 方法不可用');
+    setInfo('tag 方法不可用');
     return;
   }
-  // 使用 tag 返回的方法上报，不需要重复设置等级/标签
   t.info?.('通过 tag.info 上报的日志');
   t.warn?.('通过 tag.warn 上报的日志');
   t.error?.('通过 tag.error 上报的日志');
   t.debug?.('通过 tag.debug 上报的日志');
-  toast('已通过 tag(demo_tag) 调用 info/warn/error/debug 各一条');
+  setInfo('已通过 tag(demo_tag) 调用 info/warn/error/debug 各一条');
 }
 
 /** 读取当前 logger 的全局 commonInfo 对象 */
@@ -78,7 +73,7 @@ export function getCommonInfo() {
 export function updateCommonInfo() {
   const mgr = getLogManager();
   mgr.updateCommonInfo?.({ demo_key: 'demo_value_' + Date.now() });
-  toast('已合并更新 commonInfo');
+  setInfo('已合并更新 commonInfo');
 }
 
 /** 实时上报指标（MiniReportManager） */
@@ -90,6 +85,6 @@ export function reportMiniMetric() {
     reportManager.report?.('demo_event', { ts: Date.now() });
     setInfo('MiniReportManager.report 已上报');
   } catch (e: any) {
-    toast(`上报失败: ${e.message || e}`);
+    setInfo(`上报失败: ${e.message || e}`);
   }
 }

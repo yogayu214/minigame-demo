@@ -1,6 +1,5 @@
 import type { RichConfig } from '../rich-renderer';
 import { ARRenderer, ARMode, ARConfig } from '../ar/arRenderer';
-import { startAnimation } from '../dirty-flag';
 
 export interface ARModuleConfig {
   title: string;
@@ -21,7 +20,6 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
   let arTexture: any = null;
   let arSprite: any = null;
   let tickerFn: ((dt: number) => void) | null = null;
-  let _stopAnim: (() => void) | null = null;
   let switchBtn: any = null;
   let switchBtnText: any = null;
   let screenBg: any = null;
@@ -228,11 +226,9 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         const isIOS = (wx as any).getSystemInfoSync().platform === 'ios';
         if (isIOS) {
           renderer.onRenderCallback = drawFn;
-          _stopAnim = startAnimation();
         } else {
           tickerFn = drawFn;
           app.ticker.add(tickerFn);
-          _stopAnim = startAnimation();
         }
       } else {
         console.error('[aiAr] AR 初始化失败:', initError || vkError);
@@ -272,7 +268,6 @@ export function createArConfig(mod: any, pageLabel?: string): RichConfig {
         app.ticker.remove(tickerFn);
         tickerFn = null;
       }
-      if (_stopAnim) { _stopAnim(); _stopAnim = null; }
 
       // 销毁 AR 渲染器（onRenderCallback 随 renderer 一起释放）
       if (renderer) {

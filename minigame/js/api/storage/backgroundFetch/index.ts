@@ -15,9 +15,6 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
 );
 export { onInfoTextReady, infoArea };
 export const apiName = 'backgroundFetch';
-function toast(msg: string) {
-  wx.showToast({ title: msg, icon: 'none' });
-}
 
 let listener: any = null;
 
@@ -26,10 +23,10 @@ export function setBackgroundFetchToken() {
   (wx as any).setBackgroundFetchToken({
     token: 'demo_token_' + Date.now(),
     success() {
-      toast('设置 token 成功');
+      setInfo('设置 token 成功');
     },
     fail(err: any) {
-      toast(`设置 token 失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`设置 token 失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -38,10 +35,10 @@ export function setBackgroundFetchToken() {
 export function getBackgroundFetchToken() {
   wx.getBackgroundFetchToken({
     success(res: any) {
-      toast(`token: ${res.token?.slice(0, 20) || '空'}...`);
+      setInfo(`token: ${res.token || '空'}`);
     },
     fail(_err: any) {
-      toast('查询失败（需先在 mp 后台配置）');
+      setInfo('查询失败（需先在 mp 后台配置）');
     },
   });
 }
@@ -51,12 +48,10 @@ export function getBackgroundFetchData() {
   wx.getBackgroundFetchData({
     fetchType: 'pre',
     success(res: any) {
-      toast(
-        `fetchedData: ${String(res.fetchedData || '').slice(0, 30)}`,
-      );
+      setInfo(`fetchedData: ${String(res.fetchedData || '')}`);
     },
     fail(err: any) {
-      toast(`获取失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -64,10 +59,10 @@ export function getBackgroundFetchData() {
 /** 监听 backgroundFetch 数据推送 */
 export function onBackgroundFetchData() {
   listener = (res: any) => {
-    toast(`收到推送: ${String(res.fetchedData || '').slice(0, 30)}`);
+    setInfo(`收到推送: ${String(res.fetchedData || '')}`);
   };
   wx.onBackgroundFetchData(listener);
-  toast('已注册 onBackgroundFetchData 监听');
+  setInfo('已注册 onBackgroundFetchData 监听');
 }
 
 export function onUnload() {

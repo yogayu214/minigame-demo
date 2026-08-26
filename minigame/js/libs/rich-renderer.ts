@@ -10,7 +10,6 @@ const fixedTemplate = require('./template/fixed');
 const { p_button, p_text } = require('./component/index');
 const Scroller = require('./Scroller/index');
 import { renderHighlightedJSON, isJSONString } from './json-highlighter';
-import { markDirty } from './dirty-flag';
 
 export interface RichConfig {
   /** 页面标题 */
@@ -267,7 +266,6 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
           }
           iaScrollInner.y = 0;
           updateInfoScroller();
-          markDirty();
         });
       } catch (e) { /* ignore */ }
     }
@@ -422,7 +420,6 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
             try { config.actions![i].handler(); } catch (err: any) {
               wx.showModal({ title: '错误', content: err.errMsg || String(err), showCancel: false });
             }
-            markDirty();
             break;
           }
         }
@@ -475,7 +472,6 @@ module.exports = function richRenderer(PIXI: any, app: any, obj: any, config: Ri
   // topViewBottom 计算，scrollWrapper 的 hitArea 不再遮挡滑块。
 
   app.stage.addChild(container);
-  markDirty();
 
   if (config.onLoad) {
     try { config.onLoad(); } catch (e) { console.error('onLoad error:', e); }

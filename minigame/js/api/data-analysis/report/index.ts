@@ -16,9 +16,6 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
 );
 export { onInfoTextReady, infoArea };
 export const apiName = 'report';
-function toast(msg: string) {
-  wx.showToast({ title: msg, icon: 'none' });
-}
 
 /** 自定义事件上报（需先在 mp 后台新建事件） */
 export function reportEvent() {
@@ -27,9 +24,9 @@ export function reportEvent() {
       action: 'click',
       ts: Date.now(),
     });
-    toast('reportEvent 已调用（请在 mp 后台查看统计）');
+    setInfo('reportEvent 已调用（请在 mp 后台查看统计）');
   } catch (e: any) {
-    toast(`调用失败: ${e.message || e}`);
+    setInfo(`调用失败: ${e.message || e}`);
   }
 }
 
@@ -38,10 +35,10 @@ export function reportScene() {
   wx.reportScene({
     sceneId: 1001,
     success() {
-      toast('reportScene 已上报');
+      setInfo('reportScene 已上报');
     },
     fail(err: any) {
-      toast(`上报失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`上报失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -53,9 +50,9 @@ export function reportMonitor() {
       name: 'demo_monitor',
       value: 1,
     });
-    toast('reportMonitor 已上报');
+    setInfo('reportMonitor 已上报');
   } catch (e: any) {
-    toast(`调用失败: ${e?.message || e}`);
+    setInfo(`调用失败: ${e?.message || e}`);
   }
 }
 
@@ -67,9 +64,9 @@ export function reportUserBehaviorBranchAnalytics() {
       branchDim: '1',
       eventType: 1,
     });
-    toast('branchAnalytics 已上报');
+    setInfo('branchAnalytics 已上报');
   } catch (e: any) {
-    toast(`调用失败: ${e.message || e}`);
+    setInfo(`调用失败: ${e.message || e}`);
   }
 }
 
@@ -78,10 +75,10 @@ export function getGameExptInfo() {
   (wx as any).getGameExptInfo({
     keyList: ['demo_key'],
     success(res: any) {
-      toast(`实验信息: ${JSON.stringify(res.data || {}).slice(0, 30)}`);
+      setInfo(`实验信息: ${JSON.stringify(res.data || {})}`);
     },
     fail(err: any) {
-      toast(`获取失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`获取失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -90,8 +87,8 @@ export function getGameExptInfo() {
 export function getExptInfoSync() {
   try {
     const res = (wx as any).getExptInfoSync(['demo_key']);
-    toast(`实验信息: ${JSON.stringify(res || {}).slice(0, 30)}`);
+    setInfo(`实验信息: ${JSON.stringify(res || {})}`);
   } catch (e: any) {
-    toast(`调用失败: ${e.message || e}`);
+    setInfo(`调用失败: ${e.message || e}`);
   }
 }

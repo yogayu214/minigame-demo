@@ -30,7 +30,6 @@ import * as PIXI from './js/vendor/pixi.min';
 import pmgressBar from './js/libs/pmgressBar';
 import share from './js/libs/share';
 import { resolvePathName } from './js/libs/sceneMap';
-import { initDirtyRender, markDirty } from './js/libs/dirty-flag';
 
 wx.cloud.init({ env: 'example-69d3b' });
 
@@ -52,22 +51,8 @@ const app = new PIXI.Application({
   forceCanvas: true,
 });
 
-// 启用脏标记渲染：ticker 保持运行（动画回调正常），但只在画面变化时才执行 render
-initDirtyRender(app);
-
-// 原生触摸事件时标记脏（确保 PIXI interactive 的视觉反馈被渲染）
-const _dirtyCanvas = canvas || (typeof GameGlobal !== 'undefined' && (GameGlobal as any).canvas);
-if (_dirtyCanvas) {
-  const _md = () => markDirty();
-  _dirtyCanvas.addEventListener('touchstart', _md);
-  _dirtyCanvas.addEventListener('touchmove', _md);
-  _dirtyCanvas.addEventListener('touchend', _md);
-}
-
 // 暴露给横竖屏切换等模块使用
 (globalThis as any).__pixiApp = app;
-// 暴露 markDirty 供所有模块使用
-(globalThis as any).__markDirty = markDirty;
 
 // 因为在微信小游戏里canvas肯定是全屏的，所以映射起来就很简单暴力
 PIXI.interaction.InteractionManager.prototype.mapPositionToPoint = (

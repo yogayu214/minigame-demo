@@ -14,8 +14,6 @@ export const apiName = 'createInterstitialAd';
 
 let interstitialAd: any = null;
 
-const toast = (title: string) => wx.showToast({ title, icon: 'none', duration: 1000 });
-
 /** 创建插屏广告 */
 export function createInterstitialAd() {
   interstitialAd = wx.createInterstitialAd({
@@ -23,24 +21,24 @@ export function createInterstitialAd() {
   });
 
   if (!interstitialAd) {
-    toast('创建插屏广告失败，当前环境可能不支持');
+    setInfo('创建插屏广告失败，当前环境可能不支持');
     return;
   }
 
   interstitialAd.onLoad(() => {
-    toast('插屏广告加载成功，点击 show 展示');
+    setInfo('插屏广告加载成功，点击 show 展示');
   });
 
   interstitialAd.onError((err: any) => {
-    toast(`调用失败：${err?.errMsg || '未知错误'}`);
+    setInfo(`调用失败：${err?.errMsg || '未知错误'}`);
   });
 
   interstitialAd.onClose(() => {
-    toast('插屏广告已关闭');
+    setInfo('插屏广告已关闭');
   });
 
   interstitialAd.load().catch((err: any) => {
-    toast(`加载失败：${err?.errMsg || '未知错误'}`);
+    setInfo(`加载失败：${err?.errMsg || '未知错误'}`);
   });
 }
 
@@ -49,9 +47,9 @@ export function show() {
   if (interstitialAd) {
     interstitialAd
       .show()
-      .catch((err: any) => toast(`展示失败: ${err?.errMsg || '未知错误'}`));
+      .catch((err: any) => setInfo(`展示失败: ${err?.errMsg || '未知错误'}`));
   } else {
-    toast('请先创建插屏广告');
+    wx.showToast({ title: '请先创建插屏广告', icon: 'none' });
   }
 }
 
@@ -60,7 +58,7 @@ export function destroy() {
   if (interstitialAd) {
     interstitialAd.destroy();
     interstitialAd = null;
-    toast('插屏广告已销毁');
+    setInfo('插屏广告已销毁');
   }
 }
 

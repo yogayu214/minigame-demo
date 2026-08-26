@@ -38,9 +38,11 @@ export function loadSubpackage() {
 
   if (task && task.onProgressUpdate) {
     task.onProgressUpdate((res: any) => {
+      // progress 在分包已缓存时可能返回异常负值，需 clamp 到 0~100
+      const progress = Math.max(0, Math.min(100, res.progress ?? 0));
       setInfo(
         formatObj({
-          进度: `${res.progress}%`,
+          进度: `${progress}%`,
           已下载: `${res.totalBytesWritten} B`,
           总大小: `${res.totalBytesExpectedToWrite} B`,
         })
@@ -66,9 +68,10 @@ export function preDownloadSubpackage() {
 
   if (task && task.onProgressUpdate) {
     task.onProgressUpdate((res: any) => {
+      const progress = Math.max(0, Math.min(100, res.progress ?? 0));
       setInfo(
         formatObj({
-          预下载进度: `${res.progress}%`,
+          预下载进度: `${progress}%`,
           已下载: `${res.totalBytesWritten} B`,
           总大小: `${res.totalBytesExpectedToWrite} B`,
         })

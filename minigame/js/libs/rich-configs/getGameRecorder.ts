@@ -5,13 +5,11 @@
 
 import * as logic from '../../api/game-recorder/getGameRecorder/index';
 import type { RichConfig } from '../rich-renderer';
-import { startAnimation } from '../dirty-flag';
 
 // 模块级变量：存储旋转动画函数，供 onUnload 清理
 let rotatingFn: (() => void) | null = null;
 // 存储 app 引用，供 onUnload 移除 ticker（router 传 null 时仍可清理）
 let tickerApp: any = null;
-let _stopAnim: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '游戏对局回放',
@@ -64,7 +62,6 @@ export const config: RichConfig = {
       trilateral.rotation = (angle * Math.PI) / 180;
     };
     app.ticker.add(rotatingFn);
-    _stopAnim = startAnimation();
 
     // ========== 计算原生分享按钮位置（放在 operateGameRecorderVideo 按钮下方） ==========
     // rich-renderer 按钮布局：baseY = max(topViewBottom + 40*ratio, underlineBottom + 80*ratio)
@@ -111,7 +108,6 @@ export const config: RichConfig = {
     }
     rotatingFn = null;
     tickerApp = null;
-    if (_stopAnim) { _stopAnim(); _stopAnim = null; }
     logic.onUnload();
   },
 };

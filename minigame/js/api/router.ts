@@ -916,7 +916,6 @@ function loadPage(
     // 创建占位 container 给主路由管理
     const container = new PIXI.Container();
     app.stage.addChild(container);
-    if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
 
     // 显示加载提示
     wx.showLoading({ title: '加载中', mask: true });
@@ -1145,7 +1144,6 @@ function router(PIXI, app, parameter) {
 
       treePage[this.treeView.pop()].page.visible = false;
       treePage[this.getNowPageName()].page.visible = true;
-      if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
     };
     this.delPage = function () {
       if (this.treeView.length < 2) return;
@@ -1164,7 +1162,6 @@ function router(PIXI, app, parameter) {
       treePage[name].page = null;
       treePage[name].init = false;
       treePage[this.getNowPageName()].page.visible = true;
-      if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
     };
     this.getNowPageName = function () {
       return this.treeView[this.treeView.length - 1];

@@ -5,10 +5,8 @@
 
 import * as logic from '../../api/render/setPreferredFramesPerSecond/index';
 import type { RichConfig } from '../rich-renderer';
-import { startAnimation } from '../dirty-flag';
 
 let _removeTicker: (() => void) | null = null;
-let _stopAnim: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '渲染帧率',
@@ -50,7 +48,6 @@ export const config: RichConfig = {
     }
     app.ticker.add(rotatingFn);
     _removeTicker = () => app.ticker.remove(rotatingFn);
-    _stopAnim = startAnimation();
 
     box.addChild(
       trilateral,
@@ -103,7 +100,6 @@ export const config: RichConfig = {
   onUnload(app: any) {
     // 停止旋转动画，恢复 60fps
     if (_removeTicker) { _removeTicker(); _removeTicker = null; }
-    if (_stopAnim) { _stopAnim(); _stopAnim = null; }
     logic.onUnload();
   },
 };

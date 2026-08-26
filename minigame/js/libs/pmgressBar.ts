@@ -31,7 +31,6 @@ export default function(PIXI, app, obj) {
 
     container.addChild(pmgressBar.gray, pmgressBar.green, pmgressBar.text);
     app.stage.addChild(container);
-    if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
     return function(int_iPos) {
         if (!container) return;
         // 每次重绘绿色进度条，确保从左向右增长
@@ -46,6 +45,5 @@ export default function(PIXI, app, obj) {
             container.destroy(true);
             container = null;
         }
-        if ((globalThis as any).__markDirty) (globalThis as any).__markDirty();
     };
 };

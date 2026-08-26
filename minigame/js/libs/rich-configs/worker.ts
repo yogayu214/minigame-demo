@@ -9,10 +9,8 @@
 
 import * as logic from '../../api/worker/index';
 import type { RichConfig } from '../rich-renderer';
-import { startAnimation } from '../dirty-flag';
 
 let _removeDelta: (() => void) | null = null;
-let _stopAnim: (() => void) | null = null;
 
 export const config: RichConfig = {
   title: '多线程',
@@ -74,7 +72,6 @@ export const config: RichConfig = {
     }
     app.ticker.add(delta);
     _removeDelta = () => app.ticker.remove(delta);
-    _stopAnim = startAnimation();
 
     // 提示文字框（页面下方）
     const box = p_box(PIXI, {
@@ -207,7 +204,6 @@ export const config: RichConfig = {
   onUnload(_app: any) {
     // 停止星空动画
     if (_removeDelta) { _removeDelta(); _removeDelta = null; }
-    if (_stopAnim) { _stopAnim(); _stopAnim = null; }
     logic.onUnload();
   },
 };

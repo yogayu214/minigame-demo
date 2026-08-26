@@ -14,19 +14,16 @@ const { setInfo, onInfoTextReady, infoArea } = createInfoArea(
 );
 export { onInfoTextReady, infoArea };
 export const apiName = 'shareMenu';
-function toast(msg: string) {
-  wx.showToast({ title: msg, icon: 'none' });
-}
 
 /** 更新分享菜单：启用 withShareTicket */
 export function enableShareTicket() {
   wx.updateShareMenu({
     withShareTicket: true,
     success() {
-      toast('withShareTicket=true 已生效');
+      setInfo('withShareTicket=true 已生效');
     },
     fail(err: any) {
-      toast(`设置失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`设置失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -38,10 +35,10 @@ export function enablePrivateMode() {
     isPrivateMessage: true,
     activityId: 'demo_activity',
     success() {
-      toast('私密分享模式已生效');
+      setInfo('私密分享模式已生效');
     },
     fail(err: any) {
-      toast(`设置失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`设置失败: ${err?.errMsg || '未知错误'}`);
     },
   } as any);
 }
@@ -51,10 +48,10 @@ export function showShareMenu() {
   wx.showShareMenu({
     withShareTicket: true,
     success() {
-      toast('转发按钮已显示（withShareTicket=true）');
+      setInfo('转发按钮已显示（withShareTicket=true）');
     },
     fail(err: any) {
-      toast(`显示失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`显示失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -63,10 +60,10 @@ export function showShareMenu() {
 export function showShareMenuBasic() {
   wx.showShareMenu({
     success() {
-      toast('转发按钮已显示');
+      setInfo('转发按钮已显示');
     },
     fail(err: any) {
-      toast(`显示失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`显示失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -75,10 +72,10 @@ export function showShareMenuBasic() {
 export function hideShareMenu() {
   wx.hideShareMenu({
     success() {
-      toast('转发按钮已隐藏');
+      setInfo('转发按钮已隐藏');
     },
     fail(err: any) {
-      toast(`隐藏失败: ${err?.errMsg || '未知错误'}`);
+      setInfo(`隐藏失败: ${err?.errMsg || '未知错误'}`);
     },
   });
 }
@@ -91,5 +88,5 @@ export function shareAppMessage() {
     query: 'activityId=demo_activity',
     activityId: 'demo_activity',
   } as any);
-  toast('已触发活动分享');
+  setInfo('已触发活动分享');
 }
